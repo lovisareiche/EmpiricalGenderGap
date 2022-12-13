@@ -54,3 +54,15 @@ This file computes the regressions for the cleaned unbalanced dataset.
 - Feasible GLS estimator 
 - Hausman Taylor type estimators
 - Including between effects as controls
+
+### code05_compest
+Create a latex file to compare the estimators.
+#### Settings: 
+- choose combination of vars (typically base)
+- level or logs
+#### Output files: 
+- summary statistics 
+- comparison of y.OLS, y.PO, y.RE, y.FEt, y.LSDVt_control
+#### Note:
+Some variables are not shown in final table. This needs to be specified in the code.
+
