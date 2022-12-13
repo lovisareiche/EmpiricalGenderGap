@@ -26,6 +26,11 @@ load(fullfile('empirical', '2_pipeline', 'code02_prepvars.m', 'out', 'W_pesshop.
 % which waves
 w = 2:33;
 
+% type
+t = 'demo_only';
+% types are: int no_pessimist no_quali no_shopintent no_feedback no_edu
+% no_inc no_hhroles no_uncertainty no_employ no_geo no_hhcomp
+
 % select vars to be included in the panel
 vars = {'pessimist','q_unemployment','q_rent','q_lending','q_interest',...
     'q_inflation','q_property','q_growth','q_fuel','q_dax','q_tax',...
@@ -43,21 +48,46 @@ vars = {'pessimist','q_unemployment','q_rent','q_lending','q_interest',...
     'entrepreneur','refresher','nround','norent'};
 
 % select vars that won't make it final
-rm = {'fin_lit_subj','fin_lit_test','assets','debt_col','debt_nocol',...
-    'exphp_intqr','exphp_md','sl_major','sl_essential','sl_clothing',...
-    'sl_entz','sl_mobility','sl_services','sl_holiday','sl_housing',...
-    'sl_reserves','incexp_intqr','incexp_md','homeown','norent'};
+if ~strcmp(t,'old')
+    rm = {'fin_lit_subj','fin_lit_test','assets','debt_col','debt_nocol',...
+        'exphp_intqr','exphp_md','sl_major','sl_essential','sl_clothing',...
+        'sl_entz','sl_mobility','sl_services','sl_holiday','sl_housing',...
+        'sl_reserves','incexp_intqr','incexp_md','homeown','norent',...
+        'exphp_intqr','exphp_md','inflexppoint_long','f_short','prob_md',...
+        'leave','homemaker','civil_servant','entrepreneur'};
+    % select vars that won't make it final but preserve fin literacy
+    rm_fin = {'assets','debt_col','debt_nocol',...
+        'exphp_intqr','exphp_md','sl_major','sl_essential','sl_clothing',...
+        'sl_entz','sl_mobility','sl_services','sl_holiday','sl_housing',...
+        'sl_reserves','incexp_intqr','incexp_md','homeown','norent'...
+        'exphp_intqr','exphp_md','inflexppoint_long','f_short','prob_md',...
+        'leave','homemaker','civil_servant','entrepreneur'};
+else 
+    rm = {'fin_lit_subj','fin_lit_test','assets','debt_col','debt_nocol',...
+        'exphp_intqr','exphp_md','sl_major','sl_essential','sl_clothing',...
+        'sl_entz','sl_mobility','sl_services','sl_holiday','sl_housing',...
+        'sl_reserves','incexp_intqr','incexp_md','homeown','norent',...
+        'q_growth','q_fuel','q_dax','q_tax','inflexppoint_long','homeown',...
+        'exphp_point','expint_sav','si_major','si_essential','si_clothing',...
+        'si_entz','si_mobility','si_services','si_holiday','si_housing',...
+        'si_reserves','f_short','shop_major','prep_meals',...
+        'decide_finance','prob_md','east1989','full_time','part_time',...
+        'leave','homemaker','civil_servant','entrepreneur','norent'};
+     rm_fin = {'assets','debt_col','debt_nocol',...
+        'exphp_intqr','exphp_md','sl_major','sl_essential','sl_clothing',...
+        'sl_entz','sl_mobility','sl_services','sl_holiday','sl_housing',...
+        'sl_reserves','incexp_intqr','incexp_md','homeown','norent',...
+        'q_growth','q_fuel','q_dax','q_tax','inflexppoint_long','homeown',...
+        'exphp_point','expint_sav','si_major','si_essential','si_clothing',...
+        'si_entz','si_mobility','si_services','si_holiday','si_housing',...
+        'si_reserves','f_short','shop_major','prep_meals',...
+        'decide_finance','prob_md','east1989','full_time','part_time',...
+        'leave','homemaker','civil_servant','entrepreneur','norent'};
+end
 
-% select vars that won't make it final but preserve fin literacy
-rm_fin = {'assets','debt_col','debt_nocol',...
-    'exphp_intqr','exphp_md','sl_major','sl_essential','sl_clothing',...
-    'sl_entz','sl_mobility','sl_services','sl_holiday','sl_housing',...
-    'sl_reserves','incexp_intqr','incexp_md','homeown','norent'};
 
-% type
-t = 'no_uncertainty';
-% types are: int no_pessimist no_quali no_shopintent no_feedback no_edu
-% no_inc no_hhroles no_uncertainty no_employ no_geo no_hhcomp
+
+
 
 % ---------------------
 % Set working directory
@@ -127,8 +157,12 @@ for i=w
     end
 end
 
+R.id = id;
+R.wave = wave;
+R.y = y; 
+
 % --- Save full data to pipeline folder -- 
-save(fullfile(pipeline, 'out', 'R_full.mat'),'R','y','wave',"id","w","NAME","pipeline",'PROJECT','PROJECT_DIR')
+save(fullfile(pipeline, 'out', 'R_full.mat'),'R',"w","NAME","pipeline",'PROJECT','PROJECT_DIR')
 
 
 % ------------
@@ -138,9 +172,10 @@ save(fullfile(pipeline, 'out', 'R_full.mat'),'R','y','wave',"id","w","NAME","pip
 
 % clear all nonusable responses
 T = removevars(R,rm);
+T = removevars(T,{'id','wave','y'});
 
 r=[];
-for i = [-9999 -9998 -9997 -5555 -6666]
+for i = [-9999 -9998 -9997 -5555 -6666 9999 9998 9997 5555 6666]
     [row,~]=find([table2array(T) y]==i); % drop out
     r = [r;row];     
     clear row
@@ -151,12 +186,13 @@ clear r
 
 % same but including fin lit
 T_fin = removevars(R,rm_fin);
+T_fin = removevars(T_fin,{'id','wave','y'});
 y_fin = y;
 id_fin = id;
 wave_fin = wave;
 
 r=[];
-for i = [-9999 -9998 -9997 -5555 -6666]
+for i = [-9999 -9998 -9997 -5555 -6666 9999 9998 9997 5555 6666]
     [row,~]=find([table2array(T_fin) y_fin]==i); % drop out
     r = [r;row];     
     clear row
@@ -169,11 +205,13 @@ T(u,:)=[];
 y(u)=[];
 wave(u)=[];
 id(u)=[];
+lny = log(y-min(y)+1);
 
 T_fin(u_fin,:)=[];
 y_fin(u_fin)=[];
 wave_fin(u_fin)=[];
 id_fin(u_fin)=[];
+lny_fin = log(y_fin-min(y_fin)+1);
 
 clear r
 
@@ -222,6 +260,13 @@ end
 % -----------
 %% No controls
 
+% --- compile table without all three
+
+if strcmp(t,'demo_only') % if we are in interaction term world
+   T = removevars(T,{'pessimist','shop_groceries','shop_major','prep_meals','decide_finance','live_alone','prob_intqr','nround','refresher','f_easy','f_nointerest'});
+   T_fin = removevars(T_fin,{'pessimist','shop_groceries','shop_major','prep_meals','decide_finance','live_alone','prob_intqr','nround','refresher','f_easy','f_nointerest'});
+end
+
 % --- compile table without sentiment
 
 if strcmp(t,'no_pessimist') % if we are in interaction term world
@@ -247,8 +292,8 @@ end
 % --- compile table without feedback
 
 if strcmp(t,'no_feedback') % if we are in interaction term world
-   T = removevars(T,{'f_easy','f_nointerest','f_short'});
-   T_fin = removevars(T_fin,{'f_easy','f_nointerest','f_short'});
+   T = removevars(T,{'f_easy','f_nointerest'});
+   T_fin = removevars(T_fin,{'f_easy','f_nointerest'});
 end
 
 % --- compile table without education
@@ -267,23 +312,23 @@ end
 
 % --- compile table without hh roles
 
-if strcmp(t,'no_hhrole') % if we are in interaction term world
-   T = removevars(T,{'shop_groceries','shop_major','prep_meals','decide_finance'});
-   T_fin = removevars(T_fin,{'shop_groceries','shop_major','prep_meals','decide_finance'});
+if strcmp(t,'no_hhroles') % if we are in interaction term world
+   T = removevars(T,{'shop_groceries','shop_major','prep_meals','decide_finance','live_alone'});
+   T_fin = removevars(T_fin,{'shop_groceries','shop_major','prep_meals','decide_finance','live_alone'});
 end
 
 % --- compile table without uncertainty measures
 
 if strcmp(t,'no_uncertainty') % if we are in interaction term world
-   T = removevars(T,{'prob_intqr','nround'});
-   T_fin = removevars(T_fin,{'prob_intqr','nround'});
+   T = removevars(T,{'prob_intqr','nround','refresher','f_easy','f_nointerest'});
+   T_fin = removevars(T_fin,{'prob_intqr','nround','refresher','f_easy','f_nointerest'});
 end
 
 % --- compile table without employment measures
 
 if strcmp(t,'no_employ') % if we are in interaction term world
-   T = removevars(T,{'part_time','full_time','unemployed','retired','leave','homemaker','entrepreneur','civil_servant'});
-   T_fin = removevars(T_fin,{'part_time','full_time','unemployed','retired','leave','homemaker','entrepreneur','civil_servant'});
+   T = removevars(T,{'part_time','full_time','unemployed','retired'});
+   T_fin = removevars(T_fin,{'part_time','full_time','unemployed','retired'});
 end
 
 % --- compile table without geographic measures
@@ -293,19 +338,14 @@ if strcmp(t,'no_geo') % if we are in interaction term world
    T_fin = removevars(T_fin,{'citysize','east1989','eastgerman'});
 end
 
-% --- compile table without household composition
-
-if strcmp(t,'no_hhcomp') % if we are in interaction term world
-   T = removevars(T,{'live_alone','hhchildren'});
-   T_fin = removevars(T_fin,{'live_alone','hhchildren'});
-end
 
 % ----------
 % Saving
 % ----------
 
-save(fullfile(pipeline, 'out',t, 'T_cleaned.mat'),'T','y','wave','id','T_fin','y_fin','wave_fin','id_fin','w',"NAME","pipeline",'PROJECT','PROJECT_DIR')
-
+save(fullfile(pipeline, 'out',t, 'T_cleaned.mat'),'T','y','lny','wave','id','T_fin','y_fin','lny_fin','wave_fin','id_fin','w',"NAME","pipeline",'PROJECT','PROJECT_DIR')
+writetable([T table(y,'VariableNames',{'y'}) table(wave,'VariableNames',{'wave'}) table(id,'VariableNames',{'id'})],fullfile(pipeline, 'out',t, 'T.csv'))
+writetable([T_fin table(y_fin,'VariableNames',{'y'}) table(wave_fin,'VariableNames',{'wave'}) table(id_fin,'VariableNames',{'id'})],fullfile(pipeline, 'out',t, 'T_fin.csv'))
 
 % ----------
 % Leftovers
