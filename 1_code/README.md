@@ -72,10 +72,10 @@ Create a latex file to compare the models.
 #### Settings: 
 - choose estimator used (typically LSDV_control) 
 - level or logs
-### Output files: 
+#### Output files: 
 - comparison of base, interaction, no pessimist, no uncertainty, no hhroles or none of them
 - comparison of no quali, no shopintent, no geo, no edu, no inc
-## Note:  
+#### Note:  
 Some variables are not shown in final table. This needs to be specified in the code.
 
 ### Robustness Checks
