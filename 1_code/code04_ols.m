@@ -3,6 +3,11 @@
 % ------------
 
 % This file runs the first regression, the OLS regression
+% Here we run a "normal" OLS without time fixed effects and a pooled OLS 
+% with time effects to account for the panel structure.
+% Assumptions OLS: No heteroskedasticity, random effects, no time fixed
+% effects
+% Assumptions PO: Random effects and predeterminedness.
 
 %clear
 NAME = 'code04_ols.m';

@@ -2,7 +2,10 @@
 %% Introduction
 % ------------
 
-% This file runs the first regression, the OLS regression
+% This file runs the Random Effects regression and performs the Beusch
+% Pagan LM test.
+% Assumptions: Random effects and strict exogeneity.
+% Beusch Pagan Test has null of no random effects
 
 clear
 NAME = 'code05_randomeffect.m';

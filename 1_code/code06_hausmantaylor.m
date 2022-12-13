@@ -2,7 +2,12 @@
 %% Introduction
 % ------------
 
-% This file runs the first regression, the OLS regression
+% Haumsn Taylor estimation. The sample is split into 4 groups, time varying
+% and time invariant exogenous and endogenous variables. 
+% We use fixed effects estimation to estimate all time varying (to control for
+% endogeneity) and the apply an IV approach to recover the time invariant
+% endogfenous.
+% Assumptions: Fixed effects and strict exogeneity.
 
 clear
 NAME = 'code06_hausmantaylor.m';
