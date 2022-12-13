@@ -65,4 +65,5 @@ Create a latex file to compare the estimators.
 - comparison of y.OLS, y.PO, y.RE, y.FEt, y.LSDVt_control
 #### Note:
 Some variables are not shown in final table. This needs to be specified in the code.
+The code runs Beusch Pagan test (null: homoskedasticity) and Hausman test for endogeneity (RE on subset)
 
