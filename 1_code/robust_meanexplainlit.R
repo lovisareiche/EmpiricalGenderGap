@@ -2,7 +2,11 @@
 # Introduction
 # ------------
 
-## This file checks if the means of the time varying variables can explain financial literacy
+## Run an ordinal logistic regression to see how much of the financial 
+## iteracy (subjective or test score) is indeed caused by the time 
+## invariant and time variant variables. The output is a table that compares
+## a model including and excluding time invariant variables in a cross-sectional 
+## dataset (question was asked in waves 21 (subjective) and 25 (test)).
 
 rm(list=ls())
 NAME <- 'robust_meanexplainlit' ## Name of the R file goes here (without the file extension!)
@@ -64,6 +68,17 @@ if (!dir.exists(pipeline)) {
 if (!dir.exists(file.path(pipeline,'out',t))) {
   dir.create(file.path(pipeline,'out',t))
 }
+
+### The code below will automatically create an output folder for this code file if it does not exist.
+
+if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
+  dir.create(file.path('empirical', '3_output','results',NAME))
+}
+
+if (!dir.exists(file.path('empirical', '3_output','results',NAME,t))) {
+  dir.create(file.path('empirical', '3_output','results',NAME,t))
+}
+
 
 # ---------
 # Functions
@@ -152,7 +167,7 @@ writeLines(capture.output(stargazer(lsubj, lsubjtv, ltest, ltesttv,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels, no.space = TRUE)), 
-           file.path(pipeline,'out',t, 'code_meanexplainlit.tex'))
+           file.path('empirical','3_output','results', NAME,t,'code_meanexplainlit.tex'))
 
 
 

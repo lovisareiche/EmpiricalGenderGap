@@ -2,7 +2,11 @@
 # Introduction
 # ------------
 
-## This file computes the regressions for the cleaned unbalanced dataset
+## Create a latex file to compare the estimators.
+## Settings: choose combination of vars (typically base) and level or logs
+## Output files: summary statistics and comparison of y.OLS, y.PO, y.RE, y.FEt, y.LSDVt_control
+## Note that some variables are not shown in final table. This needs to be specified in the code.
+## The code runs Beusch Pagan test (null: homoskedasticity) and Hausman test for endogeneity (RE on subset)
 
 rm(list=ls())
 NAME <- 'code05_compest' ## Name of the R file goes here (without the file extension!)
@@ -42,6 +46,7 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ## Set  up pipeline folder if missing
 ## ----------------------------------
+
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
 if (dir.exists(file.path('empirical', '2_pipeline'))){
@@ -65,6 +70,20 @@ if (!dir.exists(file.path(pipeline,'out',t,l))) {
   dir.create(file.path(pipeline,'out',t,l))
 }
 
+### The code below will automatically create an output folder for this code file if it does not exist.
+
+if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
+  dir.create(file.path('empirical', '3_output','results',NAME))
+}
+
+if (!dir.exists(file.path('empirical', '3_output','results',NAME,t))) {
+  dir.create(file.path('empirical', '3_output','results',NAME,t))
+}
+
+if (!dir.exists(file.path('empirical', '3_output','results',NAME,t,l))) {
+  dir.create(file.path('empirical', '3_output','results',NAME,t,l))
+}
+
 # ---------
 # Main code
 # ---------
@@ -77,7 +96,9 @@ load(file.path('empirical', '2_pipeline', 'code04_regress','out',t,l, 'T.RData')
 
 # --- Summary Statistics
 
-writeLines(capture.output(stargazer(T,title="Summary Statistics",align=TRUE, label = "tab:summary", model.names = TRUE)), file.path('empirical', '2_pipeline', 'code05_compest','out',t,l, 'code_summary.tex'))
+writeLines(capture.output(stargazer(T,title="Summary Statistics",align=TRUE,
+                                    label = "tab:summary", model.names = TRUE)), 
+           file.path('empirical','3_output','results', NAME,t,l, 'code_summary.tex'))
 
 # --- Comparing estimators
 
@@ -104,7 +125,7 @@ writeLines(capture.output(stargazer(y.OLS, y.PO, y.RE, y.FEt, y.LSDVt_control,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels)), 
-           file.path('empirical', '2_pipeline', 'code05_compest','out',t,l, 'code_compest.tex'))
+           file.path('empirical', '3_output','results', NAME,t,l, 'code_compest.tex'))
 
 # --- Run tests
 

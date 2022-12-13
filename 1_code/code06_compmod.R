@@ -2,7 +2,11 @@
 # Introduction
 # ------------
 
-## This file computes the regressions for the cleaned unbalanced dataset
+## Create a latex file to compare the models.
+## Settings: choose estimator used (typically LSDV_control) and level or logs
+## Output files: comparison of base, interaction, no pessimist, no uncertainty, no hhroles or none of them
+##               comparison of no quali, no shopintent, no geo, no edu, no inc
+## Note that some variables are not shown in final table. This needs to be specified in the code.
 
 rm(list=ls())
 NAME <- 'code06_compmod' ## Name of the R file goes here (without the file extension!)
@@ -64,6 +68,21 @@ if (!dir.exists(file.path(pipeline,'out',t))) {
 if (!dir.exists(file.path(pipeline,'out',t,l))) {
   dir.create(file.path(pipeline,'out',t,l))
 }
+
+### The code below will automatically create an output folder for this code file if it does not exist.
+
+if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
+  dir.create(file.path('empirical', '3_output','results',NAME))
+}
+
+if (!dir.exists(file.path('empirical', '3_output','results',NAME,t))) {
+  dir.create(file.path('empirical', '3_output','results',NAME,t))
+}
+
+if (!dir.exists(file.path('empirical', '3_output','results',NAME,t,l))) {
+  dir.create(file.path('empirical', '3_output','results',NAME,t,l))
+}
+
 
 # ---------
 # Functions
@@ -137,7 +156,7 @@ writeLines(capture.output(stargazer(base, int, pessimist, uncertainty, hhroles, 
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels, no.space = TRUE)), 
-           file.path(pipeline,'out',t,l, 'code_compmod.tex'))
+           file.path('empirical','3_output','results', NAME,t,l, 'code_compmod.tex'))
 
 
 label <- "tab:compmoddemo"
@@ -148,6 +167,6 @@ writeLines(capture.output(stargazer(quali, shopintent, geo, edu, inc,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels, no.space = TRUE)), 
-           file.path(pipeline,'out',t,l, 'code_compmod_demo.tex'))
+           file.path('empirical','3_output','results', NAME,t,l, 'code_compmod_demo.tex'))
 
 

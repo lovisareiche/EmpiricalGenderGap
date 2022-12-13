@@ -2,7 +2,17 @@
 # Introduction
 # ------------
 
-## This file computes the regressions for the cleaned unbalanced dataset
+## This file computes the regressions for the cleaned unbalanced dataset.
+## Settings: choose combination of included vars (base, interactions, etc) in t
+##          choose if model runs on logs or level
+## Estimates: OLS (including a linear model and a least squared dummy variable model)
+##            Variable Coefficients Model (allow coefficients to vary between individuals or time periods)
+##            Between Estimator (OLS on time averaged)
+##            Random effects estimator (uses walhus method)
+##            Feasible GLS estimator 
+##            Hausman Taylor type estimators
+##            Including between effects as controls
+
 
 rm(list=ls())
 NAME <- 'code04_regress' ## Name of the R file goes here (without the file extension!)

@@ -67,6 +67,20 @@ if (!dir.exists(file.path(pipeline,'out',t,l))) {
   dir.create(file.path(pipeline,'out',t,l))
 }
 
+### The code below will automatically create an output folder for this code file if it does not exist.
+
+if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
+  dir.create(file.path('empirical', '3_output','results',NAME))
+}
+
+if (!dir.exists(file.path('empirical', '3_output','results',NAME,t))) {
+  dir.create(file.path('empirical', '3_output','results',NAME,t))
+}
+
+if (!dir.exists(file.path('empirical', '3_output','results',NAME,t,l))) {
+  dir.create(file.path('empirical', '3_output','results',NAME,t,l))
+}
+
 
 # ---------
 # Functions
@@ -165,5 +179,5 @@ writeLines(capture.output(stargazer(y.base, y.intqr, y.refresh, y.nround, y.nint
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels)), 
-           file.path('empirical', '2_pipeline', NAME,'out',t,l, 'code_compest.tex'))
+           file.path('empirical','3_output','results', NAME,t,l, 'code_compest.tex'))
 
