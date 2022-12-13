@@ -10,17 +10,27 @@ function [ isti, diff ] = istinvariant( id,  X, tol )
 %
     % Default tolerance
     if nargin < 4
-        tol = 1e-10;
+        tol = 1e-2;
+    end
+
+    % make table if it isn't already
+    if istable(X)
+        X=table2array(X);
     end
 
     % Compute group means and replicate for all observations
-    Xbar = groupmeans(id,X,'replicate',1);
+    [~,~,ic] = unique(id);
+
+    for i = 1:width(X)
+        a = accumarray(ic,X(:,i),[],@mean);
+        Xbar(:,i) = a(ic);
+    end
     
     % Substract means
     diff = X - Xbar;
     
     % Check if all are zero
-    isti = all(abs(diff) < tol);
+    isti = sum(abs(diff))/height(X) < tol;
 
 end
 

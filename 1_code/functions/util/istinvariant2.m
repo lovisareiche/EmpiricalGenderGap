@@ -5,10 +5,23 @@ if nargin < 4
     tol = 1e-10;
 end
 
-db=[];
+% make table if it isn't already
 if istable(X)
     X=table2array(X);
 end
+
+[~,~,ic] = unique(id);
+
+for i = 1:width(X)
+    a = accumarray(ic,X(:,i),[],@mean);
+    Xbar(:,i) = a(ic);
+end
+
+    % Substract means
+    diff = X - Xbar;
+    
+    % Check if all are zero
+    isti = all(abs(diff) < tol);
 
 for i=1:numel(id)
     
