@@ -2,7 +2,10 @@
 %% Introduction
 % ------------
 
-% Here you can include a brief description of the main purpose of this file.
+% This file imports the csv files of all waves specified in w and
+% transfers them into a structure with one table for each wave
+% Structures are chosen such that the code can only be run for new waves as
+% updates follow
 
 NAME = 'code01_load.m';
 PROJECT = 'EmpiricalGenderGap';
