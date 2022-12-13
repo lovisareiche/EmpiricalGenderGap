@@ -27,13 +27,17 @@ addpath(genpath(fullfile(PROJECT_DIR, PROJECT,'empirical','1_code','functions'))
 % --------
 % Any settings go here
 
+% type
 t = 'base';
-%endo = {'q_unemployment','q_rent','q_lending','q_interest','q_inflation','q_property','q_growth','q_fuel','q_dax','q_tax','inflexppoint_long','exphp_point','expint_sav','f_nointerest','f_easy','pinc','decide_finance','prob_intqr','prob_md','part_time','unemployed','homemaker'}
-%exo = {'pessimist','si_major','si_essential','si_clothing','si_entz','si_mobility','si_services','si_holiday','si_housing','si_reserves','f_short','eduschool','eduwork','hhchildren','hhinc','shop_groceries','shop_major','prep_meals','age','citysize','eastgerman','live_alone','east1989','full_time','retired','leave','civil_servant'}
 
 % -- Load data from another pipeline folder 03
-
 load(fullfile('empirical', '2_pipeline', 'code03_compilepanel.m', 'out',t, 'T_cleaned.mat'),'T','y','wave','id','T_fin','y_fin','wave_fin','id_fin','w')
+
+% set if want to use log
+l = 'level'; % or 'log'
+if strcmp(l,'log')
+    y = lny;
+end
 
 % ----------------------------------
 % Set  up pipeline folder if missing
@@ -54,8 +58,8 @@ if ~exist(pipeline,'dir')
   clear folder
 end
 
-if ~exist(fullfile(pipeline,'out',t),'dir')
-    mkdir(char(fullfile(pipeline, 'out',t)))
+if ~exist(fullfile(pipeline,'out',t,l),'dir')
+    mkdir(char(fullfile(pipeline, 'out',t,l)))
 end
 
 
@@ -65,7 +69,7 @@ end
 
 % --- check variables for time invariance
 
-[ti, ~] = istinvariant( id,  table2array(T));
+[ti,~] = istinvariant( id,  table2array(T));
 isti = T.Properties.VariableNames(ti);
 istv = T.Properties.VariableNames(~ti);
 
@@ -89,11 +93,16 @@ for i=1:width(T_fin)
 end
 
 % remove own correlations
-fls_corr = fls_corr(and(~strcmp(T_fin.Properties.VariableNames,'fin_lit_subj'),~strcmp(T_fin.Properties.VariableNames,'fin_lit_test')));
-flt_corr = flt_corr(and(~strcmp(T_fin.Properties.VariableNames,'fin_lit_subj'),~strcmp(T_fin.Properties.VariableNames,'fin_lit_test')));
+if strcmp(t,"int")
+    fls_corr = fls_corr(and(~strcmp(T_fin.Properties.VariableNames,'fin_lit_subj'),and(~strcmp(T_fin.Properties.VariableNames,'fin_lit_test'),and(~strcmp(T_fin.Properties.VariableNames,'fin_lit_test_fem'),~strcmp(T_fin.Properties.VariableNames,'fin_lit_subj_fem')))));
+    flt_corr = flt_corr(and(~strcmp(T_fin.Properties.VariableNames,'fin_lit_subj'),and(~strcmp(T_fin.Properties.VariableNames,'fin_lit_test'),and(~strcmp(T_fin.Properties.VariableNames,'fin_lit_test_fem'),~strcmp(T_fin.Properties.VariableNames,'fin_lit_subj_fem')))));
+else
+    fls_corr = fls_corr(and(~strcmp(T_fin.Properties.VariableNames,'fin_lit_subj'),~strcmp(T_fin.Properties.VariableNames,'fin_lit_test')));
+    flt_corr = flt_corr(and(~strcmp(T_fin.Properties.VariableNames,'fin_lit_subj'),~strcmp(T_fin.Properties.VariableNames,'fin_lit_test')));
+end
 
 % is endogenous if correlated with one of the two
-isexo = T.Properties.VariableNames(fls_corr + flt_corr == 0);
+isexo = T.Properties.VariableNames(logical([fls_corr + flt_corr == 0 ones(1,numel(unique(wave))-1)]));
 isendo = T.Properties.VariableNames(fls_corr + flt_corr > 0);
 
 % --- group variables
@@ -148,7 +157,7 @@ printHMT = estdisp(estHMT);
 
 %% -- Save data to pipeline folder -- 
 
-save(fullfile(pipeline, 'out',t, 'T.mat'),'T','estHMT','printHMT','y','wave','id','w','X1','X2','W1','W2',"NAME","pipeline",'PROJECT','PROJECT_DIR')
+save(fullfile(pipeline, 'out',t,l, 'T.mat'),'T','estHMT','printHMT','y','wave','id','w','X1','X2','W1','W2',"NAME","pipeline",'PROJECT','PROJECT_DIR')
 
 
 

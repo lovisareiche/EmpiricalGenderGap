@@ -27,11 +27,17 @@ addpath(genpath(fullfile(PROJECT_DIR, PROJECT,'empirical','1_code','functions'))
 % --------
 % Any settings go here
 
+% type
 t = 'no_uncertainty';
 
 % -- Load data from another pipeline folder 03
-
 load(fullfile('empirical', '2_pipeline', 'code03_compilepanel.m', 'out',t, 'T_cleaned.mat'),'T','y','wave','id','w')
+
+% set if want to use log
+l = 'level'; % or 'log'
+if strcmp(l,'log')
+    y = lny;
+end
 
 % ----------------------------------
 % Set  up pipeline folder if missing
@@ -52,8 +58,8 @@ if ~exist(pipeline,'dir')
   clear folder
 end
 
-if ~exist(fullfile(pipeline,'out',t),'dir')
-    mkdir(char(fullfile(pipeline, 'out',t)))
+if ~exist(fullfile(pipeline,'out',t,l),'dir')
+    mkdir(char(fullfile(pipeline, 'out',t,l)))
 end
 
 
@@ -64,7 +70,7 @@ end
 % under strict exogeneity (time varying error term uncorrelated with
 % explanatory vars) random effects is more efficient
 
-estRE = panel(id, wave, log(y-min(y)+1), T, 're');
+estRE = panel(id, wave, y, T, 're');
 printRE = estdisp(estRE);
 
 % Perform Beusch-Pagan LM test for random effects 
@@ -79,7 +85,7 @@ bpre = bpretest(estRE); % null hypothesis of no random effects is rejected
 
 %% -- Save data to pipeline folder -- 
 
-save(fullfile(pipeline, 'out',t, 'T.mat'),'T','estRE','printRE','bpre','y','wave','id','w',"NAME","pipeline",'PROJECT','PROJECT_DIR')
+save(fullfile(pipeline, 'out',t,l, 'T.mat'),'T','estRE','printRE','bpre','y','wave','id','w',"NAME","pipeline",'PROJECT','PROJECT_DIR')
 
 
 

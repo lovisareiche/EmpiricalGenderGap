@@ -744,9 +744,9 @@ for i=w
     W.(temp_var).part_time = double(W.(temp_var).employ == 2);
     try W.(temp_var).part_time(W.(temp_var).employ_f == 2) = 1; end
     W.(temp_var).unemployed = double(W.(temp_var).employ == 5);
-    try W.(temp_var).full_time(W.(temp_var).employ_f == 10) = 1; end
+    try W.(temp_var).unemployed(W.(temp_var).employ_f == 10) = 1; end
     W.(temp_var).retired = double(or(W.(temp_var).employ == 7,W.(temp_var).employ == 8));
-    W.(temp_var).retired(W.(temp_var).employ == -6666) = -6666;
+    try W.(temp_var).retired(W.(temp_var).employ_f == 3) = 1; end
     W.(temp_var).leave = double(W.(temp_var).employ == 4);
     W.(temp_var).leave(W.(temp_var).employ == -6666) = -6666;
     W.(temp_var).homemaker = double(W.(temp_var).employ == 10);

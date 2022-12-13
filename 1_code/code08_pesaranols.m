@@ -87,11 +87,28 @@ for i = 1:n*t
     end
 end
 
+Xit.sit = sit;
+
 % run OLS
 % --- ols
 estOLS = ols(log(yit-min(yit)+1), Xit);
 printOLS = estdisp(estOLS);
 
+% Perform graphic anaylsis of homoskedasticity
+scatter(estOLS.yhat,estOLS.res)
+
+% Perform Beusch Pagan test for heteroskedasticity
+
+bphet = bphettest(estOLS); % null hypothesis of homoskedasticity is rejected
+white = whitehettest(estOLS); % nan (don't know why)
+
+
+% --- pooled ols
+% under the assumption of heteroskedasticity perform OLS with cluster
+% robust inference
+
+estPO = panel(idit, wit, log(yit-min(yit)+1), Xit, 'po','vartype','cluster','clusterid',idit);
+printPO=estdisp(estPO);
 
 
 

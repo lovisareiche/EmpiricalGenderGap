@@ -4,7 +4,7 @@
 
 % This file runs the first regression, the OLS regression
 
-clear
+%clear
 NAME = 'code04_ols.m';
 PROJECT = 'EmpiricalGenderGap';
 PROJECT_DIR = 'D:\Lovisa\Studium\Oxford\Department of Economics\DPhil';
@@ -27,11 +27,17 @@ addpath(genpath(fullfile(PROJECT_DIR, PROJECT,'empirical','1_code','functions'))
 % --------
 % Any settings go here
 
-t = 'no_uncertainty';
+% choose type
+t = 'base';
 
 % -- Load data from another pipeline folder 03
+load(fullfile('empirical', '2_pipeline', 'code03_compilepanel.m', 'out',t, 'T_cleaned.mat'),'T','y','lny','wave','id','w')
 
-load(fullfile('empirical', '2_pipeline', 'code03_compilepanel.m', 'out',t, 'T_cleaned.mat'),'T','y','wave','id','w')
+% set if want to use log
+l = 'level'; % or 'log'
+if strcmp(l,'log')
+    y = lny;
+end
 
 % ----------------------------------
 % Set  up pipeline folder if missing
@@ -52,8 +58,8 @@ if ~exist(pipeline,'dir')
   clear folder
 end
 
-if ~exist(fullfile(pipeline,'out',t),'dir')
-    mkdir(char(fullfile(pipeline, 'out',t)))
+if ~exist(fullfile(pipeline,'out',t,l),'dir')
+    mkdir(char(fullfile(pipeline, 'out',t,l)))
 end
 
 
@@ -61,12 +67,16 @@ end
 %% Main code
 % ---------
 
+% remove time dummies
+
+TD = removevars(T,T.Properties.VariableNames(end-numel(unique(wave))+2:end));
+
 % --- ols
-estOLS = ols(log(y-min(y)+1), T);
+estOLS = ols(y, TD);
 printOLS = estdisp(estOLS);
 
 % Perform graphic anaylsis of homoskedasticity
-scatter(estOLS.yhat,estOLS.res)
+% scatter(estOLS.yhat,estOLS.res)
 
 % Perform Beusch Pagan test for heteroskedasticity
 
@@ -78,7 +88,7 @@ white = whitehettest(estOLS); % nan (don't know why)
 % under the assumption of heteroskedasticity perform OLS with cluster
 % robust inference
 
-estPO = panel(id, wave, log(y-min(y)+1), T, 'po','vartype','cluster','clusterid',id);
+estPO = panel(id, wave, y, T, 'po','vartype','cluster','clusterid',id);
 printPO=estdisp(estPO);
 
 
@@ -86,7 +96,7 @@ printPO=estdisp(estPO);
 
 %% -- Save data to pipeline folder -- 
 
-save(fullfile(pipeline, 'out',t, 'T.mat'),'T','estPO','printPO','estOLS','printOLS','bphet','y','wave','id','w',"NAME","pipeline",'PROJECT','PROJECT_DIR')
+save(fullfile(pipeline, 'out',t,l, 'T.mat'),'T','estPO','printPO','estOLS','printOLS','bphet','y','wave','id','w',"NAME","pipeline",'PROJECT','PROJECT_DIR')
 
 
 
