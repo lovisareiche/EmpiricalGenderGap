@@ -67,3 +67,23 @@ Create a latex file to compare the estimators.
 Some variables are not shown in final table. This needs to be specified in the code.
 The code runs Beusch Pagan test (null: homoskedasticity) and Hausman test for endogeneity (RE on subset)
 
+### code06_compmod
+Create a latex file to compare the models.
+#### Settings: 
+- choose estimator used (typically LSDV_control) 
+- level or logs
+### Output files: 
+- comparison of base, interaction, no pessimist, no uncertainty, no hhroles or none of them
+- comparison of no quali, no shopintent, no geo, no edu, no inc
+## Note:  
+Some variables are not shown in final table. This needs to be specified in the code.
+
+### Robustness Checks
+
+#### robust_meanexplainlit
+Run an ordinal logistic regression to see how much of the financial literacy (subjective or test score) is indeed caused by the time invariant and time variant variables. The output is a table that compares a model including and excluding time invariant variables in a cross-sectional dataset (question was asked in waves 21 (subjective) and 25 (test)).
+
+#### robust_uncertaintydrivers
+Investigate which of the uncertainty variables causes the coefficient on female to change in the model comparison. One by one intqr, refresh, nround, nointerest and easy are removed. Need to set the same settings as for the model comparison.
+
+
