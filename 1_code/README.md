@@ -32,3 +32,23 @@ Beusch Pagan Test has null of no random effects
 Hausman Taylor estimation. The sample is split into 4 groups, time varying and time invariant exogenous and endogenous variables. 
 We use fixed effects estimation to estimate all time varying (to control for endogeneity) and the apply an IV approach to recover the time invariant endogenous.
 Assumptions: Fixed effects and strict exogeneity.
+
+### WIP
+code07_iv and code08_pesaranols are work in progress.
+
+## 2. Follow new estimation in R
+
+### Setup
+Use the first three files in Matlab as indicated above.
+
+### code04_regress
+This file computes the regressions for the cleaned unbalanced dataset.
+Settings: choose combination of included vars (base, interactions, etc) in t
+          choose if model runs on logs or level
+Estimates: OLS (including a linear model and a least squared dummy variable model)
+           Variable Coefficients Model (allow coefficients to vary between individuals or time periods)
+           Between Estimator (OLS on time averaged)
+           Random effects estimator (uses walhus method)
+           Feasible GLS estimator 
+           Hausman Taylor type estimators
+           Including between effects as controls
