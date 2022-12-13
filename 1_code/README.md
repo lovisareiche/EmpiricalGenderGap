@@ -43,10 +43,10 @@ Use the first three files in Matlab as indicated above.
 
 ### code04_regress
 This file computes the regressions for the cleaned unbalanced dataset.
-Settings: 
+#####Settings: 
 - choose combination of included vars (base, interactions, etc) in t          
-- choose if model runs on logs or level\\
-Estimates: 
+- choose if model runs on logs or level
+#####Estimates: 
 - OLS (including a linear model and a least squared dummy variable model)
 - Variable Coefficients Model (allow coefficients to vary between individuals or time periods)
 - Between Estimator (OLS on time averaged)
