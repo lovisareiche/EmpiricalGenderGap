@@ -2,7 +2,7 @@
 # Introduction
 # ------------
 
-## Create a chart to show when survey participants joined the panel
+## Create a table to compare empirical moments of demographics along gender dimension
 
 rm(list=ls())
 NAME <- 'data_expmomentsgender' ## Name of the R file goes here (without the file extension!)
@@ -223,4 +223,7 @@ W_mal <- rbind(age_mal,east_mal,edu_mal,inc_mal,single_mal) %>%
 W <- cbind(W,W_fem,W_mal)
 
 ## -- Save output
-writeLines(capture.output(xtable(W)),file.path('empirical', '3_output','results', NAME, 'code_expmomentgender.tex'))
+writeLines(capture.output(xtable(W, 
+                                caption = "Empirical moments of inflation expectations by demographics and gender", 
+                                label = "expmomentsgender")),
+           file.path('empirical', '3_output','results', NAME, 'code_expmomentgender.tex'))
