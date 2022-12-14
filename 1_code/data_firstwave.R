@@ -116,39 +116,6 @@ legend("topleft", fwnames, fill = viridis(length(firstwave)))
 dev.off()
 
 
-# --- Comparing models
-
-
-# settings for stargazer
-notes <- "The full set of estimators included can be found in the appendix."
-omit <- c("w\\d","y>=","si\\_")
-omit.labels <- c("Time dummies","Constants","Shop intent")
-title <- "Eplaining financial literacy through time variant and invariant variables"
-label <- "tab:meanexplainlit"
-dep.var.labels <- c("Subjective financial literacy","Financial literacy test score")
-
-# which variables are removed
-rmvars <- c(str_subset(names(coef(lsubj)),"w\\d"),str_subset(names(coef(lsubj)),"y>="),str_subset(names(coef(lsubj)),"si\\_"))
-# which are staying
-stayvars <- setdiff(names(coef(lsubj)),rmvars)
-# in which order
-desiredOrder <- c("female","live_alone","live_alone_fem",
-                  "shop_groceries","shop_major","prep_meals",
-                  "decide_finance","pessimist","prob_intqr","refresher",
-                  "nround","f_nointerest", "f_easy","eduschool","eduwork",
-                  "hhchildren","hhinc","pinc","age","citysize",
-                  "eastgerman","east1989","part_time","unemployed","retired")
-
-writeLines(capture.output(stargazer(lsubj, lsubjtv, ltest, ltesttv,
-                                    title = title, notes = notes, label = label, 
-                                    omit = omit, omit.labels = omit.labels, 
-                                    model.names = FALSE, 
-                                    align=TRUE , df = FALSE, digits = 2, header = FALSE, 
-                                    order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
-                                    dep.var.labels = dep.var.labels, no.space = TRUE)), 
-           file.path('empirical','3_output','results', NAME,t,'code_meanexplainlit.tex'))
-
-
 
 # ----------
 # Leftovers
