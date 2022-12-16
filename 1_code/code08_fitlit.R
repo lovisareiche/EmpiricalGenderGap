@@ -23,6 +23,7 @@ PROJECT_DIR <- 'D:/Lovisa/Studium/Oxford/Department of Economics/DPhil' ## Chang
 
 library('tidyverse')
 library(plm)
+library('datawizard') # for degrouping
 library(psychTools) # for writing latex
 library(stargazer) # for writing regression tables
 library(pscl) # for McFadden R2
@@ -35,7 +36,6 @@ library(rms) # for ordered logit
 ## Settings
 ## --------
 ### Any settings go here
-
 
 
 ## ---------------------
@@ -78,28 +78,122 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
 ## -- Load data from pipeline folder --
 
 T_fin <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T_fin.csv')) %>%
-  pdata.frame(index=c( "id", "wave" ))
+  pdata.frame(index=c( "id", "wave" )) %>%
+  # create binary vars
+  mutate(fin_lit_subj_bin=as.numeric(fin_lit_subj >=2)) %>%
+  mutate(fin_lit_test_bin=as.numeric(fin_lit_test >=2))
 
 T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T.csv')) %>%
   pdata.frame(index=c( "id", "wave" ))
 
 
 finlitnames <- c("prob_intqr", "nround", "refresher", "f_easy", "f_nointerest")
-waves <- colnames(T_fin) %>%
+waves_fin <- colnames(T_fin) %>%
   str_subset("w\\d")
+waves <- colnames(T) %>%
+  str_subset("w\\d")
+
+# Section to include time averages
+# xnames <- setdiff(colnames(T),waves) %>%
+#   setdiff('id') %>%
+#   setdiff('wave') %>%
+#   setdiff('y') %>%
+#   setdiff('full_time') 
+# xtinames <- c("eduschool","citysize","female","eastgerman","east1989","leave","homemaker","civil_servant","entrepreneur","eduschool_fem","citysize_fem","female","eastgerman_fem","east1989_fem","leave_fem","homemaker_fem","civil_servant_fem","entrepreneur_fem")
+# xtvnames <- setdiff(xnames,xtinames)
+#
+# # Include time varying as averages to control 
+# 
+# T_mean <- degroup(
+#   T,
+#   xtvnames,
+#   "id",
+#   center = "mean",
+#   suffix_demean = "_within",
+#   suffix_groupmean = "_between",
+#   add_attributes = TRUE,
+#   verbose = TRUE
+# )
+# 
+# T_mean_fin <- degroup(
+#   T_fin,
+#   xtvnames,
+#   "id",
+#   center = "mean",
+#   suffix_demean = "_within",
+#   suffix_groupmean = "_between",
+#   add_attributes = TRUE,
+#   verbose = TRUE
+# )
+# 
+# T <- cbind(T,T_mean) %>%
+#   pdata.frame(index=c( "id", "wave" ) )
+# 
+# T_fin <- cbind(T_fin,T_mean_fin) %>%
+#   pdata.frame(index=c( "id", "wave" ) )
+
 
 ## -- Regress actual measures to apply out of sample
 
 
-f_subj <- as.formula(paste('fin_lit_subj ~ ', paste(finlitnames, collapse='+'),'+',paste(waves, collapse='+')))
-f_test <- as.formula(paste('fin_lit_test ~ ', paste(finlitnames, collapse='+'),'+',paste(waves, collapse='+')))
+f_subj <- as.formula(paste('fin_lit_subj ~ ', paste(finlitnames, collapse='+'),'+',
+                           #paste(paste(finlitnames,"_between",sep = ""), collapse='+'),'+',
+                           paste(waves_fin[1:length(waves_fin)-1], collapse='+')))
+f_test <- as.formula(paste('fin_lit_test ~ ', paste(finlitnames, collapse='+'),'+',
+                           #paste(paste(finlitnames,"_between",sep = ""), collapse='+'),'+',
+                           paste(waves_fin[1:length(waves_fin)-1], collapse='+')))
+
+f_subj_bin <- as.formula(paste('fin_lit_subj_bin ~ ', paste(finlitnames, collapse='+'),'+',
+                           #paste(paste(finlitnames,"_between",sep = ""), collapse='+'),'+',
+                           paste(waves_fin[1:length(waves_fin)-1], collapse='+')))
+f_test_bin <- as.formula(paste('fin_lit_test_bin ~ ', paste(finlitnames, collapse='+'),'+',
+                           #paste(paste(finlitnames,"_between",sep = ""), collapse='+'),'+',
+                           paste(waves_fin[1:length(waves_fin)-1], collapse='+')))
 
 options(datadist='ddist')
 ddist<- datadist(finlitnames)
-ddist<- datadist(waves)
+ddist<- datadist(waves_fin)
+ddist<- datadist(paste(finlitnames,"_between",sep = ""))
 
 lsubj <- lrm(f_subj, data= T_fin)
 ltest <- lrm(f_test, data= T_fin)
+lsubj_bin <- glm(f_subj_bin, family="binomial", data=T_fin)
+ltest_bin <- glm(f_test_bin, family="binomial", data=T_fin)
+
+# --- Assessing model fit for logistic
+
+# needs to be added manually in the stargazer file
+mfr2_subj <- pscl::pR2(lsubj_bin)["McFadden"]
+mfr2_test <- pscl::pR2(ltest_bin)["McFadden"]
+
+#calculate predicted value for each individual in full dataset
+T$pred_subj <- predict(lsubj, T)
+T$pred_test <- predict(ltest, T)
+
+# needs a bit more procedure for logistic
+# find optimal cutoff probability to use to maximize accuracy
+optsubj <- optimalCutoff(T_fin$fin_lit_subj_bin, fitted.values(lsubj_bin))[1]
+opttest <- optimalCutoff(T_fin$fin_lit_test_bin, fitted.values(ltest_bin))[1]
+
+# predict first and then create binary variable, 1 if exceeds cutoff
+T <- mutate(T, pred_subj_bin = predict(lsubj_bin, T, type ="response")) %>%
+  mutate(pred_subj_bin = as.numeric(pred_subj_bin >= optsubj)) %>%
+  mutate(pred_test_bin = predict(ltest_bin, T, type = "response")) %>%
+  mutate(pred_test_bin = as.numeric(pred_test_bin >= opttest))
+
+# calculate sensitivity
+sensubj <- sensitivity(T_fin$fin_lit_subj_bin, fitted.values(lsubj_bin))
+sentest <- sensitivity(T_fin$fin_lit_test_bin, fitted.values(ltest_bin))
+
+#calculate specificity
+spesubj <- specificity(T_fin$fin_lit_subj_bin, fitted.values(lsubj_bin))
+spetest <- specificity(T_fin$fin_lit_test_bin, fitted.values(ltest_bin))
+
+
+#calculate total misclassification error rate
+misesubj <- misClassError(T_fin$fin_lit_subj_bin, fitted.values(lsubj_bin), threshold=optsubj)
+misetest <- misClassError(T_fin$fin_lit_test_bin, fitted.values(ltest_bin), threshold=opttest)
+
 
 # --- Comparing models
 
@@ -108,21 +202,21 @@ ltest <- lrm(f_test, data= T_fin)
 title <- "Explaining financial literacy through financial confidence variables"
 label <- "tab:fitlit"
 dep.var.labels <- c("Subjective financial literacy","Financial literacy test score")
+omit <- c("w\\d","_between")
+omit.labels <- c("Time dummies","Between effects")
+column.labels <- c("Ordered logit","Logistic","Ordered logit","Logistic")
 
-writeLines(capture.output(stargazer(lsubj, ltest, 
+
+
+writeLines(capture.output(stargazer(lsubj, lsubj_bin, ltest, ltest_bin,
                                     title = title, label = label, 
-                                    model.names = FALSE, 
+                                    omit = omit, omit.labels = omit.labels, 
+                                    column.labels = column.labels, model.names = FALSE, 
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels, no.space = FALSE)), 
            file.path('empirical','3_output','results', NAME,'code_fitlit.tex'))
 
 
-## -- Fit variables
-
-#calculate probability of default for each individual in test dataset
-T$predicted_subj <- predict(lsubj, T)
-T$predicted_test <- predict(ltest, T)
-
-
+## -- Save T with new predicted variables
 save(T, file = file.path(pipeline, 'out', 'T.RData'))
