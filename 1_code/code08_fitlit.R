@@ -2,16 +2,9 @@
 # Introduction
 # ------------
 
-## This file computes the regressions for the cleaned unbalanced dataset.
-## Settings: choose combination of included vars (base, interactions, etc) in t
-##          choose if model runs on logs or level
-## Estimates: OLS (including a linear model and a least squared dummy variable model)
-##            Variable Coefficients Model (allow coefficients to vary between individuals or time periods)
-##            Between Estimator (OLS on time averaged)
-##            Random effects estimator (uses walhus method)
-##            Feasible GLS estimator 
-##            Hausman Taylor type estimators
-##            Including between effects as controls
+## This file fits a financial literacy test score and subjective measure by 
+## regressing within selected sample and
+## predicting out of sample
 
 
 rm(list=ls())
