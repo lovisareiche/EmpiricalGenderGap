@@ -27,7 +27,7 @@ load(fullfile('empirical', '2_pipeline', 'code02_prepvars.m', 'out', 'W_pesshop.
 w = 2:33;
 
 % type
-t = 'demo_only';
+t = 'base';
 % types are: int no_pessimist no_quali no_shopintent no_feedback no_edu
 % no_inc no_hhroles no_uncertainty no_employ no_geo no_hhcomp
 
@@ -232,6 +232,22 @@ for n = 1:numel(w)-1
 end
 
 T = [T,D];
+
+% redefine w as vector of all included waves
+w = unique(wave_fin);
+D = table;
+for n = 1:numel(w)-1
+    i = w(n);
+    if i<10
+        temp_var = strcat('w0',num2str(i));
+    elseif i>=10
+        temp_var = strcat('w',num2str(i));
+    end
+    d = double(wave_fin==i);
+    D.(temp_var) = d;
+end
+
+T_fin = [T_fin,D];
 
 % -----------
 %% Interaction Terms Table
