@@ -131,8 +131,8 @@ east_mal <- T[T$female == 0,] %>%
 
 # Matrix with mean median and std of expectations for income categories 
 inc <- mutate(T,inc_low = as.numeric(hhinc<=quantile(T$hhinc,0.3333))) %>%
-  mutate(inc_mid = as.numeric(hhinc > quantile(T$hhinc,0.3333) & hhinc <= quantile(T$hhinc,0.6666))*2) %>%
-  mutate(inc_high = as.numeric(hhinc > quantile(T$hhinc,0.6666))*3) %>%
+  mutate(inc_mid = as.numeric(hhinc > quantile(T$hhinc,0.3333) & hhinc < quantile(T$hhinc,0.6666))*2) %>%
+  mutate(inc_high = as.numeric(hhinc >= quantile(T$hhinc,0.6666))*3) %>%
   mutate(cat = inc_low + inc_mid + inc_high) %>%
   group_by(cat) %>%
   summarise(mean = mean(y), median = median(y), std = sd(y)) %>%
@@ -141,8 +141,8 @@ inc <- mutate(T,inc_low = as.numeric(hhinc<=quantile(T$hhinc,0.3333))) %>%
 # Matrix with mean median and std of expectations for age categories for female subsample
 inc_fem <- T[T$female == 1,] %>%
   mutate(inc_low = as.numeric(hhinc<=quantile(T$hhinc,0.3333))) %>%
-  mutate(inc_mid = as.numeric(hhinc > quantile(T$hhinc,0.3333) & hhinc <= quantile(T$hhinc,0.6666))*2) %>%
-  mutate(inc_high = as.numeric(hhinc > quantile(T$hhinc,0.6666))*3) %>%
+  mutate(inc_mid = as.numeric(hhinc > quantile(T$hhinc,0.3333) & hhinc < quantile(T$hhinc,0.6666))*2) %>%
+  mutate(inc_high = as.numeric(hhinc >= quantile(T$hhinc,0.6666))*3) %>%
   mutate(cat = inc_low + inc_mid + inc_high) %>%
   group_by(cat) %>%
   summarise(mean_fem = mean(y), median_fem = median(y), std_fem = sd(y)) %>%
@@ -151,8 +151,8 @@ inc_fem <- T[T$female == 1,] %>%
 # Matrix with mean median and std of expectations for age categories for male subsample
 inc_mal <- T[T$female == 0,] %>%
   mutate(inc_low = as.numeric(hhinc<=quantile(T$hhinc,0.3333))) %>%
-  mutate(inc_mid = as.numeric(hhinc > quantile(T$hhinc,0.3333) & hhinc <= quantile(T$hhinc,0.6666))*2) %>%
-  mutate(inc_high = as.numeric(hhinc > quantile(T$hhinc,0.6666))*3) %>%
+  mutate(inc_mid = as.numeric(hhinc > quantile(T$hhinc,0.3333) & hhinc < quantile(T$hhinc,0.6666))*2) %>%
+  mutate(inc_high = as.numeric(hhinc >= quantile(T$hhinc,0.6666))*3) %>%
   mutate(cat = inc_low + inc_mid + inc_high) %>%
   group_by(cat) %>%
   summarise(mean_mal = mean(y), median_mal = median(y), std_mal = sd(y)) %>%
@@ -162,8 +162,8 @@ inc_mal <- T[T$female == 0,] %>%
 
 # Matrix with mean median and std of expectations for education categories 
 edu <- mutate(T,edu_low = as.numeric(eduschool<=quantile(T$eduschool,0.3333))) %>%
-  mutate(edu_mid = as.numeric(eduschool > quantile(T$eduschool,0.3333) & eduschool <= quantile(T$eduschool,0.6666))*2) %>%
-  mutate(edu_high = as.numeric(eduschool > quantile(T$eduschool,0.6666))*3) %>%
+  mutate(edu_mid = as.numeric(eduschool > quantile(T$eduschool,0.3333) & eduschool < quantile(T$eduschool,0.6666))*2) %>%
+  mutate(edu_high = as.numeric(eduschool >= quantile(T$eduschool,0.6666))*3) %>%
   mutate(cat = edu_low + edu_mid + edu_high) %>%
   group_by(cat) %>%
   summarise(mean = mean(y), median = median(y), std = sd(y)) %>%
@@ -172,8 +172,8 @@ edu <- mutate(T,edu_low = as.numeric(eduschool<=quantile(T$eduschool,0.3333))) %
 # Matrix with mean median and std of expectations for age categories for female subsample
 edu_fem <- T[T$female == 1,] %>%
   mutate(edu_low = as.numeric(eduschool<=quantile(T$eduschool,0.3333))) %>%
-  mutate(edu_mid = as.numeric(eduschool > quantile(T$eduschool,0.3333) & eduschool <= quantile(T$eduschool,0.6666))*2) %>%
-  mutate(edu_high = as.numeric(eduschool > quantile(T$eduschool,0.6666))*3) %>%
+  mutate(edu_mid = as.numeric(eduschool > quantile(T$eduschool,0.3333) & eduschool < quantile(T$eduschool,0.6666))*2) %>%
+  mutate(edu_high = as.numeric(eduschool >= quantile(T$eduschool,0.6666))*3) %>%
   mutate(cat = edu_low + edu_mid + edu_high) %>%
   group_by(cat) %>%
   summarise(mean_fem = mean(y), median_fem = median(y), std_fem = sd(y)) %>%
@@ -182,8 +182,8 @@ edu_fem <- T[T$female == 1,] %>%
 # Matrix with mean median and std of expectations for age categories for male subsample
 edu_mal <- T[T$female == 0,] %>%
   mutate(edu_low = as.numeric(eduschool<=quantile(T$eduschool,0.3333))) %>%
-  mutate(edu_mid = as.numeric(eduschool > quantile(T$eduschool,0.3333) & eduschool <= quantile(T$eduschool,0.6666))*2) %>%
-  mutate(edu_high = as.numeric(eduschool > quantile(T$eduschool,0.6666))*3) %>%
+  mutate(edu_mid = as.numeric(eduschool > quantile(T$eduschool,0.3333) & eduschool < quantile(T$eduschool,0.6666))*2) %>%
+  mutate(edu_high = as.numeric(eduschool >= quantile(T$eduschool,0.6666))*3) %>%
   mutate(cat = edu_low + edu_mid + edu_high) %>%
   group_by(cat) %>%
   summarise(mean_mal = mean(y), median_mal = median(y), std_mal = sd(y)) %>%
