@@ -91,8 +91,8 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME,t,l))) {
 
 
 extractorRData <- function(file, object) {
-  #' Function for extracting an object from a .RData file created by R's save() command
-  #' Inputs: RData file, object name
+  # Function for extracting an object from a .RData file created by R's save() command
+  # Inputs: RData file, object name
   E <- new.env()
   load(file=file, envir=E)
   return(get(object, envir=E, inherits=F))
