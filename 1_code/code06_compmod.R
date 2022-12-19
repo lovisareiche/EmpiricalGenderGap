@@ -110,7 +110,6 @@ base <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','ou
 int <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','int',l, 'T.RData'),paste('y.',t, sep = ""))
 edu <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_edu',l, 'T.RData'),paste('y.',t, sep = ""))
 employ <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_employ',l, 'T.RData'),paste('y.',t, sep = ""))
-feedback <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_feedback',l, 'T.RData'),paste('y.',t, sep = ""))
 geo <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_geo',l, 'T.RData'),paste('y.',t, sep = ""))
 hhroles <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_hhroles',l, 'T.RData'),paste('y.',t, sep = ""))
 quali <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_quali',l, 'T.RData'),paste('y.',t, sep = ""))
