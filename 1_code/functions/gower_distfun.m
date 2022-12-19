@@ -15,8 +15,7 @@ p = size(ZI,2);
 
 % calculate matrix of partial dissimilarity
 
-load(fullfile('empirical\2_pipeline\cluster.m','out','minmax.mat')) % pre-saved vectors for minimum and maximum values of the p variables
-MPD=abs(ZI-ZJ)./abs(Wmax-Wmin);
+MPD=abs(ZI-ZJ)./abs([2 2 2 2] - [0 0 0 0]);
 
 % calculate distance as weighted average
 
