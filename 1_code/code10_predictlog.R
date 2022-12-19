@@ -2,7 +2,8 @@
 # Introduction
 # ------------
 
-## This file 
+## This file predicts the binary indicators hhcluster, pessimist and subj fin literacy from the demographics.
+## It shows that female is the biggest driver of both pessimism and fin lit
 
 rm(list=ls())
 NAME <- 'code10_predictlog' ## Name of the R file goes here (without the file extension!)
