@@ -52,10 +52,6 @@ end
 
 % Step 1: Set the variables to be clustered
 W = table2array(T(:,vars));
-Wmax = max(W); % put these in gower_distfun
-Wmin = min(W);
-
-save(fullfile(pipeline, 'out', 'minmax.mat'),'Wmax','Wmin')
 
 
 %% Step 2: Clustering
@@ -77,7 +73,24 @@ k=2;
 
 % Run Clustering
 
-[idx,~,~,~,~,~] = kmedoids(W,k,'Algorithm','pam','Distance',@gower_distfun);
+% [idx,~,~,~,~,~] = kmedoids(W,k,'Algorithm','pam','Distance',@gower_distfun);
+% idx=double(idx==1);
+
+idx = kmeans(W,k,'Distance','cityblock');
 idx=double(idx==1);
 
 writetable(table(idx,'VariableNames',{'hhcluster'}),fullfile(pipeline, 'out','hhcluster.csv'))
+
+
+%% Step 3. Look at cluster
+
+% load in case un only from here
+idx = readmatrix(fullfile(pipeline, 'out','hhcluster.csv'));
+
+M = [mean(T.shop_groceries(idx==0)) mean(T.shop_groceries(idx==1));...
+    mean(T.shop_major(idx==0)) mean(T.shop_major(idx==1));...
+    mean(T.prep_meals(idx==0)) mean(T.prep_meals(idx==1));...
+    mean(T.decide_finance(idx==0)) mean(T.decide_finance(idx==1))];
+W = array2table(M,'VariableNames',{'hhcluster0','hhcluster1'}, 'RowNames',{'shop_groceries','shop_major','prep_meals','decide_finance'});
+writetable(W,fullfile(pipeline, 'out','hhclustercomp.csv'))
+
