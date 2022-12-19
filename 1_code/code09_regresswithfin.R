@@ -172,7 +172,10 @@ rmvars <- c(str_subset(names(coef(y.int)),"wave"),str_subset(names(coef(y.int)),
 # which are staying
 stayvars <- setdiff(names(coef(y.int)),rmvars)
 # in which order
-desiredOrder <- c("Constant","female","pessimist","pred_subj","pred_test","prob_intqr","refresher","nround","f_nointerest","f_easy","hhcluster","live_alone","shop_groceries","shop_major","prep_meals","decide_finance")
+desiredOrder <- c("Constant","female","pessimist","pred_subj","pred_test",
+                  "prob_intqr","refresher","nround","f_nointerest","f_easy","hhcluster",
+                  "live_alone","shop_groceries","shop_major","prep_meals",
+                  "decide_finance")
 
 writeLines(capture.output(stargazer(y.base, y.finlit, y.hhcluster, y.both, y.int, 
                                     title = title, notes = notes, label = label, 
