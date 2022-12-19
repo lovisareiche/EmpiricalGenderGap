@@ -27,7 +27,7 @@ load(fullfile('empirical', '2_pipeline', 'code02_prepvars.m', 'out', 'W_pesshop.
 w = 2:33;
 
 % type
-t = 'base';
+t = 'no_inc';
 % types are: int no_pessimist no_quali no_shopintent no_feedback no_edu
 % no_inc no_hhroles no_uncertainty no_employ no_geo no_hhcomp
 
@@ -175,7 +175,7 @@ T = removevars(R,rm);
 T = removevars(T,{'id','wave','y'});
 
 r=[];
-for i = [-9999 -9998 -9997 -5555 -6666 9999 9998 9997 5555 6666]
+for i = [-9999 -9998 -9997 -9996 -5555 -6666 9999 9998 9997 9996 5555 6666]
     [row,~]=find([table2array(T) y]==i); % drop out
     r = [r;row];     
     clear row
