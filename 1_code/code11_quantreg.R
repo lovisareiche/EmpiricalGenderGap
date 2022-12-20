@@ -2,7 +2,7 @@
 # Introduction
 # ------------
 
-## This file 
+## This file runs a quantile regression
 
 rm(list=ls())
 NAME <- 'code11_quantreg' ## Name of the R file goes here (without the file extension!)
