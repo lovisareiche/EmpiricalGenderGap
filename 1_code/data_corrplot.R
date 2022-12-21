@@ -124,8 +124,9 @@ trace(corrplot, edit=TRUE)
 ## -- Load data from pipeline folder --
 # select variables for correlation plot
 
-T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T.csv')) %>%
-  select('live_alone','shop_groceries','shop_major', 'prep_meals', 'decide_finance','pessimist','prob_intqr','f_nointerest','f_easy','refresher','nround')
+T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T.csv'))
+female <- T$female
+T <-  select(T, 'live_alone','shop_groceries','shop_major', 'prep_meals', 'decide_finance','pessimist','prob_intqr','f_nointerest','f_easy','refresher','nround')
 res1 <- cor.mtest(T, conf.level = .95)
 
 ## -- Save Bar Plot
@@ -170,4 +171,68 @@ dev.off()
 ## Here you leave any code snippets or temporary code that you don't need but don't want to delete just yet
 
 
+## -- only roles for non singles
+T_roles <- select(T,"shop_groceries","shop_major","prep_meals","decide_finance") 
 
+
+jpeg(file.path('empirical','3_output','results', NAME,"corrplot_familyhhroles.jpg"), width = 1000, height = 700)
+res1 <- cor.mtest(T_roles[T$live_alone == 0,], conf.level = .95)
+
+corrplot.mixed(cor(T_roles[T$live_alone == 0,]),
+               lower = "number", 
+               upper = "circle",
+               tl.col = "black",
+               tl.pos = 'd',
+               tl.srt = -45,
+               tl.cex = 1,
+               p.mat = res1$p,
+               insig = "label_sig",
+               sig.level = c(.001, .01, .05),
+               pch.cex = 0.9,
+               pch.col = "black",
+               upper.col = viridis(200),
+               lower.col = viridis(200))
+
+dev.off()
+
+## --- Split by gender
+
+jpeg(file.path('empirical','3_output','results', NAME,"corrplot_female.jpg"), width = 1000, height = 700)
+res1 <- cor.mtest(T[female == 1,], conf.level = .95)
+
+corrplot.mixed(cor(T[female == 1,]),
+               lower = "number", 
+               upper = "circle",
+               tl.col = "black",
+               tl.pos = 'd',
+               tl.srt = -45,
+               tl.cex = 0.75,
+               p.mat = res1$p,
+               insig = "label_sig",
+               sig.level = c(.001, .01, .05),
+               pch.cex = 0.9,
+               pch.col = "black",
+               upper.col = viridis(200),
+               lower.col = viridis(200))
+
+dev.off()
+
+jpeg(file.path('empirical','3_output','results', NAME,"corrplot_male.jpg"), width = 1000, height = 700)
+res1 <- cor.mtest(T[female == 0,], conf.level = .95)
+
+corrplot.mixed(cor(T[female == 0,]),
+               lower = "number", 
+               upper = "circle",
+               tl.col = "black",
+               tl.pos = 'd',
+               tl.srt = -45,
+               tl.cex = 0.75,
+               p.mat = res1$p,
+               insig = "label_sig",
+               sig.level = c(.001, .01, .05),
+               pch.cex = 0.9,
+               pch.col = "black",
+               upper.col = viridis(200),
+               lower.col = viridis(200))
+
+dev.off()
