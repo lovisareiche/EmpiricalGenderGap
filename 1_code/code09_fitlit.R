@@ -8,7 +8,7 @@
 
 
 rm(list=ls())
-NAME <- 'code08_fitlit' ## Name of the R file goes here (without the file extension!)
+NAME <- 'code09_fitlit' ## Name of the R file goes here (without the file extension!)
 PROJECT <- 'EmpiricalGenderGap'
 PROJECT_DIR <- 'D:/Lovisa/Studium/Oxford/Department of Economics/DPhil' ## Change this to the directory in which your project folder is located, make sure to avoid using single backslashes (i.e. \)!
 

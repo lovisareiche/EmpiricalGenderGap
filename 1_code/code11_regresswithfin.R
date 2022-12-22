@@ -5,7 +5,7 @@
 ## This file 
 
 rm(list=ls())
-NAME <- 'code09_regresswithfin' ## Name of the R file goes here (without the file extension!)
+NAME <- 'code11_regresswithfin' ## Name of the R file goes here (without the file extension!)
 PROJECT <- 'EmpiricalGenderGap'
 PROJECT_DIR <- 'D:/Lovisa/Studium/Oxford/Department of Economics/DPhil' ## Change this to the directory in which your project folder is located, make sure to avoid using single backslashes (i.e. \)!
 
@@ -75,7 +75,7 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME,l))) {
 
 ## -- Load data from pipeline folder --
 
-load(file.path('empirical', '2_pipeline', 'code08_fitlit','out', 'T.RData'))
+load(file.path('empirical', '2_pipeline', 'code09_fitlit','out', 'T.RData'))
 hhcluster <- read_csv(file.path('empirical', '2_pipeline', 'cluster.m','out', 'hhcluster.csv'))
 T["hhcluster"] <- hhcluster
 
