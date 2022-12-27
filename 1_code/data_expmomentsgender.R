@@ -74,6 +74,16 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
 
 T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T.csv')) 
 
+## -- All
+
+all <- summarise(T,cat = 0, mean = mean(y), median = median(y), std = sd(y))
+
+all_fem <- T[T$female == 1,] %>%
+  summarise(cat = 0, mean = mean(y), median = median(y), std = sd(y))
+
+all_mal <- T[T$female == 0,] %>%
+  summarise(cat = 0, mean = mean(y), median = median(y), std = sd(y))
+
 ## -- Age grouping
 
 # Matrix with mean median and std of expectations for age categories 
@@ -214,10 +224,10 @@ single_mal <- T[T$female == 0,] %>%
 
 ## -- Put table together
 
-W <- rbind(age,east,edu,inc,single)
-W_fem <- rbind(age_fem,east_fem,edu_fem,inc_fem,single_fem) %>%
+W <- rbind(all,age,east,edu,inc,single)
+W_fem <- rbind(all_fem,age_fem,east_fem,edu_fem,inc_fem,single_fem) %>%
   select(-cat)
-W_mal <- rbind(age_mal,east_mal,edu_mal,inc_mal,single_mal) %>%
+W_mal <- rbind(all_mal,age_mal,east_mal,edu_mal,inc_mal,single_mal) %>%
   select(-cat)
 
 W <- cbind(W,W_fem,W_mal)
@@ -225,5 +235,5 @@ W <- cbind(W,W_fem,W_mal)
 ## -- Save output
 writeLines(capture.output(xtable(W, 
                                 caption = "Empirical moments of inflation expectations by demographics and gender", 
-                                label = "expmomentsgender")),
+                                label = "tab:expmomentsgender")),
            file.path('empirical', '3_output','results', NAME, 'code_expmomentgender.tex'))
