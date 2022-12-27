@@ -79,10 +79,10 @@ T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out'
 all <- summarise(T,cat = 0, mean = mean(y), median = median(y), std = sd(y))
 
 all_fem <- T[T$female == 1,] %>%
-  summarise(cat = 0, mean = mean(y), median = median(y), std = sd(y))
+  summarise(cat = 0, mean_fem = mean(y), median_fem = median(y), std_fem = sd(y))
 
 all_mal <- T[T$female == 0,] %>%
-  summarise(cat = 0, mean = mean(y), median = median(y), std = sd(y))
+  summarise(cat = 0, mean_mal = mean(y), median_mal = median(y), std_mal = sd(y))
 
 ## -- Age grouping
 
