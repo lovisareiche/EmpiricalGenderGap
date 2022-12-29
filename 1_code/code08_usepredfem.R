@@ -89,7 +89,7 @@ waves <- colnames(T) %>%
   str_subset("w\\d")
 
 fincon <- c('prob_intqr','nround','refresher','f_nointerest','f_easy')
-hhroles <- c('shop_groceries','shop_major','prep_meals','decide_finance','live_alone')
+hhroles <- c('shop_groceries_nsing','shop_major_nsing','prep_meals_nsing','decide_finance_nsing','non_single')
 
 xnames <- setdiff(colnames(T),waves) %>%
   setdiff('id') %>%
@@ -103,7 +103,10 @@ xnames <- setdiff(colnames(T),waves) %>%
   # need to remove pessimist
   setdiff('pessimist')
 
-xtinames <- c("eduschool","citysize","female","eastgerman","east1989","leave","homemaker","civil_servant","entrepreneur","eduschool_fem","citysize_fem","female","eastgerman_fem","east1989_fem","leave_fem","homemaker_fem","civil_servant_fem","entrepreneur_fem")
+xtinames <- c("eduschool","citysize","female","eastgerman","east1989","leave",
+              "homemaker","civil_servant","entrepreneur","eduschool_fem",
+              "citysize_fem","female","eastgerman_fem","east1989_fem","leave_fem",
+              "homemaker_fem","civil_servant_fem","entrepreneur_fem")
 xtvnames <- setdiff(xnames,xtinames)
 
 ## -- define dependent variables
@@ -161,7 +164,9 @@ label <- "tab:usepredfem"
 dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
 
 # in which order
-desiredOrder <- c("Constant","female","expfemale","sentfemale","finfemale","eduschool","eduwork","hhchildren","hhinc","pinc","age","citysize","eastgerman","east1989","part_time","unemployed","retired")
+desiredOrder <- c("Constant","female","expfemale","sentfemale","finfemale","eduschool",
+                  "eduwork","hhchildren","hhinc","pinc","age","citysize","eastgerman",
+                  "east1989","part_time","unemployed","retired")
 
 writeLines(capture.output(stargazer(mbase,mexp,msent,mfin, 
                                     title = title, notes = notes, label = label, 
