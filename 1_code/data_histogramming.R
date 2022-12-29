@@ -26,7 +26,7 @@ library("viridis")  # colour
 ## --------
 ### Any settings go here
 
-s <- "hhcluster"
+s <- "female"
 # run "female", "pessimist", "subj_finilliterate","hhcluster"
 
 ## ---------------------
@@ -73,7 +73,7 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME,s))) {
 
 ## -- Load data from pipeline folder --
 
-load(file.path('empirical', '2_pipeline', 'code08_fitlit','out', 'T.RData'))
+load(file.path('empirical', '2_pipeline', 'code09_fitlit','out', 'T.RData'))
 hhcluster <- read_csv(file.path('empirical', '2_pipeline', 'cluster.m','out', 'hhcluster.csv'))
 T["hhcluster"] <- hhcluster
 T["pessimist"] <- as.numeric(T$pessimist>=3)
