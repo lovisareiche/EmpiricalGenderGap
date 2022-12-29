@@ -79,9 +79,9 @@ T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out'
 
 W <- T %>%
   group_by(female) %>%
-  summarise(live_alone = mean(live_alone), shop_groceries = mean(shop_groceries), 
-            shop_major= mean(shop_major), prep_meals = mean(prep_meals), 
-            decide_finance = mean(decide_finance), pessimist = mean(pessimist), 
+  summarise(shop_groceries = sum(shop_groceries_nsing)/sum(non_single), 
+            shop_major= sum(shop_major_nsing)/sum(non_single), prep_meals = sum(prep_meals_nsing)/sum(non_single), 
+            decide_finance = sum(decide_finance_nsing)/sum(non_single), non_single = mean(non_single), pessimist = mean(pessimist), 
             prob_intqr = mean(prob_intqr), refresher = mean(refresher), 
             nround = mean(nround), f_nointerest = mean(f_nointerest), 
             f_easy = mean(f_easy)) %>%
