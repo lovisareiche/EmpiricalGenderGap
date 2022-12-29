@@ -85,7 +85,7 @@ waves <- colnames(T) %>%
   str_subset("w\\d")
 
 fincon <- c('prob_intqr','nround','refresher','f_nointerest','f_easy','pred_subj_bin','pred_test_bin','pred_subj','pred_test')
-hhroles <- c('shop_groceries','shop_major','prep_meals','decide_finance','hhcluster')
+hhroles <- c('shop_groceries_nsing','shop_major_nsing','prep_meals_nsing','decide_finance_nsing','hhcluster')
 xnames <- setdiff(colnames(T),waves) %>%
   setdiff('id') %>%
   setdiff('wave') %>%
