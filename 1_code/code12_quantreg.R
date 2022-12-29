@@ -145,8 +145,8 @@ dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
 column.labels <- c("Bottom 20%", "Bottom 40%", "Bottom 60%", "Bottom 80%")
 
 # in which order
-desiredOrder <- c("Constant","female","live_alone","shop_groceries","shop_major",
-                  "prep_meals","decide_finance","pessimist","prob_intqr","refresher",
+desiredOrder <- c("Constant","female","non_single","shop_groceries_nsing","shop_major_nsing",
+                  "prep_meals_nsing","decide_finance_nsing","pessimist","prob_intqr","refresher",
                   "nround","f_nointerest","f_easy","eduschool","eduwork","hhchildren",
                   "hhinc","pinc","age","citysize","eastgerman","east1989","part_time",
                   "unemployed","retired")
