@@ -717,8 +717,8 @@ for i=w
     W.(temp_var).eastgerman(W.(temp_var).region~=4) = 0;
     W.(temp_var).eastgerman(W.(temp_var).region==4) = 1;
 
-    % live_alone dummy
-    W.(temp_var).live_alone = double(W.(temp_var).hhsize==1);
+    % non-single dummy
+    W.(temp_var).non_single = double(W.(temp_var).hhsize>1);
 
     % children
     W.(temp_var).hhchildren(W.(temp_var).hhsize==1) = 0;
@@ -954,6 +954,19 @@ for i=w
                 W.(temp_var).decide_finance(ii) = W.(o).decide_finance(W.(temp_var).id(ii)==W.(o).id);
             end
         end
+    end
+end
+
+% include interaction variables with family for hhroles
+for i=w
+    if i<10
+        temp_var = strcat('w0',num2str(i));
+    elseif i>=10
+        temp_var = strcat('w',num2str(i));
+    end
+
+    for ii = {'shop_groceries','shop_major','prep_meals','decide_finance'}
+       W.(temp_var) = addvars(W.(temp_var),table2array(W.(temp_var)(:,ii)).*table2array(W.(temp_var)(:,'non_single')),'NewVariableNames',strcat(ii,'_nsing'));
     end
 end
 
