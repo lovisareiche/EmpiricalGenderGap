@@ -134,10 +134,10 @@ rmvars <- c(str_subset(names(coef(int)),"wave"),str_subset(names(coef(int)),"bet
 # which are staying
 stayvars <- setdiff(names(coef(int)),rmvars)
 # in which order
-desiredOrder <- c("Constant","female","live_alone","live_alone_fem",
-                  "shop_groceries","shop_groceries_fem","shop_major",
-                  "shop_major_fem","prep_meals","prep_meals_fem",
-                  "decide_finance","decide_finance_fem","pessimist",
+desiredOrder <- c("Constant","female","non_single","non_single_fem",
+                  "shop_groceries_nsing","shop_groceries_nsing_fem","shop_major_nsing",
+                  "shop_major_nsing_fem","prep_meals_nsing","prep_meals_nsing_fem",
+                  "decide_finance_nsing","decide_finance_nsing_fem","pessimist",
                   "pessimist_fem","prob_intqr","prob_intqr_fem","refresher",
                   "refresher_fem","nround","nround_fem","f_nointerest",
                   "f_nointerest_fem","f_easy","f_easy_fem","eduschool",
