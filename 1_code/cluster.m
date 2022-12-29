@@ -6,6 +6,7 @@
 % variables which have a lot of missing values.
 
 clear
+cd 'D:\Lovisa\Studium\Oxford\Department of Economics\DPhil\EmpiricalGenderGap'
 NAME = 'cluster.m';
 PROJECT = 'EmpiricalGenderGap';
 PROJECT_DIR = 'D:\Lovisa\Studium\Oxford\Department of Economics\DPhil';
@@ -23,7 +24,7 @@ load(fullfile('empirical', '2_pipeline', 'code03_compilepanel.m', 'out','base', 
 % --------
 % Any settings go here
 
-vars = {'shop_groceries','shop_major','prep_meals','decide_finance'};
+vars = {'shop_groceries_nsing','shop_major_nsing','prep_meals_nsing','decide_finance_nsing'};
 
 % ----------------------------------
 % Set  up pipeline folder if missing
@@ -51,7 +52,7 @@ end
 
 
 % Step 1: Set the variables to be clustered
-W = table2array(T(:,vars));
+W = table2array(T(T.non_single==1,vars));
 
 
 %% Step 2: Clustering
@@ -76,8 +77,9 @@ k=2;
 % [idx,~,~,~,~,~] = kmedoids(W,k,'Algorithm','pam','Distance',@gower_distfun);
 % idx=double(idx==1);
 
-idx = kmeans(W,k,'Distance','cityblock');
-idx=double(idx==1);
+i = kmeans(W,k,'Distance','cityblock');
+idx=zeros(height(T),1);
+idx(T.non_single == 1) = double(i==1);
 
 writetable(table(idx,'VariableNames',{'hhcluster'}),fullfile(pipeline, 'out','hhcluster.csv'))
 
@@ -87,10 +89,10 @@ writetable(table(idx,'VariableNames',{'hhcluster'}),fullfile(pipeline, 'out','hh
 % load in case un only from here
 idx = readmatrix(fullfile(pipeline, 'out','hhcluster.csv'));
 
-M = [mean(T.shop_groceries(idx==0)) mean(T.shop_groceries(idx==1));...
-    mean(T.shop_major(idx==0)) mean(T.shop_major(idx==1));...
-    mean(T.prep_meals(idx==0)) mean(T.prep_meals(idx==1));...
-    mean(T.decide_finance(idx==0)) mean(T.decide_finance(idx==1))];
+M = [mean(T.shop_groceries_nsing(idx==0)) mean(T.shop_groceries_nsing(idx==1));...
+    mean(T.shop_major_nsing(idx==0)) mean(T.shop_major_nsing(idx==1));...
+    mean(T.prep_meals_nsing(idx==0)) mean(T.prep_meals_nsing(idx==1));...
+    mean(T.decide_finance_nsing(idx==0)) mean(T.decide_finance_nsing(idx==1))];
 W = array2table(M,'VariableNames',{'hhcluster0','hhcluster1'}, 'RowNames',{'shop_groceries','shop_major','prep_meals','decide_finance'});
 writetable(W,fullfile(pipeline, 'out','hhclustercomp.csv'))
 
