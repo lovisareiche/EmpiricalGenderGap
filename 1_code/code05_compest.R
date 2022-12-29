@@ -116,7 +116,12 @@ rmvars <- c(str_subset(names(coef(y.LSDVt_control)),"wave"),str_subset(names(coe
 # which are staying
 stayvars <- setdiff(names(coef(y.LSDVt_control)),rmvars)
 # in which order
-desiredOrder <- c("Constant","female","live_alone","shop_groceries","shop_major","prep_meals","decide_finance","pessimist","prob_intqr","refresher","nround","f_nointerest","f_easy","eduschool","eduwork","hhchildren","hhinc","pinc","age","citysize","eastgerman","east1989","full_time","part_time","unemployed","retired")
+desiredOrder <- c("Constant","female","non_single","shop_groceries_nsing",
+                  "shop_major_nsing","prep_meals_nsing","decide_finance_nsing",
+                  "pessimist","prob_intqr","refresher","nround","f_nointerest",
+                  "f_easy","eduschool","eduwork","hhchildren","hhinc","pinc",
+                  "age","citysize","eastgerman","east1989","full_time","part_time",
+                  "unemployed","retired")
 
 writeLines(capture.output(stargazer(y.OLS, y.PO, y.RE, y.FEt, y.LSDVt_control, 
                                     title = title, notes = notes, label = label, 
