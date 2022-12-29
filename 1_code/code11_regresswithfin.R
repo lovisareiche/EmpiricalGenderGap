@@ -83,7 +83,7 @@ waves <- colnames(T) %>%
   str_subset("w\\d")
 
 fincon <- c('prob_intqr','nround','refresher','f_nointerest','f_easy')
-hhroles <- c('shop_groceries','shop_major','prep_meals','decide_finance')
+hhroles <- c('shop_groceries_nsing','shop_major_nsing','prep_meals_nsing','decide_finance_nsing')
 xnames <- setdiff(colnames(T),waves) %>%
   setdiff('id') %>%
   setdiff('wave') %>%
@@ -174,8 +174,8 @@ stayvars <- setdiff(names(coef(y.int)),rmvars)
 # in which order
 desiredOrder <- c("Constant","female","pessimist","pred_subj","pred_test",
                   "prob_intqr","refresher","nround","f_nointerest","f_easy","hhcluster",
-                  "live_alone","shop_groceries","shop_major","prep_meals",
-                  "decide_finance")
+                  "non_single","shop_groceries_nsing","shop_major_nsing","prep_meals_nsing",
+                  "decide_finance_nsing")
 
 writeLines(capture.output(stargazer(y.base, y.finlit, y.hhcluster, y.both, y.int, 
                                     title = title, notes = notes, label = label, 
