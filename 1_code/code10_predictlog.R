@@ -199,6 +199,11 @@ omit <- c("q\\_|exp","si\\_","w\\d")
 omit.labels <- c("Qualitative assessment","Shop intent","Time dummies")
 title <- "Predicting binary indicators"
 label <- "tab:predictlog"
+r2 <- c("Mc Fadden $R^2$",round(mfr2hh, digits = 2),round(mfr2pess, digits = 2),round(mfr2fin, digits = 2))
+mise <- c("Missclassification Error Rate",round(misehh, digits = 2),round(misepess, digits = 2),round(misefin, digits = 2))
+sen <- c("Sensitivity",round(senhh, digits = 2),round(senpess, digits = 2),round(senfin, digits = 2))
+spe <- c("Specificity",round(spehh, digits = 2),round(spepess, digits = 2),round(spefin, digits = 2))
+add.lines <- list(r2,mise,sen,spe)
 
 
 writeLines(capture.output(stargazer(mhh, mpess, mfin,
@@ -207,7 +212,7 @@ writeLines(capture.output(stargazer(mhh, mpess, mfin,
                                     model.names = FALSE, 
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     intercept.top = TRUE, intercept.bottom = FALSE, 
-                                    no.space = FALSE
+                                    no.space = FALSE, add.lines = add.lines
                                     )), 
            file.path('empirical', '3_output','results', NAME,'code_predictlog.tex'))
 
