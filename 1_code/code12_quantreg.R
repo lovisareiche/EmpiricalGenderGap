@@ -31,6 +31,7 @@ library(quantreg)
 ### Any settings go here
 
 l <- 'level'
+t <- 'demo_only'
 
 ## ---------------------
 ## Set working directory
@@ -64,10 +65,13 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
   dir.create(file.path('empirical', '3_output','results',NAME))
 }
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME,l))) {
-  dir.create(file.path('empirical', '3_output','results',NAME,l))
+if (!dir.exists(file.path('empirical', '3_output','results',NAME,t))) {
+  dir.create(file.path('empirical', '3_output','results',NAME,t))
 }
 
+if (!dir.exists(file.path('empirical', '3_output','results',NAME,t,l))) {
+  dir.create(file.path('empirical', '3_output','results',NAME,t,l))
+}
 
 
 # ---------
@@ -76,7 +80,7 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME,l))) {
 
 ## -- Load data from pipeline folder --
 
-T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T.csv')) %>%
+T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out',t, 'T.csv')) %>%
   pdata.frame( index=c( "id", "wave" ) )
 
 waves <- colnames(T) %>%
@@ -117,13 +121,10 @@ T_c <- cbind(T,T_mean) %>%
 
 ## -- Run quantile regression
 
-# this uses the normal standrad baseline
+# this uses the normal standard baseline
 f <- as.formula(paste('y ~','factor(wave) +', paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 
-
-# this uses the latest regression as in code 09 regresswithfin
-# f <- as.formula(paste('y ~','factor(wave) +', paste(xnames,collapse='+'),'+', paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 
 # specify tau as which percentile we want to look at
 
@@ -158,6 +159,6 @@ writeLines(capture.output(stargazer(m02, m04, m06, m08,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels)), 
-           file.path('empirical', '3_output','results', NAME,l, 'code_quantreg.tex'))
+           file.path('empirical', '3_output','results', NAME,t,l, 'code_quantreg.tex'))
 
 
