@@ -126,7 +126,7 @@ trace(corrplot, edit=TRUE)
 
 T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T.csv'))
 female <- T$female
-T <-  select(T, 'live_alone','shop_groceries','shop_major', 'prep_meals', 'decide_finance','pessimist','prob_intqr','f_nointerest','f_easy','refresher','nround')
+T <-  select(T, 'non_single','shop_groceries_nsing','shop_major_nsing', 'prep_meals_nsing', 'decide_finance_nsing','pessimist','prob_intqr','f_nointerest','f_easy','refresher','nround')
 res1 <- cor.mtest(T, conf.level = .95)
 
 ## -- Save Bar Plot
@@ -172,13 +172,13 @@ dev.off()
 
 
 ## -- only roles for non singles
-T_roles <- select(T,"shop_groceries","shop_major","prep_meals","decide_finance") 
+T_roles <- select(T,"shop_groceries_nsing","shop_major_nsing","prep_meals_nsing","decide_finance_nsing") 
 
 
 jpeg(file.path('empirical','3_output','results', NAME,"corrplot_familyhhroles.jpg"), width = 1000, height = 700)
-res1 <- cor.mtest(T_roles[T$live_alone == 0,], conf.level = .95)
+res1 <- cor.mtest(T_roles[T$non_single == 0,], conf.level = .95)
 
-corrplot.mixed(cor(T_roles[T$live_alone == 0,]),
+corrplot.mixed(cor(T_roles[T$non_single == 0,]),
                lower = "number", 
                upper = "circle",
                tl.col = "black",
