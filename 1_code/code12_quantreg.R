@@ -134,6 +134,20 @@ m06 <- rq(f, data = T_c, tau = 0.6)
 m08 <- rq(f, data = T_c, tau = 0.8)
 
 
+rqs <- rq(f, data = T_c, tau = c(0.2,0.4,0.6,0.8))
+rqs0 <- rq(y ~ 1, data = T_c, tau = c(0.2,0.4,0.6,0.8))
+
+rho <- function(u,tau=c(0.2,0.4,0.6,0.8))u*(tau - (u < 0))
+R2 <- 1 - rqs$rho/rqs0$rho
+
+rqs2 <- rq(f, data = T_c, tau = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9))
+s.rqs2 <- summary.rqs(rqs2)
+
+jpeg(file.path('empirical','3_output','results', NAME,t,l,"quantreg_female.jpg"), width = 1000, height = 700)
+plot.summary.rqs(s.rqs2, parm = "female")
+dev.off()
+
+
 # --- Write output
 
 # settings for stargazer
@@ -144,6 +158,8 @@ title <- "Quantile regression"
 label <- "tab:quantreg"
 dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
 column.labels <- c("Bottom 20%", "Bottom 40%", "Bottom 60%", "Bottom 80%")
+r2 <- c("Pseudo $R^2$",round(R2[1], digits = 2),round(R2[2], digits = 2),round(R2[3], digits = 2),round(R2[4], digits = 2))
+add.lines <- list(r2)
 
 # in which order
 desiredOrder <- c("Constant","female","non_single","shop_groceries_nsing","shop_major_nsing",
@@ -158,7 +174,8 @@ writeLines(capture.output(stargazer(m02, m04, m06, m08,
                                     model.names = FALSE, column.labels = column.labels,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
-                                    dep.var.labels = dep.var.labels)), 
+                                    dep.var.labels = dep.var.labels,
+                                    add.lines = add.lines)), 
            file.path('empirical', '3_output','results', NAME,t,l, 'code_quantreg.tex'))
 
 
