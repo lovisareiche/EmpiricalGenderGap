@@ -60,12 +60,6 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
   dir.create(file.path('empirical', '3_output','results',NAME))
 }
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME,s))) {
-  dir.create(file.path('empirical', '3_output','results',NAME,s))
-}
-
-
-
 
 # ---------
 # Main code
@@ -86,12 +80,16 @@ y2 <- T$y[T[s]==1]
 
 ## --- Draw histogram
 
-jpeg(file.path('empirical','3_output','results', NAME,s,paste("histogram_",s,".jpg", sep = "")), width = 1000, height = 700)
+# create a vector of histogram breaks
+x <- seq(min(T$y),max(T$y),length=301)
 
-hist(y1, breaks = c(min(y1),-10,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,30,max(y1)), 
+
+jpeg(file.path('empirical','3_output','results', NAME,paste("histogram_",s,".jpg", sep = "")), width = 1000, height = 700)
+
+hist(y1, breaks = x, freq = FALSE,
      col = alpha('#238a8DFF',0.8), main = paste("Histogram of Inflation Expectations:" , s, sep = " "),
-     xlim = c(-10,30))
-hist(y2, breaks = c(min(y2),-10,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,30,max(y2)), 
+     xlim = c(-10,30), xlab = "point estimate of inflation in 12 months")
+hist(y2, breaks = x, freq = FALSE,
      col = alpha('#FDE725FF',0.7), 
      xlim = c(-10,30), add = TRUE)
 legend("topleft", c(paste("not",s, sep = " "),s), fill = c('#238a8DFF','#FDE725FF'))
