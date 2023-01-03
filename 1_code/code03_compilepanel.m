@@ -27,9 +27,9 @@ load(fullfile('empirical', '2_pipeline', 'code02_prepvars.m', 'out', 'W_pesshop.
 w = 2:33;
 
 % type
-t = 'no_uncertainty';
+t = 'demo_only';
 % types are: int no_pessimist no_quali no_shopintent no_feedback no_edu
-% no_inc no_hhroles no_uncertainty no_employ no_geo no_hhcomp
+% no_inc no_hhroles no_uncertainty no_employ no_geo
 
 % select vars to be included in the panel
 vars = {'pessimist','q_unemployment','q_rent','q_lending','q_interest',...
