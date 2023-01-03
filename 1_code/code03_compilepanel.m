@@ -156,7 +156,7 @@ for i=w
         % stack also id, wave and dependent variable
         id = [id;W.(temp_var).id];
         wave = [wave;W.(temp_var).wave];
-        y = [y;W.(temp_var).inflexppoint];
+        y = [y;W.(temp_var).y];
     end
 end
 
@@ -208,13 +208,13 @@ T(u,:)=[];
 y(u)=[];
 wave(u)=[];
 id(u)=[];
-lny = log(y-min(y)+1);
+lny = log(y-min(y)+0.1);
 
 T_fin(u_fin,:)=[];
 y_fin(u_fin)=[];
 wave_fin(u_fin)=[];
 id_fin(u_fin)=[];
-lny_fin = log(y_fin-min(y_fin)+1);
+lny_fin = log(y_fin-min(y_fin)+0.1);
 
 clear r
 
