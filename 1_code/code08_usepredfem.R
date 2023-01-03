@@ -30,7 +30,7 @@ library(stargazer) # for writing regression tables
 ## --------
 ### Any settings go here
 
-l <- 'level'
+l <- 'log'
 
 ## ---------------------
 ## Set working directory
@@ -140,15 +140,15 @@ f <- as.formula(paste('y ~','factor(wave) + female +', paste(xnames, collapse='+
 mbase <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # using female predicted by experience
-f <- as.formula(paste('y ~','factor(wave) + expfemale +', paste(xnames, collapse='+'),'+',paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+f <- as.formula(paste('y ~','factor(wave) + expfemale + female +', paste(xnames, collapse='+'),'+',paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 mexp <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # using female predicted by sentiment
-f <- as.formula(paste('y ~','factor(wave) + sentfemale +', paste(xnames, collapse='+'),'+',paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+f <- as.formula(paste('y ~','factor(wave) + sentfemale + female +', paste(xnames, collapse='+'),'+',paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 msent <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # using female predicted by confidence
-f <- as.formula(paste('y ~','factor(wave) + finfemale +', paste(xnames, collapse='+'),'+',paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+f <- as.formula(paste('y ~','factor(wave) + finfemale + female +', paste(xnames, collapse='+'),'+',paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 mfin <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 
