@@ -707,7 +707,8 @@ for i=w
     end
 
     % point forecast
-    W.(temp_var).inflexppoint(W.(temp_var).infdef==2) = -W.(temp_var).inflexppoint(W.(temp_var).infdef==2);
+    W.(temp_var).y = W.(temp_var).inflexppoint;
+    W.(temp_var).y(W.(temp_var).infdef==2) = -W.(temp_var).inflexppoint(W.(temp_var).infdef==2);
 
     % female dummy
     W.(temp_var).female = W.(temp_var).gender-1;
@@ -958,15 +959,17 @@ for i=w
 end
 
 % include interaction variables with family for hhroles
-for i=w
-    if i<10
-        temp_var = strcat('w0',num2str(i));
-    elseif i>=10
-        temp_var = strcat('w',num2str(i));
-    end
-
-    for ii = {'shop_groceries','shop_major','prep_meals','decide_finance'}
-       W.(temp_var) = addvars(W.(temp_var),table2array(W.(temp_var)(:,ii)).*table2array(W.(temp_var)(:,'non_single')),'NewVariableNames',strcat(ii,'_nsing'));
+if sum(strcmp('shop_groceries_nsing',W.(temp_var).Properties.VariableNames))==0
+    for i=w
+        if i<10
+            temp_var = strcat('w0',num2str(i));
+        elseif i>=10
+            temp_var = strcat('w',num2str(i));
+        end
+    
+        for ii = {'shop_groceries','shop_major','prep_meals','decide_finance'}
+           W.(temp_var) = addvars(W.(temp_var),table2array(W.(temp_var)(:,ii)).*table2array(W.(temp_var)(:,'non_single')),'NewVariableNames',strcat(ii,'_nsing'));
+        end
     end
 end
 
