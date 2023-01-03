@@ -38,8 +38,8 @@ library('datawizard')
 ## --------
 ### Any settings go here
 
-t <- 'base'
-l <- 'level'
+t <- 'demo_only'
+l <- 'log'
 
 ## ---------------------
 ## Set working directory
@@ -204,15 +204,8 @@ T_c <- cbind(T,T_mean) %>%
 
 f <- as.formula(paste('y ~','factor(wave) +', paste(xnames, collapse='+'),'+',paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 y.LSDVt_control <- plm( f, data=T_c, effect = "individual", model = "pooling")
-y.LSDVt_control2 <- lm( f, data=T_c)
 
-# --- Variable importance
 
-# contribution of variable
-caret::varImp(y.LSDVt_control2)
-
-# check multicollinearity
-car::vif(y.LSDVt_control2)
 
 ## -- Save data to pipeline folder -- 
 
