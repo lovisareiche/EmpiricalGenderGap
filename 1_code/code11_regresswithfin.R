@@ -183,5 +183,5 @@ writeLines(capture.output(stargazer(y.base, y.finlit, y.hhcluster, y.both, y.int
                                     model.names = FALSE, 
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
-                                    dep.var.labels = dep.var.labels)), 
+                                    dep.var.labels = dep.var.labels, no.space = TRUE)), 
            file.path('empirical', '3_output','results', NAME,l, 'code_finlithhcluster.tex'))
