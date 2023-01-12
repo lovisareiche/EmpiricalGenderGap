@@ -22,6 +22,8 @@ library('tidyverse')
 library('datawizard')
 library(stargazer)
 library(quantreg)
+library('plm')
+
 
 
 
@@ -30,8 +32,10 @@ library(quantreg)
 ## --------
 ### Any settings go here
 
-l <- 'level'
+l <- 'log'
 t <- 'demo_only'
+# sub <- 'subj_finilliterate'
+sub <- ''
 
 ## ---------------------
 ## Set working directory
@@ -80,8 +84,18 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME,t,l))) {
 
 ## -- Load data from pipeline folder --
 
-T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out',t, 'T.csv')) %>%
+D <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out',t, 'T.csv')) %>%
   pdata.frame( index=c( "id", "wave" ) )
+
+if(sub != ''){
+  load(file.path('empirical', '2_pipeline', 'code09_fitlit','out', 'T.RData'))
+  D$subj_finilliterate <- as.numeric(T$pred_subj_bin==0)
+}
+
+rm(T)
+T <- D
+rm(D)
+
 
 waves <- colnames(T) %>%
   str_subset("w\\d")
@@ -89,8 +103,8 @@ xnames <- setdiff(colnames(T),waves) %>%
   setdiff('id') %>%
   setdiff('wave') %>%
   setdiff('y') %>%
-  setdiff('full_time') %>%
-  setdiff('full_time_fem')
+  setdiff(c('full_time','full_time_fem')) %>%
+  setdiff(c('subj_finilliterate'))
 xtinames <- c("eduschool","citysize","female","eastgerman","east1989","leave","homemaker","civil_servant","entrepreneur","eduschool_fem","citysize_fem","female","eastgerman_fem","east1989_fem","leave_fem","homemaker_fem","civil_servant_fem","entrepreneur_fem")
 xtvnames <- setdiff(xnames,xtinames)
 
@@ -118,6 +132,12 @@ T_mean <- degroup(
 T_c <- cbind(T,T_mean) %>%
   pdata.frame(index=c( "id", "wave" ) )
 
+## -- Use subsample if specified
+
+if(sub != ''){
+  T0 <- T_c[T_c[sub] == 0,]
+  T1 <- T_c[T_c[sub] == 1,]
+}
 
 ## -- Run quantile regression
 
@@ -125,26 +145,50 @@ T_c <- cbind(T,T_mean) %>%
 f <- as.formula(paste('y ~','factor(wave) +', paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 
-
 # specify tau as which percentile we want to look at
+
+if(sub != ''){
+  
+  rqs_sub0 <- rq(f, data = T0, tau = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9))
+  rqs_sub1 <- rq(f, data = T1, tau = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9))
+  rqs0_sub0 <- rq(y ~ 1, data = T0, tau = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9))
+  rqs0_sub1 <- rq(y ~ 1, data = T1, tau = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9))
+  
+  rho <- function(u,tau=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9))u*(tau - (u < 0))
+  R2_sub0 <- 1 - rqs_sub0$rho/rqs0_sub0$rho
+  R2_sub1 <- 1 - rqs_sub1$rho/rqs0_sub1$rho
+  
+  s.rqs_sub0 <- summary.rqs(rqs_sub0)
+  s.rqs_sub1 <- summary.rqs(rqs_sub1)
+  
+  jpeg(file.path('empirical','3_output','results', NAME,t,l,paste("quantreg_female_",sub,"0.jpg")), width = 1000, height = 700)
+  plot.summary.rqs(s.rqs_sub0, parm = "female", ols = FALSE)
+  dev.off()
+  jpeg(file.path('empirical','3_output','results', NAME,t,l,paste("quantreg_female_",sub,"1.jpg")), width = 1000, height = 700)
+  plot.summary.rqs(s.rqs_sub1, parm = "female", ols = FALSE)
+  dev.off()
+}
+
 
 m02 <- rq(f, data = T_c, tau = 0.2)
 m04 <- rq(f, data = T_c, tau = 0.4)
 m06 <- rq(f, data = T_c, tau = 0.6)
 m08 <- rq(f, data = T_c, tau = 0.8)
 
+rqs <- rq(f, data = T_c, tau = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9))
+rqs0 <- rq(y ~ 1, data = T_c, tau = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9))
 
-rqs <- rq(f, data = T_c, tau = c(0.2,0.4,0.6,0.8))
-rqs0 <- rq(y ~ 1, data = T_c, tau = c(0.2,0.4,0.6,0.8))
-
-rho <- function(u,tau=c(0.2,0.4,0.6,0.8))u*(tau - (u < 0))
+rho <- function(u,tau=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9))u*(tau - (u < 0))
 R2 <- 1 - rqs$rho/rqs0$rho
 
-rqs2 <- rq(f, data = T_c, tau = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9))
-s.rqs2 <- summary.rqs(rqs2)
+s.rqs <- summary.rqs(rqs)
 
 jpeg(file.path('empirical','3_output','results', NAME,t,l,"quantreg_female.jpg"), width = 1000, height = 700)
-plot.summary.rqs(s.rqs2, parm = "female")
+plot.summary.rqs(s.rqs, parm = "female", ols = FALSE, ylim = c(-0.005,0.02))
+dev.off()
+
+jpeg(file.path('empirical','3_output','results', NAME,t,l,"quantreg_fincon.jpg"), width = 1000, height = 700)
+plot.summary.rqs(s.rqs, parm = c("prob_intqr","nround","f_nointerest","f_easy"), ols = FALSE)
 dev.off()
 
 
@@ -158,7 +202,7 @@ title <- "Quantile regression"
 label <- "tab:quantreg"
 dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
 column.labels <- c("Bottom 20%", "Bottom 40%", "Bottom 60%", "Bottom 80%")
-r2 <- c("Pseudo $R^2$",round(R2[1], digits = 2),round(R2[2], digits = 2),round(R2[3], digits = 2),round(R2[4], digits = 2))
+r2 <- c("Pseudo $R^2$",round(R2[2], digits = 2),round(R2[4], digits = 2),round(R2[6], digits = 2),round(R2[8], digits = 2))
 add.lines <- list(r2)
 
 # in which order
