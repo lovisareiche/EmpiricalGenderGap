@@ -54,6 +54,10 @@ if (!dir.exists(pipeline)) {
   }
 }
 
+if (!dir.exists(file.path('empirical', '2_pipeline',NAME,'out',s))) {
+  dir.create(file.path('empirical', '2_pipeline',NAME,'out',s))
+}
+
 ### The code below will automatically create an output folder for this code file if it does not exist.
 
 if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
@@ -81,16 +85,22 @@ y2 <- T$y[T[s]==1]
 ## --- Draw histogram
 
 # create a vector of histogram breaks
-x <- seq(min(T$y),max(T$y),length=301)
+x <- seq(min(T$y)-0.25,max(T$y)+0.25,length=2*(max(T$y)-min(T$y))-1)
 
 
 jpeg(file.path('empirical','3_output','results', NAME,paste("histogram_",s,".jpg", sep = "")), width = 1000, height = 700)
 
-hist(y1, breaks = x, freq = FALSE,
+h1 <- hist(y1, breaks = x, freq = FALSE,
      col = alpha('#238a8DFF',0.8), main = paste("Histogram of Inflation Expectations:" , s, sep = " "),
      xlim = c(-10,30), xlab = "point estimate of inflation in 12 months")
-hist(y2, breaks = x, freq = FALSE,
+h2 <- hist(y2, breaks = x, freq = FALSE,
      col = alpha('#FDE725FF',0.7), 
      xlim = c(-10,30), add = TRUE)
 legend("topleft", c(paste("not",s, sep = " "),s), fill = c('#238a8DFF','#FDE725FF'))
 dev.off()
+
+## --- Save numbers in csv
+
+H <- cbind(round_any(h1$mids,0.5),h1$counts,h1$density,h2$counts,h2$density)
+write.csv(H, file = file.path(pipeline, 'out', s,'H.csv'))
+
