@@ -27,7 +27,7 @@ load(fullfile('empirical', '2_pipeline', 'code02_prepvars.m', 'out', 'W_pesshop.
 w = 2:33;
 
 % type
-t = 'demo_only';
+t = 'female_only';
 % types are: int no_pessimist no_quali no_shopintent no_feedback no_edu
 % no_inc no_hhroles no_uncertainty no_employ no_geo
 
@@ -49,21 +49,7 @@ vars = {'pessimist','q_unemployment','q_rent','q_lending','q_interest',...
     'entrepreneur','refresher','nround','norent'};
 
 % select vars that won't make it final
-if ~strcmp(t,'old')
-    rm = {'fin_lit_subj','fin_lit_test','assets','debt_col','debt_nocol',...
-        'exphp_intqr','exphp_md','sl_major','sl_essential','sl_clothing',...
-        'sl_entz','sl_mobility','sl_services','sl_holiday','sl_housing',...
-        'sl_reserves','incexp_intqr','incexp_md','homeown','norent',...
-        'exphp_intqr','exphp_md','inflexppoint_long','f_short','prob_md',...
-        'leave','homemaker','civil_servant','entrepreneur'};
-    % select vars that won't make it final but preserve fin literacy
-    rm_fin = {'assets','debt_col','debt_nocol',...
-        'exphp_intqr','exphp_md','sl_major','sl_essential','sl_clothing',...
-        'sl_entz','sl_mobility','sl_services','sl_holiday','sl_housing',...
-        'sl_reserves','incexp_intqr','incexp_md','homeown','norent'...
-        'exphp_intqr','exphp_md','inflexppoint_long','f_short','prob_md',...
-        'leave','homemaker','civil_servant','entrepreneur'};
-else 
+if strcmp(t,'old')
     rm = {'fin_lit_subj','fin_lit_test','assets','debt_col','debt_nocol',...
         'exphp_intqr','exphp_md','sl_major','sl_essential','sl_clothing',...
         'sl_entz','sl_mobility','sl_services','sl_holiday','sl_housing',...
@@ -86,6 +72,36 @@ else
         'shop_groceries_nsing','shop_major_nsing','prep_meals_nsing','decide_finance_nsing',...
         'decide_finance','prob_md','east1989','full_time','part_time',...
         'leave','homemaker','civil_servant','entrepreneur','norent'};
+elseif strcmp(t,'female_only')
+    rm = {'pessimist','q_unemployment','q_rent','q_lending','q_interest',...
+    'q_inflation','q_property','q_growth','q_fuel','q_dax','q_tax',...
+    'inflexppoint_long','homeown','exphp_point','expint_sav','sl_major',...
+    'sl_essential','sl_clothing','sl_entz','sl_mobility','sl_services',...
+    'sl_holiday','sl_housing','sl_reserves','si_major','si_essential',...
+    'si_clothing','si_entz','si_mobility','si_services','si_holiday',....
+    'si_housing','si_reserves','f_nointerest','f_easy','f_short',...
+    'eduschool','eduwork','hhchildren','hhinc','pinc',...
+    'shop_groceries_nsing','shop_major_nsing','prep_meals_nsing',...
+    'decide_finance_nsing','assets','debt_col',...
+    'debt_nocol','age','citysize','prob_intqr','prob_md','incexp_intqr',...
+    'incexp_md','exphp_intqr','exphp_md','fin_lit_subj','fin_lit_test',...
+    'eastgerman','non_single','east1989','full_time','part_time',...
+    'unemployed','retired','leave','homemaker','civil_servant',...
+    'entrepreneur','refresher','nround','norent'};
+else
+    rm = {'fin_lit_subj','fin_lit_test','assets','debt_col','debt_nocol',...
+        'exphp_intqr','exphp_md','sl_major','sl_essential','sl_clothing',...
+        'sl_entz','sl_mobility','sl_services','sl_holiday','sl_housing',...
+        'sl_reserves','incexp_intqr','incexp_md','homeown','norent',...
+        'exphp_intqr','exphp_md','inflexppoint_long','f_short','prob_md',...
+        'leave','homemaker','civil_servant','entrepreneur'};
+    % select vars that won't make it final but preserve fin literacy
+    rm_fin = {'assets','debt_col','debt_nocol',...
+        'exphp_intqr','exphp_md','sl_major','sl_essential','sl_clothing',...
+        'sl_entz','sl_mobility','sl_services','sl_holiday','sl_housing',...
+        'sl_reserves','incexp_intqr','incexp_md','homeown','norent'...
+        'exphp_intqr','exphp_md','inflexppoint_long','f_short','prob_md',...
+        'leave','homemaker','civil_servant','entrepreneur'};
 end
 
 
@@ -134,6 +150,12 @@ R = [];
 id = [];
 wave = [];
 y = [];
+year = [];
+month = [];
+
+if strcmp(t,'female_only')
+    vars = vars(~contains(vars,rm));
+end
 
 for i=w
 
@@ -145,7 +167,7 @@ for i=w
 
     % compile table of selected variables
     r = [];
-    for ii = vars
+    for ii = vars % all variables we actually take
         try r = [r,W.(temp_var)(:,ii)]; end
     end
 
@@ -157,15 +179,24 @@ for i=w
         id = [id;W.(temp_var).id];
         wave = [wave;W.(temp_var).wave];
         y = [y;W.(temp_var).y];
+        year = [year;W.(temp_var).year];
+        month = [month;W.(temp_var).month];
     end
+end
+
+R.y = y; 
+
+if strcmp(t,'female_only')
+    writetable([R table(year,'VariableNames',{'year'}) table(month,'VariableNames',{'month'})],fullfile(pipeline, 'out', t,'T.csv'))
+    return
 end
 
 R.id = id;
 R.wave = wave;
-R.y = y; 
 
 % --- Save full data to pipeline folder -- 
 save(fullfile(pipeline, 'out', 'R_full.mat'),'R',"w","NAME","pipeline",'PROJECT','PROJECT_DIR')
+
 
 
 % ------------
@@ -175,7 +206,7 @@ save(fullfile(pipeline, 'out', 'R_full.mat'),'R',"w","NAME","pipeline",'PROJECT'
 
 % clear all nonusable responses
 T = removevars(R,rm);
-T = removevars(T,{'id','wave','y'});
+T = removevars(R,{'id','wave','y'});
 
 r=[];
 for i = [-9999 -9998 -9997 -9996 -5555 -6666 9999 9998 9997 9996 5555 6666]
@@ -186,6 +217,7 @@ end
 
 u = unique(r);
 clear r
+
 
 % same but including fin lit
 T_fin = removevars(R,rm_fin);
@@ -203,6 +235,7 @@ end
 
 u_fin = unique(r);
 
+
 % remove missing vals
 T(u,:)=[];
 y(u)=[];
@@ -210,11 +243,13 @@ wave(u)=[];
 id(u)=[];
 lny = log(y-min(y)+0.1);
 
+
 T_fin(u_fin,:)=[];
 y_fin(u_fin)=[];
 wave_fin(u_fin)=[];
 id_fin(u_fin)=[];
 lny_fin = log(y_fin-min(y_fin)+0.1);
+
 
 clear r
 
