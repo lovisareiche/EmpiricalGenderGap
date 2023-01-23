@@ -34,7 +34,7 @@ library(miceadds) # for loading individual files
 ### Any settings go here
 
 t <- 'LSDVt_control'
-l <- 'log'
+l <- 'level'
 
 ## ---------------------
 ## Set working directory
