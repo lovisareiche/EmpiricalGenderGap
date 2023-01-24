@@ -26,7 +26,7 @@ library('tidyverse')
 ## --------
 ### Any settings go here
 
-s <- 'Michigan'
+s <- 'BOE'
 # BOP-HH, Michigan, FRBNY
 
 
@@ -83,16 +83,21 @@ if(s=='BOP-HH'){
 if(s=='Michigan'){
   T <- mutate(T,female = SEX-1, single = as.numeric(NUMADT == 1), year = as.numeric(substr(YYYYMM, 1, 4)), month = as.numeric(substr(YYYYMM, 5, 6))) %>%
     rename(y = PX1) %>%
-    filter(abs(y) <= 95) %>%
-    filter(!is.na(female)) %>%
+    filter(abs(y) <= 95 & !is.na(female) & !is.na(single)) %>%
     select(female,single,y,year,month)
 }
 
 if(s=='FRBNY'){
   T <- mutate(T,female = as.numeric(Q33==1), single = Q38 - 1, year = as.numeric(substr(date, 1, 4)), month = as.numeric(substr(date, 5, 6))) %>%
     rename(y = Q8v2part2) %>%
-    filter(abs(y) <= 95) %>%
-    filter(!is.na(female)) %>%
+    filter(abs(y) <= 95 & !is.na(female) & !is.na(single)) %>%
+    select(female,single,y,year,month)
+}
+
+if(s=='BOE'){
+  T <- mutate(T,female = as.numeric(Q33==1), single = Q38 - 1, year = as.numeric(substr(date, 1, 4)), month = as.numeric(substr(date, 5, 6))) %>%
+    rename(y = Q8v2part2) %>%
+    filter(abs(y) <= 95 & !is.na(female) & !is.na(single)) %>%
     select(female,single,y,year,month)
 }
 
