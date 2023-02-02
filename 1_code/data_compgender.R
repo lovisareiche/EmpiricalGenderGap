@@ -72,7 +72,8 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
 
 ## -- Load data from pipeline folder --
 
-T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T.csv')) 
+T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T.csv')) %>%
+  mutate(shop_groceries_nsing = as.numeric(shop_groceries_nsing==2),shop_major_nsing = as.numeric(shop_major_nsing==2),prep_meals_nsing = as.numeric(prep_meals_nsing==2),decide_finance_nsing = as.numeric(decide_finance_nsing==2))
 
 
 ## -- Crate table of means split by male and female
