@@ -93,10 +93,10 @@ rm(T)
 ## -- compute moments --
 
 T <- group_by(F,survey,single,female) %>%
-  summarise(mn = round(mean(y),2), md = median(y), std = round(sd(y),2), skew = round(skewness(y),2))
+  summarise(mn = round(mean(y),2), md = median(y), std = round(sd(y),2), p10 = round(quantile(y,0.1),2), p25 = round(quantile(y,0.25),2), p75 = round(quantile(y,0.75),2), p90 = round(quantile(y,0.9),2))
 
 T_diff <- group_by(T,survey,single) %>%
-  summarise(dmn = diff(mn), dmd = diff(md), dstd = diff(std), dskew = diff(skew))
+  summarise(dmn = diff(mn), dmd = diff(md), dstd = diff(std), dp10 = diff(p10), dp25 = diff(p25), dp75 = diff(p75), dp90 = diff(p90))
 
 # split sample by single or not
 
@@ -172,3 +172,5 @@ T_diff <- t(T_diff)
 
 xtable(T)
 xtable(T_diff)
+
+
