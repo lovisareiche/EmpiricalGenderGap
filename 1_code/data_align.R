@@ -26,7 +26,7 @@ library('tidyverse')
 ## --------
 ### Any settings go here
 
-s <- 'BOE'
+s <- 'FRBNY'
 # BOP-HH, Michigan, FRBNY
 
 
@@ -76,22 +76,24 @@ T <- read_csv(file.path('empirical', '0_data', 'manual',s, 'T.csv'))
 
 if(s=='BOP-HH'){
   T <- mutate(T,single = as.numeric(non_single == 0)) %>%
-    filter(abs(y) <= 95 & abs(female) <=1 & abs(single) <=1) %>%
-    select(-non_single)
+    filter(abs(y) <= 95 & abs(female) <=1 & abs(single) <=1 & abs(eduschool) <= 6) %>%
+    rename(region = eastgerman) %>%
+    select(-non_single,-pinc)
 }
 
 if(s=='Michigan'){
   T <- mutate(T,female = SEX-1, single = as.numeric(NUMADT == 1), year = as.numeric(substr(YYYYMM, 1, 4)), month = as.numeric(substr(YYYYMM, 5, 6))) %>%
-    rename(y = PX1) %>%
-    filter(abs(y) <= 95 & !is.na(female) & !is.na(single)) %>%
-    select(female,single,y,year,month)
+    rename(y = PX1, age = AGE, hhinc = INCOME, eduschool = EDUC, region = REGION) %>%
+    filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(eduschool) & !is.na(region) & !is.na(age) ) %>%
+    select(female,single,age,eduschool,hhinc,region,y,year,month)
 }
 
 if(s=='FRBNY'){
   T <- mutate(T,female = as.numeric(Q33==1), single = Q38 - 1, year = as.numeric(substr(date, 1, 4)), month = as.numeric(substr(date, 5, 6))) %>%
-    rename(y = Q8v2part2) %>%
-    filter(abs(y) <= 95 & !is.na(female) & !is.na(single)) %>%
-    select(female,single,y,year,month)
+    rename(y = Q8v2part2, age = Q32, eduschool = Q36, hhinc = Q47, regionCAT = `_REGION_CAT`) %>%
+    filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(eduschool) & !is.na(regionCAT) & !is.na(age) & abs(eduschool)<=8) %>%
+    mutate(region = as.numeric(factor(regionCAT))) %>%
+    select(female,single,age,eduschool,hhinc,region,y,year,month)
 }
 
 if(s=='BOE'){
