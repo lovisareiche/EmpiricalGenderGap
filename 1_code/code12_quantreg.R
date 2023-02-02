@@ -32,8 +32,8 @@ library('plm')
 ## --------
 ### Any settings go here
 
-l <- 'log'
-t <- 'demo_only'
+l <- 'level'
+t <- 'base'
 # sub <- 'subj_finilliterate'
 sub <- ''
 
@@ -183,13 +183,30 @@ R2 <- 1 - rqs$rho/rqs0$rho
 
 s.rqs <- summary.rqs(rqs)
 
+if(l == 'level'){
+jpeg(file.path('empirical','3_output','results', NAME,t,l,"quantreg_female.jpg"), width = 1000, height = 700)
+plot.summary.rqs(s.rqs, parm = "female", ols = FALSE, ylim = c(-0.2,1))
+dev.off()}
+
+if(l == 'log'){
 jpeg(file.path('empirical','3_output','results', NAME,t,l,"quantreg_female.jpg"), width = 1000, height = 700)
 plot.summary.rqs(s.rqs, parm = "female", ols = FALSE, ylim = c(-0.005,0.02))
-dev.off()
+dev.off()}
 
+if(t != 'demo_only'){
 jpeg(file.path('empirical','3_output','results', NAME,t,l,"quantreg_fincon.jpg"), width = 1000, height = 700)
 plot.summary.rqs(s.rqs, parm = c("prob_intqr","nround","f_nointerest","f_easy"), ols = FALSE)
-dev.off()
+dev.off()}
+
+if(t != 'demo_only'){
+  jpeg(file.path('empirical','3_output','results', NAME,t,l,"quantreg_pess.jpg"), width = 1000, height = 700)
+  plot.summary.rqs(s.rqs, parm = c("pessimist"), ols = FALSE)
+  dev.off()}
+
+if(t != 'demo_only'){
+  jpeg(file.path('empirical','3_output','results', NAME,t,l,"quantreg_exp.jpg"), width = 1000, height = 700)
+  plot.summary.rqs(s.rqs, parm = c("shop_groceries_nsing","shop_major_nsing","prep_meals_nsing","decide_finance_nsing"), ols = FALSE)
+  dev.off()}
 
 
 # --- Write output
