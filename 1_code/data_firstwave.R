@@ -122,5 +122,5 @@ dev.off()
 # ----------
 ## Here you leave any code snippets or temporary code that you don't need but don't want to delete just yet
 
-
+write.csv(W_full, file = file.path(pipeline, 'out', 'W.csv'))
  
