@@ -38,8 +38,10 @@ library('datawizard')
 ## --------
 ### Any settings go here
 
-t <- 'demo_only'
-l <- 'log'
+t <- 'base'
+l <- 'level'
+f <- 'bopreg'
+
 
 ## ---------------------
 ## Set working directory
@@ -53,10 +55,10 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -65,6 +67,16 @@ if (!dir.exists(pipeline)) {
     dir.create(file.path(pipeline, folder))
   }
 }
+
+
+### The code below will automatically create an output folder for this code file if it does not exist.
+
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+  dir.create(outline)
+}
+
+### This code will create affitional folders
 
 if (!dir.exists(file.path(pipeline,'out',t))) {
   dir.create(file.path(pipeline,'out',t))
@@ -80,7 +92,7 @@ if (!dir.exists(file.path(pipeline,'out',t,l))) {
 
 ## -- Load data from pipeline folder --
 
-T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out',t, 'T.csv'))
+T <- read_csv(file.path('empirical', '2_pipeline', f,'code03_compilepanel.m','out',t, 'T.csv'))
 
 waves <- colnames(T) %>%
   str_subset("w\\d")

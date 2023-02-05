@@ -36,6 +36,7 @@ library(rms) # for ordered logit
 ## Settings
 ## --------
 ### Any settings go here
+f <- 'bopreg'
 
 
 ## ---------------------
@@ -50,10 +51,10 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -66,8 +67,9 @@ if (!dir.exists(pipeline)) {
 
 ### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+  dir.create(outline)
 }
 
 
@@ -77,13 +79,13 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
 
 ## -- Load data from pipeline folder --
 
-T_fin <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T_fin.csv')) %>%
+T_fin <- read_csv(file.path('empirical', '2_pipeline',f, 'code03_compilepanel.m','out','base', 'T_fin.csv')) %>%
   pdata.frame(index=c( "id", "wave" )) %>%
   # create binary vars
   mutate(fin_lit_subj_bin=as.numeric(fin_lit_subj >=2)) %>%
   mutate(fin_lit_test_bin=as.numeric(fin_lit_test >=2))
 
-T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T.csv')) %>%
+T <- read_csv(file.path('empirical', '2_pipeline',f, 'code03_compilepanel.m','out','base', 'T.csv')) %>%
   pdata.frame(index=c( "id", "wave" ))
 
 
@@ -215,7 +217,7 @@ writeLines(capture.output(stargazer(lsubj, lsubj_bin, ltest, ltest_bin,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels, no.space = FALSE)), 
-           file.path('empirical','3_output','results', NAME,'code_fitlit.tex'))
+           file.path(outline,'code_fitlit.tex'))
 
 
 ## -- Save T with new predicted variables

@@ -37,6 +37,9 @@ t <- 'base'
 # sub <- 'subj_finilliterate'
 sub <- ''
 
+f <- 'bopreg'
+
+
 ## ---------------------
 ## Set working directory
 ## ---------------------
@@ -47,13 +50,12 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ## Set  up pipeline folder if missing
 ## ----------------------------------
-
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -63,18 +65,22 @@ if (!dir.exists(pipeline)) {
   }
 }
 
+
 ### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+  dir.create(outline)
 }
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME,t))) {
-  dir.create(file.path('empirical', '3_output','results',NAME,t))
+## Add subfolders
+
+if (!dir.exists(file.path(outline,t))) {
+  dir.create(file.path(outline,t))
 }
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME,t,l))) {
-  dir.create(file.path('empirical', '3_output','results',NAME,t,l))
+if (!dir.exists(file.path(outline,t,l))) {
+  dir.create(file.path(outline,t,l))
 }
 
 
@@ -84,11 +90,11 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME,t,l))) {
 
 ## -- Load data from pipeline folder --
 
-D <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out',t, 'T.csv')) %>%
+D <- read_csv(file.path('empirical', '2_pipeline',f, 'code03_compilepanel.m','out',t, 'T.csv')) %>%
   pdata.frame( index=c( "id", "wave" ) )
 
 if(sub != ''){
-  load(file.path('empirical', '2_pipeline', 'code09_fitlit','out', 'T.RData'))
+  load(file.path('empirical', '2_pipeline', f,'code09_fitlit','out', 'T.RData'))
   D$subj_finilliterate <- as.numeric(T$pred_subj_bin==0)
 }
 
@@ -237,6 +243,6 @@ writeLines(capture.output(stargazer(m02, m04, m06, m08,
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels,
                                     add.lines = add.lines)), 
-           file.path('empirical', '3_output','results', NAME,t,l, 'code_quantreg.tex'))
+           file.path(outline,t,l, 'code_quantreg.tex'))
 
 

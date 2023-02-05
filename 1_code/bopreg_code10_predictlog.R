@@ -33,6 +33,7 @@ library(InformationValue) # for optimal cutoff
 ## --------
 ### Any settings go here
 
+f <- 'bopreg'
 
 
 ## ---------------------
@@ -45,13 +46,12 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ## Set  up pipeline folder if missing
 ## ----------------------------------
-
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -61,13 +61,13 @@ if (!dir.exists(pipeline)) {
   }
 }
 
+
 ### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+  dir.create(outline)
 }
-
-
 
 # ---------
 # Main code
@@ -75,8 +75,8 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
 
 ## -- Load data from pipeline folder --
 
-load(file.path('empirical', '2_pipeline', 'code09_fitlit','out', 'T.RData'))
-hhcluster <- read_csv(file.path('empirical', '2_pipeline', 'cluster.m','out', 'hhcluster.csv'))
+load(file.path('empirical', '2_pipeline', f,'code09_fitlit','out', 'T.RData'))
+hhcluster <- read_csv(file.path('empirical', '2_pipeline',f, 'cluster.m','out', 'hhcluster.csv'))
 T["hhcluster"] <- hhcluster
 T["pessimist"] <- as.numeric(T$pessimist>=3)
 
@@ -214,7 +214,7 @@ writeLines(capture.output(stargazer(mhh, mpess, mfin,
                                     intercept.top = TRUE, intercept.bottom = FALSE, 
                                     no.space = FALSE, add.lines = add.lines
                                     )), 
-           file.path('empirical', '3_output','results', NAME,'code_predictlog.tex'))
+           file.path(outline,'code_predictlog.tex'))
 
 
 

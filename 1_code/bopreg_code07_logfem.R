@@ -34,6 +34,8 @@ library(InformationValue) # for optimal cutoff
 ### Any settings go here
 
 t <- 'base'
+f <- 'bopreg'
+
 
 ## ---------------------
 ## Set working directory
@@ -47,10 +49,10 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -60,15 +62,19 @@ if (!dir.exists(pipeline)) {
   }
 }
 
+
+### The code below will automatically create an output folder for this code file if it does not exist.
+
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+  dir.create(outline)
+}
+
+## Add subfolders
 if (!dir.exists(file.path(pipeline,'out',t))) {
   dir.create(file.path(pipeline,'out',t))
 }
 
-### The code below will automatically create an output folder for this code file if it does not exist.
-
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
-}
 
 # ---------
 # Functions
@@ -82,7 +88,7 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
 
 ## -- Load data from pipeline folder --
 
-T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out',t, 'T.csv')) %>%
+T <- read_csv(file.path('empirical', '2_pipeline',f, 'code03_compilepanel.m','out',t, 'T.csv')) %>%
   pdata.frame(index=c( "id", "wave" ))
 
 waves <- colnames(T) %>%
@@ -268,7 +274,7 @@ writeLines(capture.output(stargazer(mvarimp, mvarvif, fullm, expm,sentm,finm,
                                     add.lines = add.lines,
                                     column.labels = column.labels, column.separate = column.separate
                                     )), 
-           file.path('empirical', '3_output','results', NAME, 'code_logfem.tex'))
+           file.path(outline, 'code_logfem.tex'))
 
 
 ## --- Save variables required

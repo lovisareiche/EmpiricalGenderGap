@@ -30,6 +30,8 @@ library(stargazer)
 ### Any settings go here
 
 l <- "level"
+f <- 'bopreg'
+
 
 ## ---------------------
 ## Set working directory
@@ -43,10 +45,10 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -56,14 +58,17 @@ if (!dir.exists(pipeline)) {
   }
 }
 
+
 ### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+  dir.create(outline)
 }
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME,l))) {
-  dir.create(file.path('empirical', '3_output','results',NAME,l))
+## Add subfolders
+if (!dir.exists(file.path(outline,l))) {
+  dir.create(file.path(outline,l))
 }
 
 
@@ -75,8 +80,8 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME,l))) {
 
 ## -- Load data from pipeline folder --
 
-load(file.path('empirical', '2_pipeline', 'code09_fitlit','out', 'T.RData'))
-hhcluster <- read_csv(file.path('empirical', '2_pipeline', 'cluster.m','out', 'hhcluster.csv'))
+load(file.path('empirical', '2_pipeline', f,'code09_fitlit','out', 'T.RData'))
+hhcluster <- read_csv(file.path('empirical', '2_pipeline', f,'cluster.m','out', 'hhcluster.csv'))
 T["hhcluster"] <- hhcluster
 
 waves <- colnames(T) %>%
@@ -184,4 +189,4 @@ writeLines(capture.output(stargazer(y.base, y.finlit, y.hhcluster, y.both, y.int
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels, no.space = TRUE)), 
-           file.path('empirical', '3_output','results', NAME,l, 'code_finlithhcluster.tex'))
+           file.path(outline,l, 'code_finlithhcluster.tex'))

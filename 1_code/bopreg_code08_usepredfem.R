@@ -31,6 +31,8 @@ library(stargazer) # for writing regression tables
 ### Any settings go here
 
 l <- 'log'
+f <- 'bopreg'
+
 
 ## ---------------------
 ## Set working directory
@@ -44,10 +46,10 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -57,18 +59,23 @@ if (!dir.exists(pipeline)) {
   }
 }
 
+
+### The code below will automatically create an output folder for this code file if it does not exist.
+
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+  dir.create(outline)
+}
+
+## Add subfolders
+
 if (!dir.exists(file.path(pipeline,'out',l))) {
   dir.create(file.path(pipeline,'out',l))
 }
 
-### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
-}
-
-if (!dir.exists(file.path('empirical', '3_output','results',NAME,l))) {
-  dir.create(file.path('empirical', '3_output','results',NAME,l))
+if (!dir.exists(file.path(outline,l))) {
+  dir.create(file.path(outline,l))
 }
 
 # ---------
@@ -83,7 +90,7 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME,l))) {
 
 ## -- Load data from pipeline folder --
 
-load(file.path('empirical', '2_pipeline', 'code07_logfemale','out', 'T.RData'))
+load(file.path('empirical', '2_pipeline',f, 'code07_logfemale','out', 'T.RData'))
 
 waves <- colnames(T) %>%
   str_subset("w\\d")
@@ -175,4 +182,4 @@ writeLines(capture.output(stargazer(mbase,mexp,msent,mfin,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels)), 
-           file.path('empirical', '3_output','results', NAME,l, 'code_usepredfem.tex'))
+           file.path(outline,l, 'code_usepredfem.tex'))

@@ -29,6 +29,7 @@ library(xtable)
 ## Settings
 ## --------
 ### Any settings go here
+f <- 'bopreg'
 
 
 ## ---------------------
@@ -43,10 +44,10 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -59,8 +60,9 @@ if (!dir.exists(pipeline)) {
 
 ### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+  dir.create(outline)
 }
 
 
@@ -171,7 +173,7 @@ corstars <-function(x, method=c("pearson", "spearman"), removeTriangle=c("upper"
 ## -- Load data from pipeline folder --
 # select variables for correlation plot
 
-T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T.csv'))
+T <- read_csv(file.path('empirical', '2_pipeline', f,'code03_compilepanel.m','out','base', 'T.csv'))
 female <- T$female
 T <-  select(T, 'non_single','shop_groceries_nsing','shop_major_nsing', 'prep_meals_nsing', 'decide_finance_nsing','pessimist','prob_intqr','f_nointerest','f_easy','refresher','nround')
 res1 <- cor.mtest(T, conf.level = .95)
@@ -186,7 +188,7 @@ trace(corrplot, edit=TRUE)
 
 ## -- Save Bar Plot
 
-jpeg(file.path('empirical','3_output','results', NAME,"corrplot.jpg"), width = 1000, height = 700)
+jpeg(file.path(outline,"corrplot.jpg"), width = 1000, height = 700)
 
 corrplot.mixed(cor(T),
                lower = "number", 
@@ -211,7 +213,7 @@ pairs(T,
       diag.panel = panel.hist,    # histogram
       upper.panel = NULL)         # omit upper panel
 
-jpeg(file.path('empirical','3_output','results', NAME,"chartcorrelation.jpg"), width = 1000, height = 700)
+jpeg(file.path(outline,"chartcorrelation.jpg"), width = 1000, height = 700)
 
 chart.Correlation(T, histogram = TRUE, method = "pearson",lower.panel = NULL)
 
@@ -230,7 +232,7 @@ dev.off()
 T_roles <- select(T,"shop_groceries_nsing","shop_major_nsing","prep_meals_nsing","decide_finance_nsing") 
 
 
-jpeg(file.path('empirical','3_output','results', NAME,"corrplot_familyhhroles.jpg"), width = 1000, height = 700)
+jpeg(file.path(outline,"corrplot_familyhhroles.jpg"), width = 1000, height = 700)
 res1 <- cor.mtest(T_roles[T$non_single == 0,], conf.level = .95)
 
 corrplot.mixed(cor(T_roles[T$non_single == 0,]),
@@ -252,7 +254,7 @@ dev.off()
 
 ## --- Split by gender
 
-jpeg(file.path('empirical','3_output','results', NAME,"corrplot_female.jpg"), width = 1000, height = 700)
+jpeg(file.path(outline,"corrplot_female.jpg"), width = 1000, height = 700)
 res1 <- cor.mtest(T[female == 1,], conf.level = .95)
 
 corrplot.mixed(cor(T[female == 1,]),
@@ -272,7 +274,7 @@ corrplot.mixed(cor(T[female == 1,]),
 
 dev.off()
 
-jpeg(file.path('empirical','3_output','results', NAME,"corrplot_male.jpg"), width = 1000, height = 700)
+jpeg(file.path(outline,"corrplot_male.jpg"), width = 1000, height = 700)
 res1 <- cor.mtest(T[female == 0,], conf.level = .95)
 
 corrplot.mixed(cor(T[female == 0,]),

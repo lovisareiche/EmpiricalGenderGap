@@ -35,6 +35,8 @@ library(lmtest)
 
 t <- 'base'
 l <- 'level'
+f <- 'bopreg'
+
 
 ## ---------------------
 ## Set working directory
@@ -46,13 +48,12 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ## Set  up pipeline folder if missing
 ## ----------------------------------
-
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -62,6 +63,16 @@ if (!dir.exists(pipeline)) {
   }
 }
 
+
+### The code below will automatically create an output folder for this code file if it does not exist.
+
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+  dir.create(outline)
+}
+
+## Add subfolders
+
 if (!dir.exists(file.path(pipeline,'out',t))) {
   dir.create(file.path(pipeline,'out',t))
 }
@@ -70,18 +81,13 @@ if (!dir.exists(file.path(pipeline,'out',t,l))) {
   dir.create(file.path(pipeline,'out',t,l))
 }
 
-### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
+if (!dir.exists(file.path(outline,t))) {
+  dir.create(file.path(outline,t))
 }
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME,t))) {
-  dir.create(file.path('empirical', '3_output','results',NAME,t))
-}
-
-if (!dir.exists(file.path('empirical', '3_output','results',NAME,t,l))) {
-  dir.create(file.path('empirical', '3_output','results',NAME,t,l))
+if (!dir.exists(file.path(outline,t,l))) {
+  dir.create(file.path(outline,t,l))
 }
 
 # ---------
@@ -92,13 +98,13 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME,t,l))) {
   
 # --- Load data from pipeline folder --  
   
-load(file.path('empirical', '2_pipeline', 'code04_regress','out',t,l, 'T.RData'))
+load(file.path('empirical', '2_pipeline', f,'code04_regress','out',t,l, 'T.RData'))
 
 # --- Summary Statistics
 
 writeLines(capture.output(stargazer(T,title="Summary Statistics",align=TRUE,
                                     label = "tab:summary", model.names = TRUE)), 
-           file.path('empirical','3_output','results', NAME,t,l, 'code_summary.tex'))
+           file.path(outline,t,l, 'code_summary.tex'))
 
 # --- Comparing estimators
 
@@ -130,7 +136,7 @@ writeLines(capture.output(stargazer(y.OLS, y.PO, y.RE, y.FEt, y.LSDVt_control,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels)), 
-           file.path('empirical', '3_output','results', NAME,t,l, 'code_compest.tex'))
+           file.path(outline,t,l, 'code_compest.tex'))
 
 # --- Run tests
 

@@ -35,6 +35,8 @@ library(miceadds) # for loading individual files
 
 t <- 'LSDVt_control'
 l <- 'level'
+f <- 'bopreg'
+
 
 ## ---------------------
 ## Set working directory
@@ -48,10 +50,10 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -61,6 +63,16 @@ if (!dir.exists(pipeline)) {
   }
 }
 
+
+### The code below will automatically create an output folder for this code file if it does not exist.
+
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+  dir.create(outline)
+}
+
+## Add subfolders
+
 if (!dir.exists(file.path(pipeline,'out',t))) {
   dir.create(file.path(pipeline,'out',t))
 }
@@ -69,17 +81,12 @@ if (!dir.exists(file.path(pipeline,'out',t,l))) {
   dir.create(file.path(pipeline,'out',t,l))
 }
 
-### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
-}
-
-if (!dir.exists(file.path('empirical', '3_output','results',NAME,t))) {
+if (!dir.exists(file.path(outline,t))) {
   dir.create(file.path('empirical', '3_output','results',NAME,t))
 }
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME,t,l))) {
+if (!dir.exists(file.path(outline,t,l))) {
   dir.create(file.path('empirical', '3_output','results',NAME,t,l))
 }
 
@@ -106,18 +113,18 @@ extractorRData <- function(file, object) {
 
 # --- Load different models from pipeline folder --  
 
-base <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','base',l, 'T.RData'),paste('y.',t, sep = ""))
-int <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','int',l, 'T.RData'),paste('y.',t, sep = ""))
-#edu <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_edu',l, 'T.RData'),paste('y.',t, sep = ""))
-#employ <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_employ',l, 'T.RData'),paste('y.',t, sep = ""))
-#geo <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_geo',l, 'T.RData'),paste('y.',t, sep = ""))
-hhroles <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_hhroles',l, 'T.RData'),paste('y.',t, sep = ""))
-#quali <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_quali',l, 'T.RData'),paste('y.',t, sep = ""))
-pessimist <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_pessimist',l, 'T.RData'),paste('y.',t, sep = ""))
-#inc <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_inc',l, 'T.RData'),paste('y.',t, sep = ""))
-#shopintent <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_shopintent',l, 'T.RData'),paste('y.',t, sep = ""))
-uncertainty <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','no_uncertainty',l, 'T.RData'),paste('y.',t, sep = ""))
-nocontrol  <- extractorRData(file.path('empirical', '2_pipeline', 'code04_regress','out','demo_only',l, 'T.RData'),paste('y.',t, sep = ""))
+base <- extractorRData(file.path('empirical', '2_pipeline', f,'code04_regress','out','base',l, 'T.RData'),paste('y.',t, sep = ""))
+int <- extractorRData(file.path('empirical', '2_pipeline', f,'code04_regress','out','int',l, 'T.RData'),paste('y.',t, sep = ""))
+#edu <- extractorRData(file.path('empirical', '2_pipeline',f, 'code04_regress','out','no_edu',l, 'T.RData'),paste('y.',t, sep = ""))
+#employ <- extractorRData(file.path('empirical', '2_pipeline',f, 'code04_regress','out','no_employ',l, 'T.RData'),paste('y.',t, sep = ""))
+#geo <- extractorRData(file.path('empirical', '2_pipeline',f, 'code04_regress','out','no_geo',l, 'T.RData'),paste('y.',t, sep = ""))
+hhroles <- extractorRData(file.path('empirical', '2_pipeline',f, 'code04_regress','out','no_hhroles',l, 'T.RData'),paste('y.',t, sep = ""))
+#quali <- extractorRData(file.path('empirical', '2_pipeline',f, 'code04_regress','out','no_quali',l, 'T.RData'),paste('y.',t, sep = ""))
+pessimist <- extractorRData(file.path('empirical', '2_pipeline',f, 'code04_regress','out','no_pessimist',l, 'T.RData'),paste('y.',t, sep = ""))
+#inc <- extractorRData(file.path('empirical', '2_pipeline',f, 'code04_regress','out','no_inc',l, 'T.RData'),paste('y.',t, sep = ""))
+#shopintent <- extractorRData(file.path('empirical', '2_pipeline',f, 'code04_regress','out','no_shopintent',l, 'T.RData'),paste('y.',t, sep = ""))
+uncertainty <- extractorRData(file.path('empirical', '2_pipeline',f, 'code04_regress','out','no_uncertainty',l, 'T.RData'),paste('y.',t, sep = ""))
+nocontrol  <- extractorRData(file.path('empirical', '2_pipeline',f, 'code04_regress','out','demo_only',l, 'T.RData'),paste('y.',t, sep = ""))
 
 # --- Comparing models
 
@@ -155,7 +162,7 @@ writeLines(capture.output(stargazer(base, int, pessimist, uncertainty, hhroles, 
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels, no.space = TRUE)), 
-           file.path('empirical','3_output','results', NAME,t,l, 'code_compmod.tex'))
+           file.path(outline,t,l, 'code_compmod.tex'))
 
 
 # label <- "tab:compmoddemo"
@@ -166,6 +173,6 @@ writeLines(capture.output(stargazer(base, int, pessimist, uncertainty, hhroles, 
 #                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
 #                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
 #                                     dep.var.labels = dep.var.labels, no.space = TRUE)), 
-#            file.path('empirical','3_output','results', NAME,t,l, 'code_compmod_demo.tex'))
+#            file.path(outline,t,l, 'code_compmod_demo.tex'))
 # 
 

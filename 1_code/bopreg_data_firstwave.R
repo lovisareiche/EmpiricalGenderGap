@@ -25,6 +25,7 @@ library("viridis")  # colour
 ## Settings
 ## --------
 ### Any settings go here
+f <- 'bopreg'
 
 
 ## ---------------------
@@ -39,10 +40,10 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -55,10 +56,10 @@ if (!dir.exists(pipeline)) {
 
 ### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+  dir.create(outline)
 }
-
 
 # ---------
 # Functions
@@ -72,7 +73,7 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
 
 ## -- Load data from pipeline folder --
 
-T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T.csv')) 
+T <- read_csv(file.path('empirical', '2_pipeline', f,'code03_compilepanel.m','out','base', 'T.csv')) 
 
 
 
@@ -106,7 +107,7 @@ fwnames <- paste("w",firstwave,sep = "")
 
 ## -- Save Bar Plot
 
-jpeg(file.path('empirical','3_output','results', NAME,"firstwave.jpg"), width = 1000, height = 700)
+jpeg(file.path(outline,"firstwave.jpg"), width = 1000, height = 700)
 
 
 barplot(W_full, main = "Wave of first survey participation", names.arg = wnames,
