@@ -34,6 +34,8 @@ library(caroline)
 S <- c('BOP-HH','Michigan','FRBNY')
 # BOP-HH, Michigan, FRBNY - all you have
 
+f <- 'compsur'
+
 
 ## ---------------------
 ## Set working directory
@@ -47,10 +49,10 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -58,13 +60,6 @@ if (!dir.exists(pipeline)) {
   for (folder in c('out', 'store', 'tmp')){
     dir.create(file.path(pipeline, folder))
   }
-}
-
-
-### The code below will automatically create an output folder for this code file if it does not exist.
-
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
 }
 
 

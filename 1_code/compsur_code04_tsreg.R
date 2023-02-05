@@ -5,7 +5,7 @@
 ## Runs timeseries regression to understand if food prices really drive gender gap
 
 rm(list=ls())
-NAME <- 'expcheck_timeseriesreg' ## Name of the R file goes here (without the file extension!)
+NAME <- 'code04_tsreg' ## Name of the R file goes here (without the file extension!)
 PROJECT <- 'EmpiricalGenderGap'
 PROJECT_DIR <- 'D:/Lovisa/Studium/Oxford/Department of Economics/DPhil' ## Change this to the directory in which your project folder is located, make sure to avoid using single backslashes (i.e. \)!
 
@@ -27,6 +27,8 @@ library(forecast)
 ## --------
 ### Any settings go here
 
+f <- 'compsur'
+
 
 ## ---------------------
 ## Set working directory
@@ -40,10 +42,10 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -56,9 +58,11 @@ if (!dir.exists(pipeline)) {
 
 ### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+  dir.create(outline)
 }
+
 
 
 # ---------
@@ -73,7 +77,7 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
 
 ## -- Load data from pipeline folder --
 
-D <- read_csv(file.path('empirical', '2_pipeline', 'data_timeseriesgendergap','out', 'D.csv')) %>%
+D <- read_csv(file.path('empirical', '2_pipeline', 'compsur','code02_tsgendergap','out', 'D.csv')) %>%
   mutate(date = as.Date(date))
 
 ## -- Make time series data
@@ -237,6 +241,6 @@ writeLines(capture.output(stargazer(msc, sce, ecfin, bop,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels)), 
-           file.path('empirical', '3_output','results', NAME,t,l, 'code_timeseriesreg.tex'))
+           file.path(outline, 'code_tsreg.tex'))
 
 

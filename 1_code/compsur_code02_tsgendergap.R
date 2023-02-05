@@ -5,7 +5,7 @@
 ## Compares timeseries expectations from different surveys
 
 rm(list=ls())
-NAME <- 'data_timeseriesgendergap' ## Name of the R file goes here (without the file extension!)
+NAME <- 'code02_tsgendergap' ## Name of the R file goes here (without the file extension!)
 PROJECT <- 'EmpiricalGenderGap'
 PROJECT_DIR <- 'D:/Lovisa/Studium/Oxford/Department of Economics/DPhil' ## Change this to the directory in which your project folder is located, make sure to avoid using single backslashes (i.e. \)!
 
@@ -34,6 +34,8 @@ library(caroline)
 S <- c('BOP-HH','Michigan','FRBNY')
 # BOP-HH, Michigan, FRBNY - all you have
 
+f <- 'compsur'
+
 
 ## ---------------------
 ## Set working directory
@@ -47,10 +49,10 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -63,8 +65,9 @@ if (!dir.exists(pipeline)) {
 
 ### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+  dir.create(outline)
 }
 
 
@@ -86,7 +89,7 @@ moving_average <- function(x, n = 6) {             # Create user-defined functio
 ## -- Load data from pipeline folder --
 
 for(i in 1:length(S)){
-  T <- read_csv(file.path('empirical', '2_pipeline', 'data_align','out',S[i], 'T.csv')) %>%
+  T <- read_csv(file.path('empirical', '2_pipeline',f, 'code01_align','out',S[i], 'T.csv')) %>%
     mutate(survey = S[i], date = as.yearmon(paste(year, month), format = "%Y %m"))
   assign(paste("T_",S[i],sep = ""),T)
   if(i==1){
@@ -116,7 +119,7 @@ M <- group_by(F,date,survey,female) %>%
 
 # load also ECFIN data
 
-T_ECFIN <- read_csv2(file.path('empirical', '0_data','manual','ECFIN','Q6.csv')) %>%
+T_ECFIN <- read_csv2(file.path('empirical', '0_data','manual','ECFIN','Q61.csv')) %>%
   mutate(date = as.Date(date), ECFIN = f_mean-m_mean, ECFIN_mov = moving_average(f_mean-m_mean)) %>%
   arrange(date) %>%
   select(date,ECFIN,ECFIN_mov)

@@ -5,7 +5,7 @@
 ## Coverts different inflation expectation surveys in a common format
 
 rm(list=ls())
-NAME <- 'data_align' ## Name of the R file goes here (without the file extension!)
+NAME <- 'code01_align' ## Name of the R file goes here (without the file extension!)
 PROJECT <- 'EmpiricalGenderGap'
 PROJECT_DIR <- 'D:/Lovisa/Studium/Oxford/Department of Economics/DPhil' ## Change this to the directory in which your project folder is located, make sure to avoid using single backslashes (i.e. \)!
 
@@ -26,8 +26,10 @@ library('tidyverse')
 ## --------
 ### Any settings go here
 
-s <- 'FRBNY'
+s <- 'Michigan'
 # BOP-HH, Michigan, FRBNY
+
+f <- 'compsur'
 
 
 ## ---------------------
@@ -42,10 +44,10 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -55,6 +57,7 @@ if (!dir.exists(pipeline)) {
   }
 }
 
+## Add subfolders
 
 if (!dir.exists(file.path(pipeline,'out',s))) {
   dir.create(file.path(pipeline,'out',s))
