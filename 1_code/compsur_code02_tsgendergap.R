@@ -105,26 +105,81 @@ rm(T)
 # Create data in wide format
 
 M <- group_by(F,date,survey,female) %>%
-  summarise(meany = mean(y)) %>%
+  summarise(meany = mean(y), sdy = sd(y), p25y = quantile(y,probs = 0.25), p50y = median(y), p75y = quantile(y,probs = 0.75)) %>%
   ungroup %>%
   mutate(key = paste(survey,female,sep = "_")) %>%
   select(-female) %>%
   select(-survey) %>%
+  mutate(date = as.Date(format(date, "%Y-%m-%d"))) 
+  
+Mmean <- M %>%
+  select(-sdy,-p25y,-p50y,-p75y) %>%
   spread(key = key, value = meany) %>%
-  mutate(date = as.Date(format(date, "%Y-%m-%d"))) %>%
   # take difference: women - men
-  mutate(Michigan = Michigan_1-Michigan_0, FRBNY = FRBNY_1-FRBNY_0, BOP = `BOP-HH_1`-`BOP-HH_0`) %>%
-  mutate(Michigan_mov = moving_average(Michigan),FRBNY_mov = moving_average(FRBNY),BOP_mov = moving_average(BOP)) %>%
-  select(date,Michigan,Michigan_mov,FRBNY,FRBNY_mov,BOP,BOP_mov)
+  mutate(msc_mean = Michigan_1-Michigan_0, sce_mean = FRBNY_1-FRBNY_0, bop_mean = `BOP-HH_1`-`BOP-HH_0`) %>%
+  mutate(msc_mean_mov = moving_average(msc_mean),sce_mean_mov = moving_average(sce_mean),bop_mean_mov = moving_average(bop_mean)) %>%
+  select(date,msc_mean,msc_mean_mov,sce_mean,sce_mean_mov,bop_mean,bop_mean_mov)
+
+Msd <- M %>%
+  select(-meany,-p25y,-p50y,-p75y) %>%
+  spread(key = key, value = sdy) %>%
+  # take difference: women - men
+  mutate(msc_sd = Michigan_1-Michigan_0, sce_sd = FRBNY_1-FRBNY_0, bop_sd = `BOP-HH_1`-`BOP-HH_0`) %>%
+  mutate(msc_sd_mov = moving_average(msc_sd),sce_sd_mov = moving_average(sce_sd),bop_sd_mov = moving_average(bop_sd)) %>%
+  select(date,msc_sd,msc_sd_mov,sce_sd,sce_sd_mov,bop_sd,bop_sd_mov)
+
+Mp25 <- M %>%
+  select(-sdy,-meany,-p50y,-p75y) %>%
+  spread(key = key, value = p25y) %>%
+  # take difference: women - men
+  mutate(msc_25 = Michigan_1-Michigan_0, sce_25 = FRBNY_1-FRBNY_0, bop_25 = `BOP-HH_1`-`BOP-HH_0`) %>%
+  mutate(msc_25_mov = moving_average(msc_25),sce_25_mov = moving_average(sce_25),bop_25_mov = moving_average(bop_25)) %>%
+  select(date,msc_25,msc_25_mov,sce_25,sce_25_mov,bop_25,bop_25_mov)
+
+Mp50 <- M %>%
+  select(-sdy,-p25y,-meany,-p75y) %>%
+  spread(key = key, value = p50y) %>%
+  # take difference: women - men
+  mutate(msc_50 = Michigan_1-Michigan_0, sce_50 = FRBNY_1-FRBNY_0, bop_50 = `BOP-HH_1`-`BOP-HH_0`) %>%
+  mutate(msc_50_mov = moving_average(msc_50),sce_50_mov = moving_average(sce_50),bop_50_mov = moving_average(bop_50)) %>%
+  select(date,msc_50,msc_50_mov,sce_50,sce_50_mov,bop_50,bop_50_mov)
+
+Mp75 <- M %>%
+  select(-sdy,-p25y,-p50y,-meany) %>%
+  spread(key = key, value = p75y) %>%
+  # take difference: women - men
+  mutate(msc_75 = Michigan_1-Michigan_0, sce_75 = FRBNY_1-FRBNY_0, bop_75 = `BOP-HH_1`-`BOP-HH_0`) %>%
+  mutate(msc_75_mov = moving_average(msc_75),sce_75_mov = moving_average(sce_75),bop_75_mov = moving_average(bop_75)) %>%
+  select(date,msc_75,msc_75_mov,sce_75,sce_75_mov,bop_75,bop_75_mov)
 
 # load also ECFIN data
 
-T_ECFIN <- read_csv2(file.path('empirical', '0_data','manual','ECFIN','Q61.csv')) %>%
-  mutate(date = as.Date(date), ECFIN = f_mean-m_mean, ECFIN_mov = moving_average(f_mean-m_mean)) %>%
-  arrange(date) %>%
-  select(date,ECFIN,ECFIN_mov)
+T_ECFIN <- read_csv2(file.path('empirical', '0_data','manual','ECFIN','Q61.csv')) 
 
-M <- merge(M,T_ECFIN, by = "date", all = TRUE)
+Tmean <- T_ECFIN %>%
+  mutate(date = as.Date(date), ecfin_mean = f_mean-m_mean, ecfin_mean_mov = moving_average(f_mean-m_mean)) %>%
+  arrange(date) %>%
+  select(date,ecfin_mean,ecfin_mean_mov)
+
+Tp25 <- T_ECFIN %>%
+  mutate(date = as.Date(date), ecfin_25 = f_25-m_25, ecfin_25_mov = moving_average(f_25-m_25)) %>%
+  arrange(date) %>%
+  select(date,ecfin_25,ecfin_25_mov)
+
+Tp50 <- T_ECFIN %>%
+  mutate(date = as.Date(date), ecfin_50 = f_50-m_50, ecfin_50_mov = moving_average(f_50-m_50)) %>%
+  arrange(date) %>%
+  select(date,ecfin_50,ecfin_50_mov)
+
+Tp75 <- T_ECFIN %>%
+  mutate(date = as.Date(date), ecfin_75 = f_75-m_75, ecfin_75_mov = moving_average(f_75-m_75)) %>%
+  arrange(date) %>%
+  select(date,ecfin_75,ecfin_75_mov)
+
+Mmean <- merge(Mmean,Tmean, by = "date", all = TRUE)
+Mp25 <- merge(Mp25,Tp25, by = "date", all = TRUE)
+Mp50 <- merge(Mp50,Tp50, by = "date", all = TRUE)
+Mp75 <- merge(Mp75,Tp75, by = "date", all = TRUE)
 
 # load in food inflation data
 
@@ -154,13 +209,17 @@ euro_t <- filter(T,LOCATION == "EA19" & SUBJECT == "TOT") %>%
 
 # merge all together
 
+M <- merge(Mmean,Msd, by = "date", all = TRUE) %>%
+  merge(Mp25, by = "date", all = TRUE) %>%
+  merge(Mp50, by = "date", all = TRUE) %>%
+  merge(Mp75, by = "date", all = TRUE)
+
 D <- merge(M,germany_f, by = "date", all = TRUE) %>%
   merge(germany_t, by = "date", all = TRUE) %>%
   merge(us_f, by = "date", all = TRUE) %>%
   merge(us_t, by = "date", all = TRUE) %>%
   merge(euro_f, by = "date", all = TRUE) %>%
   merge(euro_t, by = "date", all = TRUE) %>%
-  select(date,BOP,Michigan,FRBNY,ECFIN,BOP_mov,Michigan_mov,FRBNY_mov,ECFIN_mov,cpi_food_germany,cpi_food_us,cpi_food_euro,cpi_tot_germany,cpi_tot_us,cpi_tot_euro) %>%
   mutate(date = as.Date(format(date, "%Y-%m-%d")))
 
 # save as text
