@@ -76,7 +76,7 @@ if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
 # ---------
 
 # function for moving average
-moving_average <- function(x, n = 6) {             # Create user-defined function
+moving_average <- function(x, n = 3) {             # Create user-defined function
   stats::filter(x, rep(1 / n, n), sides = 2)
 }
 
@@ -157,22 +157,22 @@ Mp75 <- M %>%
 T_ECFIN <- read_csv2(file.path('empirical', '0_data','manual','ECFIN','Q61.csv')) 
 
 Tmean <- T_ECFIN %>%
-  mutate(date = as.Date(date), ecfin_mean = f_mean-m_mean, ecfin_mean_mov = moving_average(f_mean-m_mean)) %>%
+  mutate(date = as.Date(date), ecfin_mean = f_mean-m_mean) %>%
   arrange(date) %>%
   select(date,ecfin_mean,ecfin_mean_mov)
 
 Tp25 <- T_ECFIN %>%
-  mutate(date = as.Date(date), ecfin_25 = f_25-m_25, ecfin_25_mov = moving_average(f_25-m_25)) %>%
+  mutate(date = as.Date(date), ecfin_25 = f_25-m_25) %>%
   arrange(date) %>%
   select(date,ecfin_25,ecfin_25_mov)
 
 Tp50 <- T_ECFIN %>%
-  mutate(date = as.Date(date), ecfin_50 = f_50-m_50, ecfin_50_mov = moving_average(f_50-m_50)) %>%
+  mutate(date = as.Date(date), ecfin_50 = f_50-m_50) %>%
   arrange(date) %>%
   select(date,ecfin_50,ecfin_50_mov)
 
 Tp75 <- T_ECFIN %>%
-  mutate(date = as.Date(date), ecfin_75 = f_75-m_75, ecfin_75_mov = moving_average(f_75-m_75)) %>%
+  mutate(date = as.Date(date), ecfin_75 = f_75-m_75) %>%
   arrange(date) %>%
   select(date,ecfin_75,ecfin_75_mov)
 
