@@ -20,7 +20,7 @@ PROJECT_DIR <- 'D:/Lovisa/Studium/Oxford/Department of Economics/DPhil' ## Chang
 
 library('tidyverse')
 library(tseries) # for timeseries test
-library(forecast)
+library(stargazer)
 
 ## --------
 ## Settings
@@ -28,6 +28,9 @@ library(forecast)
 ### Any settings go here
 
 f <- 'compsur'
+
+m <- '50'
+# can go mean, sd, 25, 50, 75
 
 
 ## ---------------------
@@ -58,8 +61,14 @@ if (!dir.exists(pipeline)) {
 
 ### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+
+if (dir.exists(file.path('empirical', '3_output','results',f,NAME))){
   outline <- file.path('empirical', '3_output','results',f,NAME)
+} else {
+  outline <- file.path('3_output','results',f,NAME)
+}
+
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
   dir.create(outline)
 }
 
@@ -77,10 +86,12 @@ if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
 
 ## -- Load data from pipeline folder --
 
-D <- read_csv(file.path('empirical', '2_pipeline', 'compsur','code02_tsgendergap','out', 'D.csv')) %>%
+D <- read_csv(file.path('empirical', '2_pipeline', 'compsur','code03_addquali','out', 'D.csv')) %>%
   mutate(date = as.Date(date))
 
 ## -- Make time series data
+
+# Inflation data
 
 us_tot_mich <- ts(data = D$cpi_tot_us[D$date >= as.Date('1978-01-01')], 
              start=c(1978, 01), 
@@ -122,35 +133,117 @@ euro_food <- ts(data = D$cpi_food_euro[D$date >= as.Date('2004-01-01') & D$date 
              end=c(2022, 09), 
              frequency = 12)
 
-msc <- ts(data = D$Michigan[D$date >= as.Date('1978-01-01')], 
+# add quantitative expectations
+
+msc <- ts(data = D[D$date >= as.Date('1978-01-01'),paste('msc_',m, sep = "")], 
              start=c(1978, 01), 
              end=c(2022, 12), 
              frequency = 12)
 
-sce <- ts(data = D$FRBNY[D$date >= as.Date('2013-06-01') & D$date <= as.Date('2020-11-01')], 
+sce <- ts(data = D[D$date >= as.Date('2013-06-01') & D$date <= as.Date('2020-11-01'),paste('sce_',m, sep = "")], 
              start=c(2013, 06), 
              end=c(2020, 11), 
              frequency = 12)
 
-bop <- ts(data = D$BOP[D$date >= as.Date('2019-05-01') & D$date <= as.Date('2022-09-01')], 
+bop <- ts(data = D[D$date >= as.Date('2019-05-01') & D$date <= as.Date('2022-09-01'),paste('bop_',m, sep = "")], 
              start=c(2019, 05), 
              end=c(2022, 09), 
              frequency = 12)
 
-ecfin <- ts(data = D$ECFIN[D$date >= as.Date('2004-01-01') & D$date <= as.Date('2022-09-01')], 
-             start=c(2004, 01), 
-             end=c(2022, 09), 
-             frequency = 12)
+if(m!="sd"){
+  ecfin <- ts(data = D[D$date >= as.Date('2004-01-01') & D$date <= as.Date('2022-09-01'),paste('ecfin_',m, sep = "")], 
+               start=c(2004, 01), 
+               end=c(2022, 09), 
+               frequency = 12)
+}
+
+# add qualitative data
+
+qmsc <- ts(data = D[D$date >= as.Date('1978-01-01'),'qmsc'], 
+          start=c(1978, 01), 
+          end=c(2022, 12), 
+          frequency = 12)
+
+qsce <- ts(data = D[D$date >= as.Date('2013-06-01') & D$date <= as.Date('2020-11-01'),'qsce'], 
+          start=c(2013, 06), 
+          end=c(2020, 11), 
+          frequency = 12)
+
+qbop <- ts(data = D[D$date >= as.Date('2019-05-01') & D$date <= as.Date('2022-09-01'),'qbop'], 
+          start=c(2019, 05), 
+          end=c(2022, 09), 
+          frequency = 12)
+if(m!="sd"){
+  qecfin <- ts(data = D[D$date >= as.Date('2004-01-01') & D$date <= as.Date('2022-09-01'),'qecfin'], 
+              start=c(2004, 01), 
+              end=c(2022, 09), 
+              frequency = 12)
+}
 
 
-Tmsc <- ts.union(us_food_mich,us_tot_mich,msc)
-Tsce <- ts.union(us_food_sce,us_tot_sce,sce)
-Tbop <- ts.union(germany_food,germany_tot,bop)
-Teuro <- ts.union(euro_food,euro_tot,ecfin)
+Tmsc <- ts.union(us_food_mich,us_tot_mich,msc,qmsc)
+colnames(Tmsc) <- c("food_cpi","tot_cpi","msc","q_inflation")
+Tsce <- ts.union(us_food_sce,us_tot_sce,sce,qsce)
+colnames(Tsce) <- c("food_cpi","tot_cpi","sce","q_inflation")
+Tbop <- ts.union(germany_food,germany_tot,bop,qbop)
+colnames(Tbop) <- c("food_cpi","tot_cpi","bop","q_inflation")
+if(m!="sd"){
+  Teuro <- ts.union(euro_food,euro_tot,ecfin,qecfin)
+  colnames(Teuro) <- c("food_cpi","tot_cpi","ecfin","q_inflation")
+}
 
 
-# ## -- Structural Decomposition
-# 
+## -- Run static time series
+
+Tbop <- na.remove(Tbop)
+bopq <- lm(bop ~ q_inflation + food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Tbop, na.action=na.exclude)
+bop <- lm(bop ~ food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Tbop, na.action=na.exclude)
+summary(bop)
+
+if(m!="sd"){
+  Teuro <- na.remove(Teuro)
+  ecfinq <- lm(ecfin ~ q_inflation + food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Teuro, na.action=na.exclude)
+  ecfin <- lm(ecfin ~ food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Teuro, na.action=na.exclude)
+  summary(ecfin)
+}
+
+Tmsc <- na.remove(Tmsc)
+mscq <- lm(msc ~ q_inflation + food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Tmsc, na.action=na.exclude)
+msc <- lm(msc ~ food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Tmsc, na.action=na.exclude)
+summary(msc)
+
+Tsce <- na.remove(Tsce)
+sceq <- lm(sce ~ q_inflation + food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Tsce, na.action=na.exclude)
+sce <- lm(sce ~ food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Tsce, na.action=na.exclude)
+summary(sce)
+
+# --- Print output
+
+# settings for stargazer
+column.labels <- c("MSC","SCE","ECFIN","BOP")
+title <- "Timeseries regression"
+label <- paste("tab:timeseries_",m,sep = "")
+
+if(m!="sd"){
+  writeLines(capture.output(stargazer(msc, mscq, sce, sceq, ecfin, ecfinq, bop, bopq,
+                                    title = title, label = label, 
+                                    column.labels = column.labels,  model.names = FALSE, 
+                                    align=TRUE , df = FALSE, digits = 2, header = FALSE, 
+                                    intercept.top = TRUE, intercept.bottom = FALSE)),
+           file.path(outline, paste('code_tsreg_',m,'.tex',sep = "")))
+} else {
+  writeLines(capture.output(stargazer(msc, mscq, sce, sceq, bop, bopq,
+                                      title = title, label = label, 
+                                      column.labels = column.labels,  model.names = FALSE, 
+                                      align=TRUE , df = FALSE, digits = 2, header = FALSE, 
+                                      intercept.top = TRUE, intercept.bottom = FALSE)), 
+            file.path(outline, paste('code_tsreg_',m,'.tex',sep = "")))
+}
+
+
+## Leftover Code
+################
+
 # 
 # bop_dec <- decompose(na.StructTS(bop))
 # plot(bop_dec)
@@ -207,40 +300,3 @@ Teuro <- ts.union(euro_food,euro_tot,ecfin)
 # # ADF Test
 # adf.test(diff(msc))
 # # cannot reject null of unit root
-
-## -- Run static time series
-
-Tbop <- na.remove(Tbop)
-bop <- lm(bop ~ germany_food + germany_tot + lag(germany_food) + lag(germany_tot), data = Tbop, na.action=na.exclude)
-summary(bop)
-
-Teuro <- na.remove(Teuro)
-ecfin <- lm(ecfin ~ euro_food + euro_tot + lag(euro_food) + lag(euro_tot), data = Teuro, na.action=na.exclude)
-summary(ecfin)
-
-Tmsc <- na.remove(Tmsc)
-msc <- lm(msc ~ us_food_mich + us_tot_mich + lag(us_food_mich) + lag(us_tot_mich), data = Tmsc, na.action=na.exclude)
-summary(msc)
-
-Tsce <- na.remove(Tsce)
-sce <- lm(sce ~ us_food_sce + us_tot_sce + lag(us_food_sce) + lag(us_tot_sce), data = Tsce, na.action=na.exclude)
-summary(sce)
-
-# --- Print output
-
-# settings for stargazer
-column.labels <- c("MSC","SCE","ECFIN","BOP")
-title <- "Comparing estimators"
-label <- "tab:timeseries"
-dep.var.labels <- "Gender gap in inflation expectation, 12 months ahead, point estimate"
-
-
-writeLines(capture.output(stargazer(msc, sce, ecfin, bop, 
-                                    title = title, label = label, 
-                                    column.labels = column.labels,  model.names = FALSE, 
-                                    align=TRUE , df = FALSE, digits = 2, header = FALSE, 
-                                    intercept.top = TRUE, intercept.bottom = FALSE, 
-                                    dep.var.labels = dep.var.labels)), 
-           file.path(outline, 'code_tsreg.tex'))
-
-
