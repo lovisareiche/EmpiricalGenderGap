@@ -67,8 +67,13 @@ if (!dir.exists(pipeline)) {
 
 ### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+if (dir.exists(file.path('empirical', '3_output','results',f,NAME))){
   outline <- file.path('empirical', '3_output','results',f,NAME)
+} else {
+  outline <- file.path('3_output','results',f,NAME)
+}
+
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
   dir.create(outline)
 }
 
@@ -94,6 +99,12 @@ waves_fin <- colnames(T_fin) %>%
   str_subset("w\\d")
 waves <- colnames(T) %>%
   str_subset("w\\d")
+
+xnames <- setdiff(colnames(T),waves) %>%
+  setdiff('id') %>%
+  setdiff('wave') %>%
+  setdiff('y') %>%
+  setdiff(c('full_time','full_time_fem'))
 
 # Section to include time averages
 # xnames <- setdiff(colnames(T),waves) %>%
@@ -138,17 +149,17 @@ waves <- colnames(T) %>%
 ## -- Regress actual measures to apply out of sample
 
 
-f_subj <- as.formula(paste('fin_lit_subj ~ ', paste(finlitnames, collapse='+'),'+',
+f_subj <- as.formula(paste('fin_lit_subj ~ ', paste(xnames, collapse='+'),'+',
                            #paste(paste(finlitnames,"_between",sep = ""), collapse='+'),'+',
                            paste(waves_fin[1:length(waves_fin)-1], collapse='+')))
-f_test <- as.formula(paste('fin_lit_test ~ ', paste(finlitnames, collapse='+'),'+',
+f_test <- as.formula(paste('fin_lit_test ~ ', paste(xnames, collapse='+'),'+',
                            #paste(paste(finlitnames,"_between",sep = ""), collapse='+'),'+',
                            paste(waves_fin[1:length(waves_fin)-1], collapse='+')))
 
-f_subj_bin <- as.formula(paste('fin_lit_subj_bin ~ ', paste(finlitnames, collapse='+'),'+',
+f_subj_bin <- as.formula(paste('fin_lit_subj_bin ~ ', paste(xnames, collapse='+'),'+',
                            #paste(paste(finlitnames,"_between",sep = ""), collapse='+'),'+',
                            paste(waves_fin[1:length(waves_fin)-1], collapse='+')))
-f_test_bin <- as.formula(paste('fin_lit_test_bin ~ ', paste(finlitnames, collapse='+'),'+',
+f_test_bin <- as.formula(paste('fin_lit_test_bin ~ ', paste(xnames, collapse='+'),'+',
                            #paste(paste(finlitnames,"_between",sep = ""), collapse='+'),'+',
                            paste(waves_fin[1:length(waves_fin)-1], collapse='+')))
 
@@ -222,3 +233,75 @@ writeLines(capture.output(stargazer(lsubj, lsubj_bin, ltest, ltest_bin,
 
 ## -- Save T with new predicted variables
 save(T, file = file.path(pipeline, 'out', 'T.RData'))
+
+
+## Alternative way to show results
+
+# --- Variable importance
+
+# contribution of variable
+tvimp <- caret::varImp(ltest_bin)
+myvalues <- tvimp$Overall
+mynames <- rownames(tvimp)
+tvimp <- setNames(myvalues, mynames)
+
+svimp <- caret::varImp(lsubj_bin)
+myvalues <- svimp$Overall
+mynames <- rownames(svimp)
+svimp <- setNames(myvalues, mynames)
+
+# check multicollinearity
+
+tvif <- car::vif(ltest_bin)
+
+svif <- car::vif(lsubj_bin)
+
+# --- Comparing models
+
+# create "models" that show variable importance (absolute value of z startstic) and VIF (variance inflation factor)
+tvimpm <- ltest_bin
+tvimpm$coefficients <- tvimp
+tvifm <- ltest_bin
+tvifm$coefficients <- tvif
+
+svimpm <- lsubj_bin
+svimpm$coefficients <- svimp
+svifm <- lsubj_bin
+svifm$coefficients <- svif
+
+# settings for stargazer
+omit <- c("q\\_|exp","si\\_","w\\d","_between")
+omit.labels <- c("Qualitative Macro","Shop intent","Time dummies","Between effects")
+title <- "Predicting Financial Literacy"
+label <- "tab:predfinlit"
+dep.var.labels <- c("","","","","Subjective financial literacy","Financial literacy test score")
+column.labels <- c("Absolute z score", "Variance Inflation Factor","Regression Coefficients")
+column.separate <- c(2,2,2)
+se <- c(NA, NA, NA, NA, NULL, NULL)
+tstat <- c(NA, NA, NA, NA, NULL, NULL)
+p <- c(NA, NA, NA, NA, NULL,NULL)
+r2 <- c("Mc Fadden $R^2$","","","","",round(mfr2_test, digits = 2),round(mfr2_subj, digits = 2))
+mise <- c("Missclassification Error Rate","","","","",round(misetest, digits = 2),round(misesubj, digits = 2))
+sen <- c("Sensitivity","","","","",round(sentest, digits = 2),round(sensubj, digits = 2))
+spe <- c("Specificity","","","","",round(spetest, digits = 2),round(spesubj, digits = 2))
+add.lines <- list(r2,mise,sen,spe)
+
+# in which order
+desiredOrder <- c("Constant","shop_groceries_nsing","shop_major_nsing","prep_meals_nsing",
+                  "decide_finance_nsing","pessimist","prob_intqr","refresher",
+                  "nround","f_nointerest", "f_easy","eduschool","eduwork",
+                  "hhchildren","hhinc","pinc","age","citysize",
+                  "eastgerman","east1989","part_time","unemployed","retired")
+
+writeLines(capture.output(stargazer(tvimpm, svimpm,tvifm, svifm,ltest_bin, lsubj_bin,
+                                    title = title, label = label ,
+                                    omit = omit, omit.labels = omit.labels, 
+                                    model.names = FALSE, 
+                                    align=TRUE , df = FALSE, digits = 2, header = FALSE, 
+                                    order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
+                                    dep.var.labels = dep.var.labels, no.space = FALSE,
+                                    p = p, se = se, t = tstat,
+                                    add.lines = add.lines,
+                                    column.labels = column.labels, column.separate = column.separate
+)), 
+file.path(outline, 'code_fitlit_varimp.tex'))
