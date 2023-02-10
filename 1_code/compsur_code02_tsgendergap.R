@@ -220,7 +220,8 @@ D <- merge(M,germany_f, by = "date", all = TRUE) %>%
   merge(us_t, by = "date", all = TRUE) %>%
   merge(euro_f, by = "date", all = TRUE) %>%
   merge(euro_t, by = "date", all = TRUE) %>%
-  mutate(date = as.Date(format(date, "%Y-%m-%d")))
+  mutate(date = as.Date(format(date, "%Y-%m-%d"))) %>%
+  mutate(germany_cpigap = germany_f-germany_t, euro_cpigap = euro_f-euro_t, us_cpigap = us_f-us_t)
 
 # save as text
 
