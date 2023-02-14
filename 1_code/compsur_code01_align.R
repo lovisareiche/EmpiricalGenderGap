@@ -26,7 +26,7 @@ library('tidyverse')
 ## --------
 ### Any settings go here
 
-s <- 'Michigan'
+s <- 'FRBNY'
 # BOP-HH, Michigan, FRBNY
 
 f <- 'compsur'
@@ -86,17 +86,17 @@ if(s=='BOP-HH'){
 
 if(s=='Michigan'){
   T <- mutate(T,female = SEX-1, single = as.numeric(NUMADT == 1), year = as.numeric(substr(YYYYMM, 1, 4)), month = as.numeric(substr(YYYYMM, 5, 6))) %>%
-    rename(y = PX1, age = AGE, hhinc = INCOME, eduschool = EDUC, region = REGION) %>%
+    rename(y = PX1, age = AGE, hhinc = INCOME, eduschool = EDUC, region = REGION, id = ID) %>%
     filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(eduschool) & !is.na(region) & !is.na(age) ) %>%
-    select(female,single,age,eduschool,hhinc,region,y,year,month)
+    select(female,single,age,eduschool,hhinc,region,y,year,month,id)
 }
 
 if(s=='FRBNY'){
   T <- mutate(T,female = as.numeric(Q33==1), single = Q38 - 1, year = as.numeric(substr(date, 1, 4)), month = as.numeric(substr(date, 5, 6))) %>%
-    rename(y = Q8v2part2, age = Q32, eduschool = Q36, hhinc = Q47, regionCAT = `_REGION_CAT`) %>%
+    rename(y = Q8v2part2, age = Q32, eduschool = Q36, hhinc = Q47, regionCAT = `_REGION_CAT`, id = userid) %>%
     filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(eduschool) & !is.na(regionCAT) & !is.na(age) & abs(eduschool)<=8) %>%
     mutate(region = as.numeric(factor(regionCAT))) %>%
-    select(female,single,age,eduschool,hhinc,region,y,year,month)
+    select(female,single,age,eduschool,hhinc,region,y,year,month,id)
 }
 
 if(s=='BOE'){
