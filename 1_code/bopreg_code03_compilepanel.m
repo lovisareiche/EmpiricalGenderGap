@@ -16,7 +16,7 @@ PROJECT_DIR = 'D:\Lovisa\Studium\Oxford\Department of Economics\DPhil';
 
 % -- Load data from another pipeline folder --
 
-load(fullfile('empirical', '2_pipeline', 'code02_prepvars.m', 'out', 'W_pesshop.mat'),'W','w')
+load(fullfile('empirical', '2_pipeline', 'bopreg', 'code02_prepvars.m', 'out', 'W_pesshop.mat'),'W','w')
 
 % --------
 % Settings
@@ -121,10 +121,10 @@ addpath(fullfile(PROJECT_DIR, PROJECT,'empirical','1_code','functions'))
 % ----------------------------------
 % The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if exist(fullfile('empirical', '2_pipeline'))
-  pipeline = fullfile('empirical', '2_pipeline', NAME);
+if exist(fullfile('empirical', '2_pipeline','bopreg'))
+  pipeline = fullfile('empirical', '2_pipeline','bopreg', NAME);
 else
-  pipeline = fullfile('2_pipeline', NAME);
+  pipeline = fullfile('2_pipeline','bopreg', NAME);
 end
 
 if ~exist(pipeline,'dir')
@@ -187,7 +187,7 @@ end
 R.y = y; 
 
 if strcmp(t,'female_only')
-    writetable([R table(year,'VariableNames',{'year'}) table(month,'VariableNames',{'month'})],fullfile(pipeline, 'out', t,'T.csv'))
+    writetable([R table(year,'VariableNames',{'year'}) table(month,'VariableNames',{'month'}) table(id,'VariableNames',{'id'})],fullfile(pipeline, 'out', t,'T.csv'))
     return
 end
 
