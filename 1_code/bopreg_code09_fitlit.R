@@ -87,91 +87,44 @@ if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
 T_fin <- read_csv(file.path('empirical', '2_pipeline',f, 'code03_compilepanel.m','out','base', 'T_fin.csv')) %>%
   pdata.frame(index=c( "id", "wave" )) %>%
   # create binary vars
-  mutate(fin_lit_subj_bin=as.numeric(fin_lit_subj >=2)) %>%
-  mutate(fin_lit_test_bin=as.numeric(fin_lit_test >=2))
+  mutate(fin_lit_subj_bin=as.numeric(fin_lit_subj >= 1)) %>% # 1 is median
+  mutate(fin_lit_test_bin=as.numeric(fin_lit_test == 3)) # 3 is median
 
 T <- read_csv(file.path('empirical', '2_pipeline',f, 'code03_compilepanel.m','out','base', 'T.csv')) %>%
   pdata.frame(index=c( "id", "wave" ))
 
 
+# Define variables used in regression and time dummies
 finlitnames <- c("prob_intqr", "nround", "refresher", "f_easy", "f_nointerest")
 waves_fin <- colnames(T_fin) %>%
   str_subset("w\\d")
-waves <- colnames(T) %>%
-  str_subset("w\\d")
-
-xnames <- setdiff(colnames(T),waves) %>%
-  setdiff('id') %>%
-  setdiff('wave') %>%
-  setdiff('y') %>%
-  setdiff(c('full_time','full_time_fem'))
-
-# Section to include time averages
-# xnames <- setdiff(colnames(T),waves) %>%
-#   setdiff('id') %>%
-#   setdiff('wave') %>%
-#   setdiff('y') %>%
-#   setdiff('full_time') 
-# xtinames <- c("eduschool","citysize","female","eastgerman","east1989","leave","homemaker","civil_servant","entrepreneur","eduschool_fem","citysize_fem","female","eastgerman_fem","east1989_fem","leave_fem","homemaker_fem","civil_servant_fem","entrepreneur_fem")
-# xtvnames <- setdiff(xnames,xtinames)
-#
-# # Include time varying as averages to control 
-# 
-# T_mean <- degroup(
-#   T,
-#   xtvnames,
-#   "id",
-#   center = "mean",
-#   suffix_demean = "_within",
-#   suffix_groupmean = "_between",
-#   add_attributes = TRUE,
-#   verbose = TRUE
-# )
-# 
-# T_mean_fin <- degroup(
-#   T_fin,
-#   xtvnames,
-#   "id",
-#   center = "mean",
-#   suffix_demean = "_within",
-#   suffix_groupmean = "_between",
-#   add_attributes = TRUE,
-#   verbose = TRUE
-# )
-# 
-# T <- cbind(T,T_mean) %>%
-#   pdata.frame(index=c( "id", "wave" ) )
-# 
-# T_fin <- cbind(T_fin,T_mean_fin) %>%
-#   pdata.frame(index=c( "id", "wave" ) )
 
 
 ## -- Regress actual measures to apply out of sample
 
 
-f_subj <- as.formula(paste('fin_lit_subj ~ ', paste(xnames, collapse='+'),'+',
-                           #paste(paste(finlitnames,"_between",sep = ""), collapse='+'),'+',
-                           paste(waves_fin[1:length(waves_fin)-1], collapse='+')))
-f_test <- as.formula(paste('fin_lit_test ~ ', paste(xnames, collapse='+'),'+',
-                           #paste(paste(finlitnames,"_between",sep = ""), collapse='+'),'+',
-                           paste(waves_fin[1:length(waves_fin)-1], collapse='+')))
+f_subj <- as.formula(paste('fin_lit_subj ~ ', paste(finlitnames, collapse='+')))
+f_test <- as.formula(paste('fin_lit_test ~ ', paste(finlitnames, collapse='+')))
 
-f_subj_bin <- as.formula(paste('fin_lit_subj_bin ~ ', paste(xnames, collapse='+'),'+',
-                           #paste(paste(finlitnames,"_between",sep = ""), collapse='+'),'+',
-                           paste(waves_fin[1:length(waves_fin)-1], collapse='+')))
-f_test_bin <- as.formula(paste('fin_lit_test_bin ~ ', paste(xnames, collapse='+'),'+',
-                           #paste(paste(finlitnames,"_between",sep = ""), collapse='+'),'+',
-                           paste(waves_fin[1:length(waves_fin)-1], collapse='+')))
+f_subj_bin <- as.formula(paste('fin_lit_subj_bin ~ ', paste(finlitnames, collapse='+')))
+f_test_bin <- as.formula(paste('fin_lit_test_bin ~ ', paste(finlitnames, collapse='+')))
+
+## Run Regression
 
 options(datadist='ddist')
 ddist<- datadist(finlitnames)
 ddist<- datadist(waves_fin)
-ddist<- datadist(paste(finlitnames,"_between",sep = ""))
+
 
 lsubj <- lrm(f_subj, data= T_fin)
 ltest <- lrm(f_test, data= T_fin)
+
 lsubj_bin <- glm(f_subj_bin, family="binomial", data=T_fin)
 ltest_bin <- glm(f_test_bin, family="binomial", data=T_fin)
+
+psubj <- glm(f_subj, family="poisson", data=T_fin)
+ptest <- glm(f_test, family="poisson", data=T_fin)
+
 
 # --- Assessing model fit for logistic
 
@@ -180,8 +133,12 @@ mfr2_subj <- pscl::pR2(lsubj_bin)["McFadden"]
 mfr2_test <- pscl::pR2(ltest_bin)["McFadden"]
 
 #calculate predicted value for each individual in full dataset
-T$pred_subj <- predict(lsubj, T)
-T$pred_test <- predict(ltest, T)
+T$lpred_subj <- predict(lsubj, T)
+T$lpred_test <- predict(ltest, T)
+
+T$ppred_subj <- predict(psubj, T, type ="response")
+T$ppred_test <- predict(ptest, T, type ="response")
+
 
 # needs a bit more procedure for logistic
 # find optimal cutoff probability to use to maximize accuracy
@@ -217,11 +174,10 @@ label <- "tab:fitlit"
 dep.var.labels <- c("Subjective financial literacy","Financial literacy test score")
 omit <- c("w\\d","_between")
 omit.labels <- c("Time dummies","Between effects")
-column.labels <- c("Ordered logit","Logistic","Ordered logit","Logistic")
+column.labels <- c("Ordered logit","Poisson","Ordered logit","Poisson")
 
 
-
-writeLines(capture.output(stargazer(lsubj, lsubj_bin, ltest, ltest_bin,
+writeLines(capture.output(stargazer(lsubj, psubj, ltest, ptest,
                                     title = title, label = label, 
                                     omit = omit, omit.labels = omit.labels, 
                                     column.labels = column.labels, model.names = FALSE, 
@@ -232,7 +188,7 @@ writeLines(capture.output(stargazer(lsubj, lsubj_bin, ltest, ltest_bin,
 
 
 ## -- Save T with new predicted variables
-save(T, file = file.path(pipeline, 'out', 'T.RData'))
+save(T, file = file.path(pipeline, 'out', 'T_fin.RData'))
 
 
 ## Alternative way to show results
@@ -287,19 +243,17 @@ spe <- c("Specificity","","","","",round(spetest, digits = 2),round(spesubj, dig
 add.lines <- list(r2,mise,sen,spe)
 
 # in which order
-desiredOrder <- c("Constant","shop_groceries_nsing","shop_major_nsing","prep_meals_nsing",
-                  "decide_finance_nsing","pessimist","prob_intqr","refresher",
-                  "nround","f_nointerest", "f_easy","eduschool","eduwork",
-                  "hhchildren","hhinc","pinc","age","citysize",
-                  "eastgerman","east1989","part_time","unemployed","retired")
+desiredOrder <- c("Constant","prob_intqr","refresher",
+                  "nround","f_nointerest", "f_easy")
 
 writeLines(capture.output(stargazer(tvimpm, svimpm,tvifm, svifm,ltest_bin, lsubj_bin,
                                     title = title, label = label ,
                                     omit = omit, omit.labels = omit.labels, 
                                     model.names = FALSE, 
+                                    no.space = TRUE,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
-                                    dep.var.labels = dep.var.labels, no.space = FALSE,
+                                    dep.var.labels = dep.var.labels, 
                                     p = p, se = se, t = tstat,
                                     add.lines = add.lines,
                                     column.labels = column.labels, column.separate = column.separate
