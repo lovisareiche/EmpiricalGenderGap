@@ -23,6 +23,8 @@ library(moments) # to compute skew
 library(zoo) # for date vector
 library(xtable) # for latex conversion
 library(stargazer) # for latex table
+library('plm')
+library('datawizard')
 
 ## --------
 ## Settings
@@ -115,12 +117,28 @@ for(i in 1:length(S)){
     setdiff('month') %>%
     setdiff('year') %>%
     setdiff('survey') %>%
+    setdiff('id') %>%
     setdiff('single')
+  
+  T_mean <- degroup(
+    T,
+    c("age","hhinc"),
+    "id",
+    center = "mean",
+    suffix_demean = "_within",
+    suffix_groupmean = "_between",
+    add_attributes = TRUE,
+    verbose = TRUE
+  )
+  
+  T_c <- cbind(T,T_mean) %>%
+    pdata.frame(index=c( "id", "date" ) )
+  
 
-  eq <- as.formula(paste('y ~ factor(date) +', paste(xnames, collapse='+')))
-  n <- lm( eq, data=filter(T,single ==0) )
+  eq <- as.formula(paste('y ~ factor(year) +', paste(xnames, collapse='+'), '+ age_between + hhinc_between'))
+  n <- plm( eq, data=filter(T_c,single ==0), effect = "individual", model = "pooling" )
   assign(paste("n_",S[i],sep = ""),n)
-  s <- lm( eq, data=filter(T,single ==1) )
+  s <- plm( eq, data=filter(T_c,single ==1), effect = "individual", model = "pooling" )
   assign(paste("s_",S[i],sep = ""),s)
   
 }
@@ -129,8 +147,8 @@ for(i in 1:length(S)){
 
 # settings for stargazer
 title <- "Multivariate: The gender gap for singles and non-singles"
-omit <- c("factor")
-omit.labels <- c("Time dummies")
+omit <- c("factor","between")
+omit.labels <- c("Year dummies","Between effects")
 label <- "tab:ggsinglemulti"
 dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
 
