@@ -159,22 +159,22 @@ T_ECFIN <- read_csv2(file.path('empirical', '0_data','manual','ECFIN','Q61.csv')
 Tmean <- T_ECFIN %>%
   mutate(date = as.Date(date), ecfin_mean = f_mean-m_mean) %>%
   arrange(date) %>%
-  select(date,ecfin_mean,ecfin_mean_mov)
+  select(date,ecfin_mean)
 
 Tp25 <- T_ECFIN %>%
   mutate(date = as.Date(date), ecfin_25 = f_25-m_25) %>%
   arrange(date) %>%
-  select(date,ecfin_25,ecfin_25_mov)
+  select(date,ecfin_25)
 
 Tp50 <- T_ECFIN %>%
   mutate(date = as.Date(date), ecfin_50 = f_50-m_50) %>%
   arrange(date) %>%
-  select(date,ecfin_50,ecfin_50_mov)
+  select(date,ecfin_50)
 
 Tp75 <- T_ECFIN %>%
   mutate(date = as.Date(date), ecfin_75 = f_75-m_75) %>%
   arrange(date) %>%
-  select(date,ecfin_75,ecfin_75_mov)
+  select(date,ecfin_75)
 
 Mmean <- merge(Mmean,Tmean, by = "date", all = TRUE)
 Mp25 <- merge(Mp25,Tp25, by = "date", all = TRUE)
@@ -221,7 +221,7 @@ D <- merge(M,germany_f, by = "date", all = TRUE) %>%
   merge(euro_f, by = "date", all = TRUE) %>%
   merge(euro_t, by = "date", all = TRUE) %>%
   mutate(date = as.Date(format(date, "%Y-%m-%d"))) %>%
-  mutate(germany_cpigap = germany_f-germany_t, euro_cpigap = euro_f-euro_t, us_cpigap = us_f-us_t)
+  mutate(germany_cpigap = cpi_food_germany-cpi_tot_germany, euro_cpigap = cpi_food_euro-cpi_food_germany-cpi_tot_euro, us_cpigap = cpi_food_us-cpi_tot_us)
 
 # save as text
 
