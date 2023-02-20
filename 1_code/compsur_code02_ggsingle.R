@@ -91,7 +91,8 @@ for(i in 1:length(S)){
   # load aligned data
   
   T <- read_csv(file.path('empirical', '2_pipeline',f, 'code01_align','out',S[i], 'T.csv')) %>%
-    mutate(survey = S[i], date = as.yearmon(paste(year, month), format = "%Y %m"))
+    mutate(survey = S[i], date = as.yearmon(paste(year, month), format = "%Y %m")) %>%
+    pdata.frame( T, index=c( "id", "date" ) )
   assign(paste("T_",S[i],sep = ""),T)
   
   # do t test and wolcoxon rank test
