@@ -31,6 +31,9 @@ library(stargazer)
 
 l <- "level"
 f <- 'bopreg'
+source <- 'code09_fitlit'
+  # 'code09_fitlit'
+# or 'code03_compilepanel.m'
 
 
 ## ---------------------
@@ -61,8 +64,13 @@ if (!dir.exists(pipeline)) {
 
 ### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+if (dir.exists(file.path('empirical', '3_output','results',f,NAME))){
   outline <- file.path('empirical', '3_output','results',f,NAME)
+} else {
+  outline <- file.path('3_output','results',f,NAME)
+}
+
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
   dir.create(outline)
 }
 
@@ -80,28 +88,77 @@ if (!dir.exists(file.path(outline,l))) {
 
 ## -- Load data from pipeline folder --
 
-load(file.path('empirical', '2_pipeline', f,'code09_fitlit','out', 'T.RData'))
-hhcluster <- read_csv(file.path('empirical', '2_pipeline', f,'cluster.m','out', 'hhcluster.csv'))
-T["hhcluster"] <- hhcluster
+if(source == 'code09_fitlit'){
+  load(file.path('empirical', '2_pipeline', f,source,'out','T_fin.RData'))
+  T_fin <- T 
+} else {
+  T_fin <- read_csv(file.path('empirical', '2_pipeline',f, source,'out','base', 'T_fin.csv')) %>%
+    pdata.frame(index=c( "id", "wave" )) %>%
+    # create binary vars
+    mutate(pred_subj_bin=as.numeric(fin_lit_subj >=1)) %>%
+    mutate(pred_test_bin=as.numeric(fin_lit_test >=1))
+}
 
-waves <- colnames(T) %>%
+
+# label waves
+waves <- colnames(T_fin) %>%
   str_subset("w\\d")
 
+# label financial literacy vars because we need to remove them
 fincon <- c('prob_intqr','nround','refresher','f_nointerest','f_easy')
+
+# label household role vars
 hhroles <- c('shop_groceries_nsing','shop_major_nsing','prep_meals_nsing','decide_finance_nsing')
-xnames <- setdiff(colnames(T),waves) %>%
-  setdiff('id') %>%
-  setdiff('wave') %>%
-  setdiff('y') %>%
-  setdiff(c('full_time','full_time_fem')) %>%
-  # need to also remove all financial confidence variables
-  setdiff(fincon) %>%
-  # need to remove hhroles
-  setdiff(hhroles) %>%
-  # need to remove also binary variable and only leave in categorical
-  setdiff(c('pred_subj_bin','pred_test_bin'))
-xtinames <- c("eduschool","citysize","female","eastgerman","east1989","leave","homemaker","civil_servant","entrepreneur","eduschool_fem","citysize_fem","female","eastgerman_fem","east1989_fem","leave_fem","homemaker_fem","civil_servant_fem","entrepreneur_fem")
-xtvnames <- setdiff(c(xnames,fincon,hhroles),xtinames)
+
+xnames <- c("pessimist",              "q_unemployment",         "q_rent",                
+            "q_lending"   ,           "q_interest"     ,        "q_inflation",           
+            "q_property"   ,          "q_growth"        ,       "q_fuel"  ,              
+            "q_dax"         ,         "q_tax"            ,      "exphp_point" ,          
+            "expint_sav"     ,        "si_major"          ,     "si_essential" ,         
+            "si_clothing"     ,       "si_entz"            ,    "si_mobility"   ,        
+            "si_services"      ,      "si_holiday"          ,   "si_housing"     ,       
+            "si_reserves"       ,     "eduschool"            ,  "eduwork"         ,      
+            "hhchildren"         ,    "hhinc"                 , "pinc"             ,     
+            "age"                 ,   "citysize"               ,"female"            ,    
+            "eastgerman"             ,"east1989"           ,   
+            "part_time"             , "unemployed"             ,"retired"      )
+
+xtvnames <- c("pessimist",              "q_unemployment",         "q_rent",                
+            "q_lending"   ,           "q_interest"     ,        "q_inflation",           
+            "q_property"   ,          "q_growth"        ,       "q_fuel"  ,              
+            "q_dax"         ,         "q_tax"            ,      "exphp_point" ,          
+            "expint_sav"     ,        "si_major"          ,     "si_essential" ,         
+            "si_clothing"     ,       "si_entz"            ,    "si_mobility"   ,        
+            "si_services"      ,      "si_holiday"          ,   "si_housing"     ,       
+            "si_reserves"       ,           
+            "hhchildren"         ,    "hhinc"                 , "pinc"             ,     
+            "age"                 ,      
+            
+            "part_time"             , "unemployed"             ,"retired"      )
+
+xnames <- c("eduschool"  ,
+             "hhinc"                 ,   
+            "age"                 ,   "citysize"               ,"female"            ,    
+            "eastgerman"             ,"east1989"           )
+
+xtvnames <- c("hhinc" , 
+              "age"  )
+
+# Include time varying as averages to control 
+
+T_mean <- degroup(
+  T,
+  c(xtvnames,'lpred_subj','ppred_test','lpred_test','ppred_subj',hhroles),
+  "id",
+  center = "mean",
+  suffix_demean = "_within",
+  suffix_groupmean = "_between",
+  add_attributes = TRUE,
+  verbose = TRUE
+)
+
+T_c <- cbind(T_fin,T_mean) %>%
+  pdata.frame(index=c( "id", "wave" ) ) 
 
 ## -- define dependent variables
 
@@ -111,82 +168,83 @@ if (l == 'log') {
 }
 # without log it's just y
 
-## -- Use degrouped estimator
-
-T_mean <- degroup(
-  T,
-  xtvnames,
-  "id",
-  center = "mean",
-  suffix_demean = "_within",
-  suffix_groupmean = "_between",
-  add_attributes = TRUE,
-  verbose = TRUE
-)
-
-T_c <- cbind(T,T_mean) %>%
-  pdata.frame(index=c( "id", "wave" ) )
-
 
 ## -- Run different specifications
 
-
 # baseline 
-f <- as.formula(paste('y ~','factor(wave) +', paste(fincon, collapse='+'),'+', 
-                      paste(hhroles, collapse='+'),'+', paste(setdiff(xnames,c("pred_subj","pred_test","hhcluster")), collapse='+'),'+',
-                      paste(paste(setdiff(xtvnames,c("pred_subj","pred_test","hhcluster")),"_between",sep = ""), collapse='+')))
-y.base <- plm( f, data=T_c, effect = "individual", model = "pooling")
+f <- as.formula(paste('y ~','factor(wave) +', paste(xnames, collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+b <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
 
 
-# replace fincon
+# introducing predicted test ordered logit
+f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between +', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+tl <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
+
+# introducing predicted test poisson
+f <- as.formula(paste('y ~','factor(wave) +', 'ppred_test + ppred_test_between +', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+tp <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
+
+# introducing predicted subjective bol
+f <- as.formula(paste('y ~','factor(wave) +', 'lpred_subj + lpred_subj_between +', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+sl <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
+
+# introducing predicted subjective p
+f <- as.formula(paste('y ~','factor(wave) +', 'ppred_subj + ppred_subj_between +', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+sp <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
+
+f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between +', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(hhroles, collapse='+'),'+',
+                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+a <- plm( f, data=T_c, effect = "individual", model = "pooling")
+
+f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test:female + lpred_test_between +', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(hhroles, collapse='+'),'+',
+                      paste(paste(hhroles,":female",sep = ""), collapse='+'),'+',
+                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+i <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
+
 f <- as.formula(paste('y ~','factor(wave) +', 
-                      paste(hhroles, collapse='+'),'+', paste(setdiff(xnames,c("hhcluster")), collapse='+'),'+',
-                      paste(paste(setdiff(xtvnames,c("hhcluster")),"_between",sep = ""), collapse='+')))
-y.finlit <- plm( f, data=T_c, effect = "individual", model = "pooling")
-
-# replace hhroles
-f <- as.formula(paste('y ~','factor(wave) +', paste(fincon, collapse='+'),'+', 
-                      paste(setdiff(xnames,c("pred_subj","pred_test")), collapse='+'),'+',
-                      paste(paste(setdiff(xtvnames,c("pred_subj","pred_test")),"_between",sep = ""), collapse='+')))
-y.hhcluster <- plm( f, data=T_c, effect = "individual", model = "pooling")
-
-# replace both 
-f <- as.formula(paste('y ~','factor(wave) +', paste(xnames,collapse='+'),'+',
+                      paste(xnames, collapse='+'),'+',
+                      paste(hhroles, collapse='+'),'+',
+                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-y.both <- plm( f, data=T_c, effect = "individual", model = "pooling")
-
-# interactions
-f <- as.formula(paste('y ~','factor(wave) +', 'female:pessimist + female:pred_subj + female:hhcluster + pessimist:pred_subj + pessimist:hhcluster + pred_subj:hhcluster +',
-                      paste(xnames,collapse='+'),'+',
-                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-y.int <- plm( f, data=T_c, effect = "individual", model = "pooling")
-
+hh <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
 
 # --- Write output
 
 # settings for stargazer
 notes <- "The full set of estimators included can be found in the appendix."
-omit <- c("wave","q\\_|exp","si\\_","between")
-omit.labels <- c("Time dummies","Macro qualitative","Shop intent","Between effects")
-title <- "Collapsing variables"
-label <- "tab:finlithhcluster"
+omit <- c("wave","between")
+omit.labels <- c("Time dummies","Between effects")
+title <- "The role of financial confidence"
+label <- "tab:regresswithfin"
 dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
+column.labels <- c("","Ordered logit","Poisson","Ordered logit","Poisson","","Ordered logit")
 
-# which variables are removed
-rmvars <- c(str_subset(names(coef(y.int)),"wave"),str_subset(names(coef(y.int)),"q\\_|exp"),str_subset(names(coef(y.int)),"si\\_"),str_subset(names(coef(y.int)),"between"), c("eduschool","eduwork","hhchildren","hhinc","pinc","age","citysize","eastgerman","east1989","part_time","unemployed","retired"))
-# which are staying
-stayvars <- setdiff(names(coef(y.int)),rmvars)
 # in which order
-desiredOrder <- c("Constant","female","pessimist","pred_subj","pred_test",
-                  "prob_intqr","refresher","nround","f_nointerest","f_easy","hhcluster",
-                  "non_single","shop_groceries_nsing","shop_major_nsing","prep_meals_nsing",
-                  "decide_finance_nsing")
+desiredOrder <- c("Constant","female","lpred_test","ppred_test","lpred_subj","ppred_subj",hhroles)
 
-writeLines(capture.output(stargazer(y.base, y.finlit, y.hhcluster, y.both, y.int, 
+writeLines(capture.output(stargazer(b,tl,tp,sl,sp,hh,a,
                                     title = title, notes = notes, label = label, 
                                     omit = omit, omit.labels = omit.labels, 
-                                    model.names = FALSE, 
+                                    model.names = FALSE, column.labels = column.labels,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels, no.space = TRUE)), 
-           file.path(outline,l, 'code_finlithhcluster.tex'))
+           file.path(outline,l, 'code_regresswithfin.tex'))
+
+
+
