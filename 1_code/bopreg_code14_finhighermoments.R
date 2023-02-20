@@ -200,3 +200,26 @@ writeLines(capture.output(xtable(W,
                                  label = "ggfinlit")),
            file.path(outline, 'gendergapfinlit.tex'))
 
+
+
+T <- transform(T, percentile=(findInterval(y, quantile(T$y, seq(0,1, by=.1)))-1)/10)
+
+jpeg(file.path(pipeline,"boxplot_test.jpg"), width = 1000, height = 700)
+boxplot(lpred_test~percentile,
+        data=T,
+        xlab="Percentile of inflation expectation distribution",
+        ylab="Predicted Test Score",
+        col="steelblue",
+        border="black"
+)
+dev.off()
+
+jpeg(file.path(pipeline,"boxplot_subj.jpg"), width = 1000, height = 700)
+boxplot(lpred_subj~percentile,
+        data=T,
+        xlab="Percentile of inflation expectation distribution",
+        ylab="Predicted Subjective Literacy",
+        col="steelblue",
+        border="black"
+)
+dev.off()
