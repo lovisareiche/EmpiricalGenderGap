@@ -26,7 +26,7 @@ library('tidyverse')
 ## --------
 ### Any settings go here
 
-s <- 'BOP-HH'
+s <- 'FRBNY'
 # BOP-HH, Michigan, FRBNY
 
 f <- 'compsur'
@@ -79,24 +79,32 @@ T <- read_csv(file.path('empirical', '0_data', 'manual',s, 'T.csv'))
 
 if(s=='BOP-HH'){
   T <- mutate(T,single = as.numeric(non_single == 0)) %>%
-    filter(abs(y) <= 95 & abs(female) <=1 & abs(single) <=1 & abs(eduschool) <= 6, abs(hhinc) <= 13) %>%
-    rename(region = eastgerman) %>%
+    filter(abs(y) <= 95 & abs(female) <=1 & abs(single) <=1 & abs(eduschool) <= 6 & abs(hhinc) <= 13 & abs(q_inflation) <= 5) %>%
+    rename(region = eastgerman, quali = q_inflation) %>%
     select(-non_single,-pinc)
 }
 
 if(s=='Michigan'){
-  T <- mutate(T,female = SEX-1, single = as.numeric(NUMADT == 1), year = as.numeric(substr(YYYYMM, 1, 4)), month = as.numeric(substr(YYYYMM, 5, 6))) %>%
-    rename(y = PX1, age = AGE, hhinc = INCOME, eduschool = EDUC, region = REGION, id = ID) %>%
-    filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(eduschool) & !is.na(region) & !is.na(age) ) %>%
-    select(female,single,age,eduschool,hhinc,region,y,year,month,id)
+  T <- mutate(T,female = SEX-1, single = as.numeric(NUMADT == 1), year = as.numeric(substr(YYYYMM, 1, 4)), month = as.numeric(substr(YYYYMM, 5, 6)), PX1Q1 = PX1Q1 + 5) %>%
+    rename(y = PX1, age = AGE, hhinc = INCOME, eduschool = EDUC, region = REGION, id = ID, quali = PX1Q1) %>%
+    filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(eduschool) & !is.na(region) & !is.na(age)  & abs(quali) <= 10) %>%
+    select(female,single,age,eduschool,hhinc,region,y,year,month,id,quali)
+  
+  T$quali[T$quali == 6] = 5
+  T$quali[T$quali == 7] = 4
+  T$quali[T$quali == 8] = 3
+  T$quali[T$quali == 10] = 1
 }
 
 if(s=='FRBNY'){
   T <- mutate(T,female = as.numeric(Q33==1), single = Q38 - 1, year = as.numeric(substr(date, 1, 4)), month = as.numeric(substr(date, 5, 6))) %>%
-    rename(y = Q8v2part2, age = Q32, eduschool = Q36, hhinc = Q47, regionCAT = `_REGION_CAT`, id = userid) %>%
-    filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(eduschool) & !is.na(regionCAT) & !is.na(age) & abs(eduschool)<=8) %>%
+    rename(y = Q8v2part2, quali = Q8v2, age = Q32, eduschool = Q36, hhinc = Q47, regionCAT = `_REGION_CAT`, id = userid) %>%
+    filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(eduschool) & !is.na(regionCAT) & !is.na(age) & abs(eduschool)<=8 & !is.na(quali)) %>%
     mutate(region = as.numeric(factor(regionCAT))) %>%
-    select(female,single,age,eduschool,hhinc,region,y,year,month,id)
+    select(female,single,age,eduschool,hhinc,region,y,year,month,id,quali)
+  
+  T$quali[T$quali == 1] = 5
+  T$quali[T$quali == 2] = 1
 }
 
 if(s=='BOE'){
