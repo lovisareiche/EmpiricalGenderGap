@@ -74,7 +74,7 @@ if strcmp(t,'old')
         'leave','homemaker','civil_servant','entrepreneur','norent'};
 elseif strcmp(t,'female_only')
     rm = {'pessimist','q_unemployment','q_rent','q_lending','q_interest',...
-    'q_inflation','q_property','q_growth','q_fuel','q_dax','q_tax',...
+    'q_property','q_growth','q_fuel','q_dax','q_tax',...
     'inflexppoint_long','homeown','exphp_point','expint_sav','sl_major',...
     'sl_essential','sl_clothing','sl_entz','sl_mobility','sl_services',...
     'sl_holiday','sl_housing','sl_reserves','si_major','si_essential',...
@@ -163,6 +163,22 @@ for i=w
         temp_var = strcat('w0',num2str(i));
     elseif i>=10
         temp_var = strcat('w',num2str(i));
+    end
+
+    if i <= 3 % less than December - need to align months
+        W.(temp_var).month = (i+3)*ones(height( W.(temp_var)),1); 
+    end
+
+    if i >= 4 && i <= 12 % less than December - need to align months
+        W.(temp_var).month = (i)*ones(height( W.(temp_var)),1); 
+    end
+
+    if i >= 13 && i <= 24 % less than December - need to align months
+        W.(temp_var).month = (i-12)*ones(height( W.(temp_var)),1); 
+    end
+
+    if i >= 25 && i <= 36 % less than December - need to align months
+        W.(temp_var).month = (i-24)*ones(height( W.(temp_var)),1); 
     end
 
     % compile table of selected variables
