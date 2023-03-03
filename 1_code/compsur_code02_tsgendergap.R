@@ -24,7 +24,7 @@ library(zoo) # for date vector
 library(lattice) # for plotting
 library("ggplot2")
 library(xtable)
-library(caroline)
+library(caroline) # for delimited text file
 
 ## --------
 ## Settings
@@ -105,7 +105,7 @@ rm(T)
 # Create data in wide format
 
 M <- group_by(F,date,survey,female) %>%
-  summarise(meany = mean(y), sdy = sd(y), p25y = quantile(y,probs = 0.25), p50y = median(y), p75y = quantile(y,probs = 0.75)) %>%
+  dplyr::summarise(meany = mean(y), sdy = sd(y), p25y = quantile(y,probs = 0.25), p50y = median(y), p75y = quantile(y,probs = 0.75)) %>%
   ungroup %>%
   mutate(key = paste(survey,female,sep = "_")) %>%
   select(-female) %>%
@@ -188,24 +188,24 @@ T <- read_csv2(file.path('empirical', '0_data', 'external', 'OECD_CPI_data.csv')
 
 germany_f <- filter(T,LOCATION == "DEU" & SUBJECT == "FOOD") %>%
   select(date,cpi) %>%
-  rename(cpi_food_germany = cpi)
+  dplyr::rename(cpi_food_germany = cpi)
 germany_t <- filter(T,LOCATION == "DEU" & SUBJECT == "TOT") %>%
   select(date,cpi) %>%
-  rename(cpi_tot_germany = cpi)
+  dplyr::rename(cpi_tot_germany = cpi)
 
 us_f <- filter(T,LOCATION == "USA" & SUBJECT == "FOOD") %>%
   select(date,cpi) %>%
-  rename(cpi_food_us = cpi)
+  dplyr::rename(cpi_food_us = cpi)
 us_t <- filter(T,LOCATION == "USA" & SUBJECT == "TOT") %>%
   select(date,cpi) %>%
-  rename(cpi_tot_us = cpi)
+  dplyr::rename(cpi_tot_us = cpi)
 
 euro_f <- filter(T,LOCATION == "EA19" & SUBJECT == "FOOD") %>%
   select(date,cpi) %>%
-  rename(cpi_food_euro= cpi)
+  dplyr::rename(cpi_food_euro= cpi)
 euro_t <- filter(T,LOCATION == "EA19" & SUBJECT == "TOT") %>%
   select(date,cpi) %>%
-  rename(cpi_tot_euro= cpi)
+  dplyr::rename(cpi_tot_euro= cpi)
 
 # merge all together
 
