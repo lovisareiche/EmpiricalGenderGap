@@ -65,7 +65,7 @@ if (!dir.exists(pipeline)) {
 if (dir.exists(file.path('empirical', '3_output','results',f,NAME))){
   outline <- file.path('empirical', '3_output','results',f,NAME)
 } else {
-  outline <- file.path('3_output','results',f,NAME)
+  outline <- file.path('empirical','3_output','results',f,NAME)
 }
 
 if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
