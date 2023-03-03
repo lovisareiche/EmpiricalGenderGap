@@ -96,10 +96,11 @@ Qecfin <- read_csv2(file.path('empirical', '0_data', 'manual','ECFIN','Q60.csv')
 ## BOP 
 # have to code balance statistic
 
-Qbop <- read_csv(file.path('empirical', '2_pipeline', 'bopreg','code03_compilepanel.m','out','base', 'T.csv')) %>%
-  select(q_inflation,wave,female) %>%
-  group_by(wave,female) %>%
-  summarise(q1 = sum(as.numeric(q_inflation == 1))/length(q_inflation),q2 = sum(as.numeric(q_inflation == 2))/length(q_inflation),q4 = sum(as.numeric(q_inflation == 4))/length(q_inflation),q5 = sum(as.numeric(q_inflation == 5))/length(q_inflation)) %>%
+Qbop <- read_csv(file.path('empirical', '2_pipeline', 'compsur','code01_align','out','BOP-HH', 'T.csv')) %>%
+  mutate(date = as.yearmon(paste(year, month), format = "%Y %m")) %>%
+  select(quali,date,female) %>%
+  group_by(date,female) %>%
+  dplyr::summarise(q1 = sum(as.numeric(quali == 1))/length(quali),q2 = sum(as.numeric(quali == 2))/length(quali),q4 = sum(as.numeric(quali == 4))/length(quali),q5 = sum(as.numeric(quali == 5))/length(quali)) %>%
   ungroup %>%
   # compute balance statitsic
   mutate(b = -q1 -0.5*q2 + 0.5*q4 + q5) %>%
@@ -107,17 +108,17 @@ Qbop <- read_csv(file.path('empirical', '2_pipeline', 'bopreg','code03_compilepa
 
 Qbop_f <- filter(Qbop,female == 1) %>%
   select(-female) %>%
-  rename(b_f = b)
+  dplyr::rename(b_f = b)
 Qbop_m <- filter(Qbop,female == 0) %>%
   select(-female) %>%
-  rename(b_m = b) 
+  dplyr::rename(b_m = b) 
 
 # compute gap in main
-Qbop <- merge(Qbop_f,Qbop_m, by = "wave") %>%
+Qbop <- merge(Qbop_f,Qbop_m, by = "date") %>%
   mutate(qbop = b_f - b_m, qbop_mov = moving_average(b_f - b_m))
 
-dates <- seq(as.Date("2019-05-01"), by = "month", length.out = max(Qbop$wave)) 
-Qbop$date <- dates[Qbop$wave]
+dates <- seq(as.Date("2019-05-01"), by = "month", length.out = nrow(Qbop)) 
+Qbop$date <- dates
 
 Qbop <- select(Qbop, qbop,qbop_mov, date)
 
@@ -125,7 +126,7 @@ Qbop <- select(Qbop, qbop,qbop_mov, date)
 
 Qmsc <- read_csv(file.path('empirical', '0_data', 'manual','Michigan', 'T.csv')) %>%
   mutate(female = SEX-1,  year = as.numeric(substr(YYYYMM, 1, 4)), month = as.numeric(substr(YYYYMM, 5, 6))) %>%
-  rename(q_inflation = PX1Q1) %>%
+  dplyr::rename(q_inflation = PX1Q1) %>%
   filter(abs(q_inflation) <= 5 & !is.na(female)) %>%
   select(female,q_inflation,year,month) %>%
   # inefficient way to get right date format
@@ -134,7 +135,7 @@ Qmsc <- read_csv(file.path('empirical', '0_data', 'manual','Michigan', 'T.csv'))
   # continue as with bop
   select(q_inflation,date,female) %>%
   group_by(date,female) %>%
-  summarise(q1 = sum(as.numeric(q_inflation == 1))/length(q_inflation),q5 = sum(as.numeric(q_inflation == 5))/length(q_inflation)) %>%
+  dplyr::summarise(q1 = sum(as.numeric(q_inflation == 1))/length(q_inflation),q5 = sum(as.numeric(q_inflation == 5))/length(q_inflation)) %>%
   ungroup %>%
   # compute balance statitsic, note michigan has 1 go up, eu has 1 go down
   mutate(b = q1 - q5) %>%
@@ -142,10 +143,10 @@ Qmsc <- read_csv(file.path('empirical', '0_data', 'manual','Michigan', 'T.csv'))
 
 Qmsc_f <- filter(Qmsc,female == 1) %>%
   select(-female) %>%
-  rename(b_f = b)
+  dplyr::rename(b_f = b)
 Qmsc_m <- filter(Qmsc,female == 0) %>%
   select(-female) %>%
-  rename(b_m = b) 
+  dplyr::rename(b_m = b) 
 
 # compute gap in main
 Qmsc <- merge(Qmsc_f,Qmsc_m, by = "date") %>%
@@ -156,7 +157,7 @@ Qmsc <- merge(Qmsc_f,Qmsc_m, by = "date") %>%
 
 Qsce <- read_csv(file.path('empirical', '0_data', 'manual','FRBNY', 'T.csv')) %>%
   mutate(female = as.numeric(Q33==1), year = as.numeric(substr(date, 1, 4)), month = as.numeric(substr(date, 5, 6))) %>%
-  rename(q_inflation = Q8v2) %>%
+  dplyr::rename(q_inflation = Q8v2) %>%
   filter(!is.na(q_inflation) & !is.na(female) ) %>%
   select(female,q_inflation,year,month) %>%
   # inefficient way to get right date format (continue as in msc)
@@ -165,7 +166,7 @@ Qsce <- read_csv(file.path('empirical', '0_data', 'manual','FRBNY', 'T.csv')) %>
   # continue as with bop
   select(q_inflation,date,female) %>%
   group_by(date,female) %>%
-  summarise(q1 = sum(as.numeric(q_inflation == 1))/length(q_inflation),q5 = sum(as.numeric(q_inflation == 2))/length(q_inflation)) %>%
+  dplyr::summarise(q1 = sum(as.numeric(q_inflation == 1))/length(q_inflation),q5 = sum(as.numeric(q_inflation == 2))/length(q_inflation)) %>%
   ungroup %>%
   # compute balance statitsic, note sce has 1 go up, eu has 1 go down
   mutate(b = q1 - q5) %>%
@@ -173,10 +174,10 @@ Qsce <- read_csv(file.path('empirical', '0_data', 'manual','FRBNY', 'T.csv')) %>
 
 Qsce_f <- filter(Qsce,female == 1) %>%
   select(-female) %>%
-  rename(b_f = b)
+  dplyr::rename(b_f = b)
 Qsce_m <- filter(Qsce,female == 0) %>%
   select(-female) %>%
-  rename(b_m = b) 
+  dplyr::rename(b_m = b) 
 
 # compute gap in main
 Qsce <- merge(Qsce_f,Qsce_m, by = "date") %>%
