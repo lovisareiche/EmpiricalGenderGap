@@ -136,12 +136,12 @@ xtvnames <- c("pessimist",              "q_unemployment",         "q_rent",
             
             "part_time"             , "unemployed"             ,"retired"      )
 
-xnames <- c("eduschool"  ,
-             "hhinc"                 ,   
+xnames <- c("eduschool"  ,"non_single",
+             "hhinc"                 ,   "q_inflation",
             "age"                 ,   "citysize"               ,"female"            ,    
             "eastgerman"             ,"east1989"           )
 
-xtvnames <- c("hhinc" , 
+xtvnames <- c("hhinc" , "non_single","q_inflation",
               "age"  )
 
 # Include time varying as averages to control 
@@ -174,32 +174,32 @@ if (l == 'log') {
 # baseline 
 f <- as.formula(paste('y ~','factor(wave) +', paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-b <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
+b <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 
 # introducing predicted test ordered logit
 f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between +', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-tl <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
+tl <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # introducing predicted test poisson
 f <- as.formula(paste('y ~','factor(wave) +', 'ppred_test + ppred_test_between +', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-tp <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
+tp <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # introducing predicted subjective bol
 f <- as.formula(paste('y ~','factor(wave) +', 'lpred_subj + lpred_subj_between +', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-sl <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
+sl <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # introducing predicted subjective p
 f <- as.formula(paste('y ~','factor(wave) +', 'ppred_subj + ppred_subj_between +', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-sp <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
+sp <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between +', 
                       paste(xnames, collapse='+'),'+',
@@ -214,14 +214,56 @@ f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test:female + lpred_test_be
                       paste(paste(hhroles,":female",sep = ""), collapse='+'),'+',
                       paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-i <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
+i <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 f <- as.formula(paste('y ~','factor(wave) +', 
                       paste(xnames, collapse='+'),'+',
                       paste(hhroles, collapse='+'),'+',
                       paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-hh <- plm( f, data=filter(T_c, non_single == 1), effect = "individual", model = "pooling")
+hh <- plm( f, data=T_c, effect = "individual", model = "pooling")
+
+## Lasso Test
+
+library(glmnet)
+
+#define response variable
+y <- T_c$y
+
+#define matrix of predictor variables
+x <- data.matrix(T_c[,c(paste(xnames),paste(hhroles),paste(hhroles,"_between",sep = ""),paste(xtvnames,"_between",sep = ""),'lpred_test','lpred_test_between' )])
+
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(x, y, alpha = 1)
+
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+#produce plot of test MSE by lambda value
+plot(cv_model) 
+
+#find coefficients of best model
+best_model <- glmnet(x, y, alpha = 1, lambda = best_lambda)
+coef(best_model)
+
+
+#use fitted best model to make predictions
+y_predicted <- predict(best_model, s = best_lambda, newx = x)
+
+#find SST and SSE
+sst <- sum((y - mean(y))^2)
+sse <- sum((y_predicted - y)^2)
+
+#find R-Squared
+rsq <- 1 - sse/sst
+rsq
+
+# create "models" that show variable importance (absolute value of z startstic) and VIF (variance inflation factor)
+lasso <- a
+lasso$coefficients <- coefficients(best_model)
+
 
 # --- Write output
 
@@ -232,19 +274,159 @@ omit.labels <- c("Time dummies","Between effects")
 title <- "The role of financial confidence"
 label <- "tab:regresswithfin"
 dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
-column.labels <- c("","Ordered logit","Poisson","Ordered logit","Poisson","","Ordered logit")
+
+se <- c(NULL, NULL, NULL, NULL,NULL,NA)
+tstat <- c(NULL, NULL, NULL, NULL,NULL,NA)
+p <- c(NULL, NULL, NULL, NULL,NULL,NA)
+r2 <- c("Lasso $R^2$","","","","","",rsq)
+add.lines <- list(r2)
+
 
 # in which order
-desiredOrder <- c("Constant","female","lpred_test","ppred_test","lpred_subj","ppred_subj",hhroles)
+desiredOrder <- c("Constant","female","lpred_test","lpred_subj",hhroles)
 
-writeLines(capture.output(stargazer(b,tl,tp,sl,sp,hh,a,
+writeLines(capture.output(stargazer(b,tl,sl,hh,a,
                                     title = title, notes = notes, label = label, 
                                     omit = omit, omit.labels = omit.labels, 
                                     model.names = FALSE, column.labels = column.labels,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
-                                    dep.var.labels = dep.var.labels, no.space = TRUE)), 
-           file.path(outline,l, 'code_regresswithfin.tex'))
+                                    dep.var.labels = dep.var.labels, no.space = FALSE)), 
+           file.path(outline, l,'code_regresswithfin.tex'))
 
 
 
+## Decile regression
+
+# pre define vars
+C_female <- data.frame()
+SE_female <- data.frame()
+C_fin <- data.frame()
+SE_fin <- data.frame()
+C_groc <- data.frame()
+SE_groc <- data.frame()
+O <- data.frame()
+Q <- data.frame()
+R <- data.frame()
+AR <- data.frame()
+
+# Baseline
+form <- as.formula(paste('y ~','factor(wave) +', paste(xnames, collapse='+'),'+',
+                            paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+
+for (ii in c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)) {
+  m <- plm( form, data=filter(T_c, y<=quantile(y,ii)), effect = "individual", model = "pooling")
+  assign(paste("m_",ii,sep = ""),m)
+  
+  # collect all coefficient estimates and standard errors for variables of interest
+  C_female[1,ii*10] <- coefficients(m)["female"]
+  SE_female[1,ii*10] <- coefficients(summary(m))[, "Std. Error"]["female"]
+  
+  # collect observations, percentiles, R2 and adjuster R2
+  O[1,ii*10] <- nrow(filter(T_c, y<=quantile(y,ii)))
+  Q[1,ii*10] <- quantile(T_c$y,ii)
+  h <- summary(m)["r.squared"]
+  R[1,ii*10] <- h$r.squared["rsq"]
+  AR[1,ii*10] <- h$r.squared["adjrsq"]
+}
+
+# INCLUDING PREDICT TEST
+form <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between +', 
+                         paste(xnames, collapse='+'),'+',
+                         paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+
+for (ii in c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)) {
+  findec <- plm( form, data=filter(T_c, y<=quantile(y,ii)), effect = "individual", model = "pooling")
+  assign(paste("findec_",ii,sep = ""),findec)
+  
+  # collect all coefficient estimates and standard errors for variables of interest
+  C_female[2,ii*10] <- coefficients(findec)["female"]
+  SE_female[2,ii*10] <- coefficients(summary(findec))[, "Std. Error"]["female"]
+  C_fin[1,ii*10] <- coefficients(findec)["lpred_test"]
+  SE_fin[1,ii*10] <- coefficients(summary(findec))[, "Std. Error"]["lpred_test"]
+  
+  # collect observations, percentiles, R2 and adjuster R2
+  O[2,ii*10] <- nrow(filter(T_c, y<=quantile(y,ii)))
+  Q[2,ii*10] <- quantile(T_c$y,ii)
+  h <- summary(m)["r.squared"]
+  R[2,ii*10] <- h$r.squared["rsq"]
+  AR[2,ii*10] <- h$r.squared["adjrsq"]
+}
+
+# Including household roles
+
+form <- as.formula(paste('y ~','factor(wave) +', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(hhroles, collapse='+'),'+',
+                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+
+for (ii in c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)) {
+  hhdec <- plm( form, data=filter(T_c, y<=quantile(y,ii)), effect = "individual", model = "pooling")
+  assign(paste("hhdec_",ii,sep = ""),hhdec)
+  
+  # collect all coefficient estimates and standard errors for variables of interest
+  C_female[3,ii*10] <- coefficients(hhdec)["female"]
+  SE_female[3,ii*10] <- coefficients(summary(hhdec))[, "Std. Error"]["female"]
+  C_groc[1,ii*10] <- coefficients(hhdec)["shop_groceries_nsing"]
+  SE_groc[1,ii*10] <- coefficients(summary(hhdec))[, "Std. Error"]["shop_groceries_nsing"]
+  
+  # collect observations, percentiles, R2 and adjuster R2
+  O[3,ii*10] <- nrow(filter(T_c, y<=quantile(y,ii)))
+  Q[3,ii*10] <- quantile(T_c$y,ii)
+  h <- summary(m)["r.squared"]
+  R[3,ii*10] <- h$r.squared["rsq"]
+  AR[3,ii*10] <- h$r.squared["adjrsq"]
+}
+
+
+D <- data.frame(t(C_female[1,]),t(C_female[2,]),t(C_female[3,]),t(C_fin),t(C_groc),t(SE_female[1,]),t(SE_female[2,]),t(SE_female[3,]),t(SE_fin),t(SE_groc),t(O[1,])) %>%
+  dplyr::rename(female_b = X1, female_fin = X2, female_hh = X3, fin = X1.1, groc = X1.2, female_b_se = X1.3, female_fin_se = X2.1,female_hh_se = X3.1, fin_se = X1.4, groc_se = X1.5, obs = X1.6) %>%
+  mutate(female_u = female_b + female_b_se, female_fin_u = female_fin + female_fin_se, female_hh_u = female_hh + female_hh_se, fin_u = fin + fin_se, groc_u = groc + groc_se) %>%
+  mutate(female_l = female_b - female_b_se, female_fin_l = female_fin - female_fin_se, female_hh_l = female_hh - female_hh_se, fin_l = fin - fin_se, groc_l = groc - groc_se) %>%
+  mutate(decile = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)) %>%
+  mutate(decileval = c(quantile(`T_c`$y,0.1),quantile(`T_c`$y,0.2),quantile(`T_c`$y,0.3),quantile(`T_c`$y,0.4),quantile(`T_c`$y,0.5),quantile(`T_c`$y,0.6),quantile(`T_c`$y,0.7),quantile(`T_c`$y,0.8),quantile(`T_c`$y,0.9),quantile(`T_c`$y,1)))
+
+# save as delimited text file
+
+library(caroline) # for delimited text file
+
+write.delim(D, file = file.path(pipeline, 'out', 'D.txt'), sep = "\t")
+
+
+## Lasso Test
+
+library(glmnet)
+
+#define response variable
+y <- T_c$y
+
+#define matrix of predictor variables
+x <- data.matrix(T_c[,c(paste(xnames),paste(hhroles),paste(hhroles,"_between",sep = ""),paste(xtvnames,"_between",sep = ""),'lpred_test','lpred_test_between' )])
+
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(x, y, alpha = 1)
+
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+#produce plot of test MSE by lambda value
+plot(cv_model) 
+
+#find coefficients of best model
+best_model <- glmnet(x, y, alpha = 1, lambda = best_lambda)
+coef(best_model)
+
+
+#use fitted best model to make predictions
+y_predicted <- predict(best_model, s = best_lambda, newx = x)
+
+#find SST and SSE
+sst <- sum((y - mean(y))^2)
+sse <- sum((y_predicted - y)^2)
+
+#find R-Squared
+rsq <- 1 - sse/sst
+rsq
