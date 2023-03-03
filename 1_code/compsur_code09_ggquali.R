@@ -67,7 +67,7 @@ if (!dir.exists(pipeline)) {
 if (dir.exists(file.path('empirical', '3_output','results',f,NAME))){
   outline <- file.path('empirical', '3_output','results',f,NAME)
 } else {
-  outline <- file.path('3_output','results',f,NAME)
+  outline <- file.path('empirical', '3_output','results',f,NAME)
 }
 
 if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
@@ -97,6 +97,8 @@ for(i in 1:length(S)){
     pdata.frame( index=c( "id", "date" ) )
   assign(paste("T_",S[i],sep = ""),T)
   
+  T <- T[!duplicated(T[c('id','date')]), ]
+  
   # do t test and wilcoxon rank test
   
   tgap = t.test(T$quali[T$female == 1],T$quali[T$female == 0])
@@ -108,7 +110,7 @@ for(i in 1:length(S)){
   # do multivariate analysis
   
   xnames <- setdiff(colnames(T),'date') %>%
-    setdiff(c('y','quali')) %>%
+    setdiff(c('y','quali','single')) %>%
     setdiff('month') %>%
     setdiff('year') %>%
     setdiff('survey') %>%
@@ -119,7 +121,6 @@ for(i in 1:length(S)){
     c("age","hhinc"),
     "id",
     center = "mean",
-    suffix_demean = "_within",
     suffix_groupmean = "_between",
     add_attributes = TRUE,
     verbose = TRUE
@@ -130,8 +131,10 @@ for(i in 1:length(S)){
   
   eq <- as.formula(paste('quali ~ factor(date) +', paste(xnames, collapse='+'), '+ age_between + hhinc_between'))
   
-  m <- plm( eq, data=T_c, effect = "individual", model = "pooling" )
-  assign(paste("m_",S[i],sep = ""),m)
+  n <- plm( eq, data=filter(T_c,single ==0), effect = "individual", model = "pooling" )
+  assign(paste("n_",S[i],sep = ""),n)
+  s <- plm( eq, data=filter(T_c,single ==1), effect = "individual", model = "pooling" )
+  assign(paste("s_",S[i],sep = ""),s)
   
 }
 
@@ -143,16 +146,17 @@ omit <- c("factor","between")
 omit.labels <- c("Year dummies","Between effects")
 label <- "tab:ggsinglemulti"
 dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
+column.labels <- c("BOP", "SCE", "MSC")
 
 # in which order
 desiredOrder <- c("Constant","female","age","eduschool","hhinc",
                   "region")
 
-writeLines(capture.output(stargazer(`m_BOP-HH`,m_FRBNY,m_Michigan,
+writeLines(capture.output(stargazer(`n_BOP-HH`,`s_BOP-HH`,n_FRBNY,s_FRBNY,n_Michigan,s_Michigan,
                                     title = title, label = label, 
                                     omit = omit, omit.labels = omit.labels, 
-                                    model.names = FALSE, 
+                                    model.names = FALSE, column.labels = column.labels,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels)), 
-           file.path(outline, 'code_ggsinglemulti.tex'))
+           file.path(outline, 'code_ggqualimulti.tex'))
