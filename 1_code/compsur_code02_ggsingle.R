@@ -67,7 +67,7 @@ if (!dir.exists(pipeline)) {
 if (dir.exists(file.path('empirical', '3_output','results',f,NAME))){
   outline <- file.path('empirical', '3_output','results',f,NAME)
 } else {
-  outline <- file.path('3_output','results',f,NAME)
+  outline <- file.path('empirical','3_output','results',f,NAME)
 }
 
 if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
@@ -92,7 +92,7 @@ for(i in 1:length(S)){
   
   T <- read_csv(file.path('empirical', '2_pipeline',f, 'code01_align','out',S[i], 'T.csv')) %>%
     mutate(survey = S[i], date = as.yearmon(paste(year, month), format = "%Y %m")) %>%
-    pdata.frame( T, index=c( "id", "date" ) )
+    pdata.frame( index=c( "id", "date" ) )
   assign(paste("T_",S[i],sep = ""),T)
   
   # do t test and wolcoxon rank test
@@ -126,7 +126,6 @@ for(i in 1:length(S)){
     c("age","hhinc"),
     "id",
     center = "mean",
-    suffix_demean = "_within",
     suffix_groupmean = "_between",
     add_attributes = TRUE,
     verbose = TRUE
@@ -136,7 +135,7 @@ for(i in 1:length(S)){
     pdata.frame(index=c( "id", "date" ) )
   
 
-  eq <- as.formula(paste('y ~ factor(year) +', paste(xnames, collapse='+'), '+ age_between + hhinc_between'))
+  eq <- as.formula(paste('y ~ factor(date) +', paste(xnames, collapse='+'), '+ age_between + hhinc_between'))
   n <- plm( eq, data=filter(T_c,single ==0), effect = "individual", model = "pooling" )
   assign(paste("n_",S[i],sep = ""),n)
   s <- plm( eq, data=filter(T_c,single ==1), effect = "individual", model = "pooling" )
