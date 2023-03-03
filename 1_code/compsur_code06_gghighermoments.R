@@ -21,6 +21,7 @@ PROJECT_DIR <- 'D:/Lovisa/Studium/Oxford/Department of Economics/DPhil' ## Chang
 library('tidyverse')
 library(moments)
 library(xtable)
+library(lattice)
 
 ## --------
 ## Settings
@@ -89,11 +90,11 @@ for(i in 1:length(S)){
   assign(paste("T_",S[i],sep = ""),T)
     if(i==1){
       F <- T
-      F_p25 <- filter(F,y <= 4 & y >= 0)
+      F_p25 <- filter(T,y < quantile(y,0.9))
     }
     if(i>1){
       F <- rbind(F,T)
-      F_p25 <- rbind(F_p25,filter(T,y <= 4 & y >= 0))
+      F_p25 <- rbind(F_p25,filter(T,y < quantile(y,0.9)))
     }
   }
 
@@ -103,11 +104,7 @@ rm(T)
 ## -- compute moments --
 
 T <- group_by(F,survey,female) %>%
-  summarise(mn = round(mean(y),2), md = median(y), std = round(sd(y),2), p10 = round(quantile(y,0.1),2), p25 = round(quantile(y,0.25),2), p75 = round(quantile(y,0.75),2), p90 = round(quantile(y,0.9),2))
-
-T_diff <- group_by(T,survey) %>%
-  summarise(dmn = diff(mn), dmd = diff(md), dstd = diff(std), dp10 = diff(p10), dp25 = diff(p25), dp75 = diff(p75), dp90 = diff(p90))
-
+  dplyr::summarise(mn = round(mean(y),2), md = median(y), std = round(sd(y),2), p10 = round(quantile(y,0.1),2), p25 = round(quantile(y,0.25),2), p75 = round(quantile(y,0.75),2), p90 = round(quantile(y,0.9),2))
 
 # run wilcoxin and kolmogorov smirnoff tests on subsamples
 
@@ -130,12 +127,13 @@ for(i in 1:length(S)){
 T$t <- round(c(rep(`t_BOP-HH`$p.value,2),rep(t_FRBNY$p.value,2),rep(t_Michigan$p.value,2)),2)
 T$w <- round(c(rep(`w_BOP-HH`$p.value,2),rep(w_FRBNY$p.value,2),rep(w_Michigan$p.value,2)),2)
 T$ks <- round(c(rep(`ks_BOP-HH`$p.value,2),rep(ks_FRBNY$p.value,2),rep(ks_Michigan$p.value,2)),2)
-T_diff$t <- round(c(`t_BOP-HH`$p.value,t_FRBNY$p.value,t_Michigan$p.value),2)
-T_diff$w <- round(c(`w_BOP-HH`$p.value,w_FRBNY$p.value,w_Michigan$p.value),2)
-T_diff$ks <- round(c(`ks_BOP-HH`$p.value,ks_FRBNY$p.value,ks_Michigan$p.value),2)
 
 
-# run wilcoxin and kolmogorov smirnoff tests on subsamples
+# Same for subsample
+
+Tsub <- group_by(F_p25,survey,female) %>%
+  dplyr::summarise(mn = round(mean(y),2), md = median(y), std = round(sd(y),2), p10 = round(quantile(y,0.1),2), p25 = round(quantile(y,0.25),2), p75 = round(quantile(y,0.75),2), p90 = round(quantile(y,0.9),2))
+
 
 for(i in 1:length(S)){
   w <-  wilcox.test(y~female, data = filter(F_p25, survey == S[i]),alternative = c("less"))
@@ -156,29 +154,23 @@ for(i in 1:length(S)){
 T$t_p25 <- round(c(rep(`t_BOP-HH`$p.value,2),rep(t_FRBNY$p.value,2),rep(t_Michigan$p.value,2)),2)
 T$w_p25 <- round(c(rep(`w_BOP-HH`$p.value,2),rep(w_FRBNY$p.value,2),rep(w_Michigan$p.value,2)),2)
 T$ks_p25 <- round(c(rep(`ks_BOP-HH`$p.value,2),rep(ks_FRBNY$p.value,2),rep(ks_Michigan$p.value,2)),2)
-T_diff$t_p25 <- round(c(`t_BOP-HH`$p.value,t_FRBNY$p.value,t_Michigan$p.value),2)
-T_diff$w_p25 <- round(c(`w_BOP-HH`$p.value,w_FRBNY$p.value,w_Michigan$p.value),2)
-T_diff$ks_p25 <- round(c(`ks_BOP-HH`$p.value,ks_FRBNY$p.value,ks_Michigan$p.value),2)
 
 
 #
 # transpose
 T <- t(T)
-T_diff <- t(T_diff)
+Tsub <- t(Tsub)
 
 V7 <- c("ECFIN",0,6.4,4.1,9.7,0.7,1.5,9.1,15.9,0,0,0,0,0,0)
 V8 <- c("ECFIN",1,7.8,4.9,11.5,0.8,1.7,11.3,19.8,0,0,0,0,0,0)
 
 T <- cbind(T,V7,V8)
 
-V <- vector()
-V[1] <- "ECFIN"
-V[2:length(V8)-1] <- round(as.numeric(V8[3:length(V8)])-as.numeric(V7[3:length(V8)]),2)
-
-T_diff <- cbind(T_diff,V)
-
 
 xtable(T)
-xtable(T_diff)
+xtable(Tsub)
+
+
+histogram(F_p25$y[F_p25$female == 0])
 
 
