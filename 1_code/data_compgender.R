@@ -26,6 +26,9 @@ library('xtable') # write final table in latex
 ## --------
 ### Any settings go here
 
+f <- 'bopreg'
+source <- 'code09_fitlit'
+
 
 ## ---------------------
 ## Set working directory
@@ -39,10 +42,10 @@ setwd(file.path(PROJECT_DIR, PROJECT))
 ## ----------------------------------
 ### The code below will automatically create a pipeline folder for this code file if it does not exist.
 
-if (dir.exists(file.path('empirical', '2_pipeline'))){
-  pipeline <- file.path('empirical', '2_pipeline', NAME)
+if (dir.exists(file.path('empirical', '2_pipeline',f))){
+  pipeline <- file.path('empirical', '2_pipeline',f, NAME)
 } else {
-  pipeline <- file.path('2_pipeline', NAME)
+  pipeline <- file.path('2_pipeline',f, NAME)
 }
 
 if (!dir.exists(pipeline)) {
@@ -55,8 +58,14 @@ if (!dir.exists(pipeline)) {
 
 ### The code below will automatically create an output folder for this code file if it does not exist.
 
-if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
-  dir.create(file.path('empirical', '3_output','results',NAME))
+if (dir.exists(file.path('empirical', '3_output','results',f,NAME))){
+  outline <- file.path('empirical', '3_output','results',f,NAME)
+} else {
+  outline <- file.path('3_output','results',f,NAME)
+}
+
+if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  dir.create(outline)
 }
 
 
@@ -72,9 +81,7 @@ if (!dir.exists(file.path('empirical', '3_output','results',NAME))) {
 
 ## -- Load data from pipeline folder --
 
-T <- read_csv(file.path('empirical', '2_pipeline', 'code03_compilepanel.m','out','base', 'T.csv')) %>%
-  mutate(shop_groceries_nsing = as.numeric(shop_groceries_nsing==2),shop_major_nsing = as.numeric(shop_major_nsing==2),prep_meals_nsing = as.numeric(prep_meals_nsing==2),decide_finance_nsing = as.numeric(decide_finance_nsing==2))
-
+T <- read_csv(file.path('empirical', '2_pipeline',f, 'code03_compilepanel.m','out','base', 'T.csv'))
 
 ## -- Crate table of means split by male and female
 
@@ -100,6 +107,6 @@ W <- T %>%
 writeLines(capture.output(xtable(W, 
                                  caption = "Comparing the male and female subsamples", 
                                  label = "compgender")),
-           file.path('empirical', '3_output','results', NAME, 'code_compgender.tex'))
+           file.path(outline, NAME, 'code_compgender.tex'))
 
 
