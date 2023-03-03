@@ -21,6 +21,7 @@ PROJECT_DIR <- 'D:/Lovisa/Studium/Oxford/Department of Economics/DPhil' ## Chang
 library('tidyverse')
 library(tseries) # for timeseries test
 library(stargazer)
+library(data.table)
 
 ## --------
 ## Settings
@@ -29,7 +30,7 @@ library(stargazer)
 
 f <- 'compsur'
 
-m <- '50'
+m <- 'mean'
 # can go mean, sd, 25, 50, 75
 
 
@@ -97,41 +98,49 @@ us_tot_mich <- ts(data = D$cpi_tot_us[D$date >= as.Date('1978-01-01')],
              start=c(1978, 01), 
              end=c(2022, 12), 
              frequency = 12)
+us_tot_mich_lag <- shift(us_tot_mich, n=1, fill=NA, type="lag")
 
 us_food_mich <- ts(data = D$cpi_food_us[D$date >= as.Date('1978-01-01')], 
              start=c(1978, 01), 
              end=c(2022, 12), 
              frequency = 12)
+us_food_mich_lag <- shift(us_food_mich, n=1, fill=NA, type="lag")
 
 us_tot_sce <- ts(data = D$cpi_tot_us[D$date >= as.Date('2013-06-01') & D$date <= as.Date('2020-11-01')], 
                   start=c(2013, 06), 
                   end=c(2020, 11), 
                   frequency = 12)
+us_tot_sce_lag <- shift(us_tot_sce, n=1, fill=NA, type="lag")
 
 us_food_sce <- ts(data = D$cpi_food_us[D$date >= as.Date('2013-06-01') & D$date <= as.Date('2020-11-01')], 
                    start=c(2013, 06), 
                    end=c(2020, 11), 
                    frequency = 12)
+us_food_sce_lag <- shift(us_food_sce, n=1, fill=NA, type="lag")
 
 germany_tot <- ts(data = D$cpi_tot_germany[D$date >= as.Date('2019-05-01') & D$date <= as.Date('2022-09-01')], 
              start=c(2019, 05), 
              end=c(2022, 09), 
              frequency = 12)
+germany_tot_lag <- shift(germany_tot, n=1, fill=NA, type="lag")
 
 germany_food <- ts(data = D$cpi_food_germany[D$date >= as.Date('2019-05-01') & D$date <= as.Date('2022-09-01')], 
              start=c(2019, 05), 
              end=c(2022, 09), 
              frequency = 12)
+germany_food_lag <- shift(germany_food, n=1, fill=NA, type="lag")
 
 euro_tot <- ts(data = D$cpi_tot_euro[D$date >= as.Date('2004-01-01') & D$date <= as.Date('2022-09-01')], 
              start=c(2004, 01), 
              end=c(2022, 09), 
              frequency = 12)
+euro_tot_lag <- shift(euro_tot, n=1, fill=NA, type="lag")
 
 euro_food <- ts(data = D$cpi_food_euro[D$date >= as.Date('2004-01-01') & D$date <= as.Date('2022-09-01')], 
              start=c(2004, 01), 
              end=c(2022, 09), 
              frequency = 12)
+euro_food_lag <- shift(euro_food, n=1, fill=NA, type="lag")
 
 # add quantitative expectations
 
@@ -181,40 +190,46 @@ if(m!="sd"){
 }
 
 
-Tmsc <- ts.union(us_food_mich,us_tot_mich,msc,qmsc)
-colnames(Tmsc) <- c("food_cpi","tot_cpi","msc","q_inflation")
-Tsce <- ts.union(us_food_sce,us_tot_sce,sce,qsce)
-colnames(Tsce) <- c("food_cpi","tot_cpi","sce","q_inflation")
-Tbop <- ts.union(germany_food,germany_tot,bop,qbop)
-colnames(Tbop) <- c("food_cpi","tot_cpi","bop","q_inflation")
+Tmsc <- ts.union(us_food_mich,us_tot_mich,us_food_mich_lag,us_tot_mich_lag,msc,qmsc)
+colnames(Tmsc) <- c("food_cpi","tot_cpi","food_cpi_lag","tot_cpi_lag","msc","q_inflation")
+Tsce <- ts.union(us_food_sce,us_tot_sce,us_food_sce_lag,us_tot_sce_lag,sce,qsce)
+colnames(Tsce) <- c("food_cpi","tot_cpi","food_cpi_lag","tot_cpi_lag","sce","q_inflation")
+Tbop <- ts.union(germany_food,germany_tot,germany_food_lag,germany_tot_lag,bop,qbop)
+colnames(Tbop) <- c("food_cpi","tot_cpi","food_cpi_lag","tot_cpi_lag","bop","q_inflation")
 if(m!="sd"){
-  Teuro <- ts.union(euro_food,euro_tot,ecfin,qecfin)
-  colnames(Teuro) <- c("food_cpi","tot_cpi","ecfin","q_inflation")
+  Teuro <- ts.union(euro_food,euro_tot,euro_food_lag,euro_tot_lag,ecfin,qecfin)
+  colnames(Teuro) <- c("food_cpi","tot_cpi","food_cpi_lag","tot_cpi_lag","ecfin","q_inflation")
 }
 
 
 ## -- Run static time series
 
 Tbop <- na.remove(Tbop)
-bopq <- lm(bop ~ q_inflation + food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Tbop, na.action=na.exclude)
-bop <- lm(bop ~ food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Tbop, na.action=na.exclude)
+bopq <- lm(bop ~ q_inflation + food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tbop, na.action=na.exclude)
+bop <- lm(bop ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tbop, na.action=na.exclude)
 summary(bop)
 
 if(m!="sd"){
   Teuro <- na.remove(Teuro)
-  ecfinq <- lm(ecfin ~ q_inflation + food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Teuro, na.action=na.exclude)
-  ecfin <- lm(ecfin ~ food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Teuro, na.action=na.exclude)
+  ecfinq <- lm(ecfin ~ q_inflation + food_cpi + tot_cpi  + food_cpi_lag + tot_cpi_lag, data = Teuro, na.action=na.exclude)
+  ecfin <- lm(ecfin ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Teuro, na.action=na.exclude)
   summary(ecfin)
 }
 
 Tmsc <- na.remove(Tmsc)
-mscq <- lm(msc ~ q_inflation + food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Tmsc, na.action=na.exclude)
-msc <- lm(msc ~ food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Tmsc, na.action=na.exclude)
+mscq <- lm(msc ~ q_inflation + food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tmsc, na.action=na.exclude)
+msc <- lm(msc ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tmsc, na.action=na.exclude)
 summary(msc)
 
+# Robustness: sub period
+Tmscsub <- window(Tmsc, start = 2004)
+mscsq <- lm(msc ~ q_inflation + food_cpi + tot_cpi  + food_cpi_lag + tot_cpi_lag, data = Tmscsub, na.action=na.exclude)
+mscs <- lm(msc ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tmscsub, na.action=na.exclude)
+
+
 Tsce <- na.remove(Tsce)
-sceq <- lm(sce ~ q_inflation + food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Tsce, na.action=na.exclude)
-sce <- lm(sce ~ food_cpi + tot_cpi + lag(food_cpi) + lag(tot_cpi), data = Tsce, na.action=na.exclude)
+sceq <- lm(sce ~ q_inflation + food_cpi + tot_cpi  + food_cpi_lag + tot_cpi_lag, data = Tsce, na.action=na.exclude)
+sce <- lm(sce ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tsce, na.action=na.exclude)
 summary(sce)
 
 # --- Print output
@@ -225,14 +240,14 @@ title <- "Timeseries regression"
 label <- paste("tab:timeseries_",m,sep = "")
 
 if(m!="sd"){
-  writeLines(capture.output(stargazer(msc, mscq, sce, sceq, ecfin, ecfinq, bop, bopq,
+  writeLines(capture.output(stargazer(msc, mscq, mscs, mscsq, sce, sceq, ecfin, ecfinq, bop, bopq,
                                     title = title, label = label, 
                                     column.labels = column.labels,  model.names = FALSE, 
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     intercept.top = TRUE, intercept.bottom = FALSE)),
            file.path(outline, paste('code_tsreg_',m,'.tex',sep = "")))
 } else {
-  writeLines(capture.output(stargazer(msc, mscq, sce, sceq, bop, bopq,
+  writeLines(capture.output(stargazer(msc, mscq, mscs, mscsq, sce, sceq, bop, bopq,
                                       title = title, label = label, 
                                       column.labels = column.labels,  model.names = FALSE, 
                                       align=TRUE , df = FALSE, digits = 2, header = FALSE, 
