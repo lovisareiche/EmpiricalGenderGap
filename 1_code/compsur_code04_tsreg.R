@@ -205,31 +205,31 @@ if(m!="sd"){
 ## -- Run static time series
 
 Tbop <- na.remove(Tbop)
-bopq <- lm(bop ~ q_inflation + food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tbop, na.action=na.exclude)
-bop <- lm(bop ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tbop, na.action=na.exclude)
+bopq <- lm(bop ~ q_inflation + food_cpi + tot_cpi, data = Tbop, na.action=na.exclude)
+bop <- lm(bop ~ food_cpi + tot_cpi, data = Tbop, na.action=na.exclude)
 summary(bop)
 
 if(m!="sd"){
   Teuro <- na.remove(Teuro)
-  ecfinq <- lm(ecfin ~ q_inflation + food_cpi + tot_cpi  + food_cpi_lag + tot_cpi_lag, data = Teuro, na.action=na.exclude)
-  ecfin <- lm(ecfin ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Teuro, na.action=na.exclude)
+  ecfinq <- lm(ecfin ~ q_inflation + food_cpi + tot_cpi , data = Teuro, na.action=na.exclude)
+  ecfin <- lm(ecfin ~ food_cpi + tot_cpi, data = Teuro, na.action=na.exclude)
   summary(ecfin)
 }
 
 Tmsc <- na.remove(Tmsc)
-mscq <- lm(msc ~ q_inflation + food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tmsc, na.action=na.exclude)
-msc <- lm(msc ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tmsc, na.action=na.exclude)
+mscq <- lm(msc ~ q_inflation + food_cpi + tot_cpi, data = Tmsc, na.action=na.exclude)
+msc <- lm(msc ~ food_cpi + tot_cpi, data = Tmsc, na.action=na.exclude)
 summary(msc)
 
 # Robustness: sub period
 Tmscsub <- window(Tmsc, start = 2004)
-mscsq <- lm(msc ~ q_inflation + food_cpi + tot_cpi  + food_cpi_lag + tot_cpi_lag, data = Tmscsub, na.action=na.exclude)
-mscs <- lm(msc ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tmscsub, na.action=na.exclude)
+mscsq <- lm(msc ~ q_inflation + food_cpi + tot_cpi , data = Tmscsub, na.action=na.exclude)
+mscs <- lm(msc ~ food_cpi + tot_cpi, data = Tmscsub, na.action=na.exclude)
 
 
 Tsce <- na.remove(Tsce)
-sceq <- lm(sce ~ q_inflation + food_cpi + tot_cpi  + food_cpi_lag + tot_cpi_lag, data = Tsce, na.action=na.exclude)
-sce <- lm(sce ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tsce, na.action=na.exclude)
+sceq <- lm(sce ~ q_inflation + food_cpi + tot_cpi , data = Tsce, na.action=na.exclude)
+sce <- lm(sce ~ food_cpi + tot_cpi, data = Tsce, na.action=na.exclude)
 summary(sce)
 
 # --- Print output
