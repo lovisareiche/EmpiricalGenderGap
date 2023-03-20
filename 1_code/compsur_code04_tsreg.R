@@ -256,6 +256,11 @@ if(m!="sd"){
 }
 
 
+library(multcomp)
+# msc, mscq, mscs, mscsq, sce, sceq, ecfin, ecfinq, bop, bopq
+
+summary(glht(msc, "food_cpi - tot_cpi=0"))
+
 ## Leftover Code
 ################
 
