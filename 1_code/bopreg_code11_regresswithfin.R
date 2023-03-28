@@ -108,7 +108,7 @@ waves <- colnames(T_fin) %>%
 fincon <- c('prob_intqr','nround','refresher','f_nointerest','f_easy')
 
 # label household role vars
-hhroles <- c('shop_groceries_nsing','shop_major_nsing','prep_meals_nsing','decide_finance_nsing')
+hhroles <- c('shop_groceries','shop_major','prep_meals','decide_finance')
 
 xnames <- c("pessimist",              "q_unemployment",         "q_rent",                
             "q_lending"   ,           "q_interest"     ,        "q_inflation",           
@@ -136,12 +136,12 @@ xtvnames <- c("pessimist",              "q_unemployment",         "q_rent",
             
             "part_time"             , "unemployed"             ,"retired"      )
 
-xnames <- c("eduschool"  ,"non_single",
+xnames <- c("eduschool"  , "non_single",
              "hhinc"                 ,   "q_inflation",
             "age"                 ,   "citysize"               ,"female"            ,    
             "eastgerman"             ,"east1989"           )
 
-xtvnames <- c("hhinc" , "non_single","q_inflation",
+xtvnames <- c("hhinc" , "q_inflation", "non_single",
               "age"  )
 
 # Include time varying as averages to control 
@@ -183,45 +183,79 @@ f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between +
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 tl <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
-# introducing predicted test poisson
-f <- as.formula(paste('y ~','factor(wave) +', 'ppred_test + ppred_test_between +', 
+# introducing grocery shopping
+f <- as.formula(paste('y ~','factor(wave) +', 'shop_groceries + shop_groceries_between + ', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-tp <- plm( f, data=T_c, effect = "individual", model = "pooling")
+g <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
-# introducing predicted subjective bol
-f <- as.formula(paste('y ~','factor(wave) +', 'lpred_subj + lpred_subj_between +', 
+# introducing main shopping
+f <- as.formula(paste('y ~','factor(wave) +', 'shop_groceries + shop_groceries_between + shop_major + shop_major_between + ', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-sl <- plm( f, data=T_c, effect = "individual", model = "pooling")
+m <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
-# introducing predicted subjective p
-f <- as.formula(paste('y ~','factor(wave) +', 'ppred_subj + ppred_subj_between +', 
+# introducing meal prep
+f <- as.formula(paste('y ~','factor(wave) +', 'shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between + ', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-sp <- plm( f, data=T_c, effect = "individual", model = "pooling")
+p <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
-f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between +', 
-                      paste(xnames, collapse='+'),'+',
-                      paste(hhroles, collapse='+'),'+',
-                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
-                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-a <- plm( f, data=T_c, effect = "individual", model = "pooling")
-
-f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test:female + lpred_test_between +', 
-                      paste(xnames, collapse='+'),'+',
-                      paste(hhroles, collapse='+'),'+',
-                      paste(paste(hhroles,":female",sep = ""), collapse='+'),'+',
-                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
-                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-i <- plm( f, data=T_c, effect = "individual", model = "pooling")
-
+# introducing financial decision
 f <- as.formula(paste('y ~','factor(wave) +', 
                       paste(xnames, collapse='+'),'+',
                       paste(hhroles, collapse='+'),'+',
                       paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 hh <- plm( f, data=T_c, effect = "individual", model = "pooling")
+
+# introducing tested literacy
+f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between + ', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(hhroles, collapse='+'),'+',
+                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+a <- plm( f, data=T_c, effect = "individual", model = "pooling")
+
+# introducing interactions
+# with grocery shopping
+f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between + shop_groceries + shop_groceries_between + shop_groceries:lpred_test + ', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+gi <- plm( f, data=T_c, effect = "individual", model = "pooling")
+
+# introducing main shopping
+f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + shop_groceries:lpred_test + shop_major:lpred_test + ', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+mi <- plm( f, data=T_c, effect = "individual", model = "pooling")
+
+# introducing meal prep
+f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between +  shop_groceries:lpred_test + shop_major:lpred_test + prep_meals:lpred_test +', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+pi <- plm( f, data=T_c, effect = "individual", model = "pooling")
+
+# full interactions
+f <- as.formula(paste('y ~','factor(wave) +',  'lpred_test + lpred_test_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between + decide_finance + decide_finance_between +  shop_groceries:lpred_test + shop_major:lpred_test + prep_meals:lpred_test + decide_finance:lpred_test +', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+i <- plm( f, data=T_c, effect = "individual", model = "pooling")
+
+
+
+
+## for subsamples
+
+f <- as.formula(paste('y ~','factor(wave) +', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(hhroles, collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+hhhigh <- plm( f, data=filter(T_c, lpred_test > median(lpred_test)), effect = "individual", model = "pooling")
 
 ## Lasso Test
 
@@ -275,24 +309,33 @@ title <- "The role of financial confidence"
 label <- "tab:regresswithfin"
 dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
 
-se <- c(NULL, NULL, NULL, NULL,NULL,NA)
-tstat <- c(NULL, NULL, NULL, NULL,NULL,NA)
-p <- c(NULL, NULL, NULL, NULL,NULL,NA)
-r2 <- c("Lasso $R^2$","","","","","",rsq)
-add.lines <- list(r2)
+# se <- c(NULL, NULL, NULL, NULL,NULL,NA)
+# tstat <- c(NULL, NULL, NULL, NULL,NULL,NA)
+# p <- c(NULL, NULL, NULL, NULL,NULL,NA)
+# r2 <- c("Lasso $R^2$","","","","","",rsq)
+# add.lines <- list(r2)
 
 
 # in which order
-desiredOrder <- c("Constant","female","lpred_test","lpred_subj",hhroles)
+desiredOrder <- c("Constant","female","lpred_test",hhroles)
 
-writeLines(capture.output(stargazer(b,tl,sl,hh,a,
+writeLines(capture.output(stargazer(b,tl,g,m,p,hh,a,
                                     title = title, notes = notes, label = label, 
                                     omit = omit, omit.labels = omit.labels, 
-                                    model.names = FALSE, column.labels = column.labels,
+                                    model.names = FALSE, 
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels, no.space = FALSE)), 
            file.path(outline, l,'code_regresswithfin.tex'))
+
+writeLines(capture.output(stargazer(a,gi,mi, pi, i,
+                                    title = title, notes = notes, label = label, 
+                                    omit = omit, omit.labels = omit.labels, 
+                                    model.names = FALSE, 
+                                    align=TRUE , df = FALSE, digits = 2, header = FALSE, 
+                                    order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
+                                    dep.var.labels = dep.var.labels, no.space = FALSE)), 
+           file.path(outline, l,'code_regresswithfin_int.tex'))
 
 
 
@@ -368,8 +411,8 @@ for (ii in c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)) {
   # collect all coefficient estimates and standard errors for variables of interest
   C_female[3,ii*10] <- coefficients(hhdec)["female"]
   SE_female[3,ii*10] <- coefficients(summary(hhdec))[, "Std. Error"]["female"]
-  C_groc[1,ii*10] <- coefficients(hhdec)["shop_groceries_nsing"]
-  SE_groc[1,ii*10] <- coefficients(summary(hhdec))[, "Std. Error"]["shop_groceries_nsing"]
+  C_groc[1,ii*10] <- coefficients(hhdec)["shop_groceries"]
+  SE_groc[1,ii*10] <- coefficients(summary(hhdec))[, "Std. Error"]["shop_groceries"]
   
   # collect observations, percentiles, R2 and adjuster R2
   O[3,ii*10] <- nrow(filter(T_c, y<=quantile(y,ii)))
@@ -382,10 +425,12 @@ for (ii in c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)) {
 
 D <- data.frame(t(C_female[1,]),t(C_female[2,]),t(C_female[3,]),t(C_fin),t(C_groc),t(SE_female[1,]),t(SE_female[2,]),t(SE_female[3,]),t(SE_fin),t(SE_groc),t(O[1,])) %>%
   dplyr::rename(female_b = X1, female_fin = X2, female_hh = X3, fin = X1.1, groc = X1.2, female_b_se = X1.3, female_fin_se = X2.1,female_hh_se = X3.1, fin_se = X1.4, groc_se = X1.5, obs = X1.6) %>%
-  mutate(female_u = female_b + female_b_se, female_fin_u = female_fin + female_fin_se, female_hh_u = female_hh + female_hh_se, fin_u = fin + fin_se, groc_u = groc + groc_se) %>%
-  mutate(female_l = female_b - female_b_se, female_fin_l = female_fin - female_fin_se, female_hh_l = female_hh - female_hh_se, fin_l = fin - fin_se, groc_l = groc - groc_se) %>%
+  mutate(female_u = female_b + 1.96*female_b_se, female_fin_u = female_fin + 1.96*female_fin_se, female_hh_u = female_hh + 1.96*female_hh_se, fin_u = fin + 1.96*fin_se, groc_u = groc + 1.96*groc_se) %>%
+  mutate(female_l = female_b - 1.96*female_b_se, female_fin_l = female_fin - 1.96*female_fin_se, female_hh_l = female_hh - 1.96*female_hh_se, fin_l = fin - 1.96*fin_se, groc_l = groc - 1.96*groc_se) %>%
   mutate(decile = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)) %>%
-  mutate(decileval = c(quantile(`T_c`$y,0.1),quantile(`T_c`$y,0.2),quantile(`T_c`$y,0.3),quantile(`T_c`$y,0.4),quantile(`T_c`$y,0.5),quantile(`T_c`$y,0.6),quantile(`T_c`$y,0.7),quantile(`T_c`$y,0.8),quantile(`T_c`$y,0.9),quantile(`T_c`$y,1)))
+  mutate(decilevaly = c(quantile(`T_c`$y,0.1),quantile(`T_c`$y,0.2),quantile(`T_c`$y,0.3),quantile(`T_c`$y,0.4),quantile(`T_c`$y,0.5),quantile(`T_c`$y,0.6),quantile(`T_c`$y,0.7),quantile(`T_c`$y,0.8),quantile(`T_c`$y,0.9),quantile(`T_c`$y,1)))%>%
+  mutate(decilevalfin = c(quantile(`T_c`$lpred_test,0.1),quantile(`T_c`$lpred_test,0.2),quantile(`T_c`$lpred_test,0.3),quantile(`T_c`$lpred_test,0.4),quantile(`T_c`$lpred_test,0.5),quantile(`T_c`$lpred_test,0.6),quantile(`T_c`$lpred_test,0.7),quantile(`T_c`$lpred_test,0.8),quantile(`T_c`$lpred_test,0.9),quantile(`T_c`$lpred_test,1)))
+
 
 # save as delimited text file
 
@@ -394,39 +439,16 @@ library(caroline) # for delimited text file
 write.delim(D, file = file.path(pipeline, 'out', 'D.txt'), sep = "\t")
 
 
-## Lasso Test
+# Test joint significance
 
-library(glmnet)
-
-#define response variable
-y <- T_c$y
-
-#define matrix of predictor variables
-x <- data.matrix(T_c[,c(paste(xnames),paste(hhroles),paste(hhroles,"_between",sep = ""),paste(xtvnames,"_between",sep = ""),'lpred_test','lpred_test_between' )])
+f <- as.formula(paste('y ~','factor(wave) +',  'lpred_test + lpred_test_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between + decide_finance + decide_finance_between +  shop_groceries:lpred_test + shop_major:lpred_test + prep_meals:lpred_test + decide_finance:lpred_test +', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+i <- lm( f, data=T_c)
 
 
-#perform k-fold cross-validation to find optimal lambda value
-cv_model <- cv.glmnet(x, y, alpha = 1)
-
-#find optimal lambda value that minimizes test MSE
-best_lambda <- cv_model$lambda.min
-best_lambda
-
-#produce plot of test MSE by lambda value
-plot(cv_model) 
-
-#find coefficients of best model
-best_model <- glmnet(x, y, alpha = 1, lambda = best_lambda)
-coef(best_model)
+library(multcomp)
 
 
-#use fitted best model to make predictions
-y_predicted <- predict(best_model, s = best_lambda, newx = x)
-
-#find SST and SSE
-sst <- sum((y - mean(y))^2)
-sse <- sum((y_predicted - y)^2)
-
-#find R-Squared
-rsq <- 1 - sse/sst
-rsq
+summary(glht(i, "(Intercept) + lpred_test*3.05=0"))
