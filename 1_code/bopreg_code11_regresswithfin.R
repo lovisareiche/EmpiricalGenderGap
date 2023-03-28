@@ -5,7 +5,7 @@
 ## This file 
 
 rm(list=ls())
-NAME <- 'code11_regresswithfin' ## Name of the R file goes here (without the file extension!)
+NAME <- 'code11_regresswithfin' 
 PROJECT <- 'EmpiricalGenderGap'
 PROJECT_DIR <- 'D:/Lovisa/Studium/Oxford/Department of Economics/DPhil' ## Change this to the directory in which your project folder is located, make sure to avoid using single backslashes (i.e. \)!
 
@@ -75,8 +75,8 @@ if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
 }
 
 ## Add subfolders
-if (!dir.exists(file.path(outline,l))) {
-  dir.create(file.path(outline,l))
+if (!dir.exists(file.path(outline,source))) {
+  dir.create(file.path(outline,source))
 }
 
 
@@ -90,13 +90,12 @@ if (!dir.exists(file.path(outline,l))) {
 
 if(source == 'code09_fitlit'){
   load(file.path('empirical', '2_pipeline', f,source,'out','T_fin.RData'))
-  T_fin <- T 
+  T_fin <- T %>%
+    rename(fin_lit = lpred_test) ## choose here if test or subjective!
 } else {
   T_fin <- read_csv(file.path('empirical', '2_pipeline',f, source,'out','base', 'T_fin.csv')) %>%
     pdata.frame(index=c( "id", "wave" )) %>%
-    # create binary vars
-    mutate(pred_subj_bin=as.numeric(fin_lit_subj >=1)) %>%
-    mutate(pred_test_bin=as.numeric(fin_lit_test >=1))
+    rename(fin_lit = fin_lit_test)
 }
 
 
@@ -110,31 +109,6 @@ fincon <- c('prob_intqr','nround','refresher','f_nointerest','f_easy')
 # label household role vars
 hhroles <- c('shop_groceries','shop_major','prep_meals','decide_finance')
 
-xnames <- c("pessimist",              "q_unemployment",         "q_rent",                
-            "q_lending"   ,           "q_interest"     ,        "q_inflation",           
-            "q_property"   ,          "q_growth"        ,       "q_fuel"  ,              
-            "q_dax"         ,         "q_tax"            ,      "exphp_point" ,          
-            "expint_sav"     ,        "si_major"          ,     "si_essential" ,         
-            "si_clothing"     ,       "si_entz"            ,    "si_mobility"   ,        
-            "si_services"      ,      "si_holiday"          ,   "si_housing"     ,       
-            "si_reserves"       ,     "eduschool"            ,  "eduwork"         ,      
-            "hhchildren"         ,    "hhinc"                 , "pinc"             ,     
-            "age"                 ,   "citysize"               ,"female"            ,    
-            "eastgerman"             ,"east1989"           ,   
-            "part_time"             , "unemployed"             ,"retired"      )
-
-xtvnames <- c("pessimist",              "q_unemployment",         "q_rent",                
-            "q_lending"   ,           "q_interest"     ,        "q_inflation",           
-            "q_property"   ,          "q_growth"        ,       "q_fuel"  ,              
-            "q_dax"         ,         "q_tax"            ,      "exphp_point" ,          
-            "expint_sav"     ,        "si_major"          ,     "si_essential" ,         
-            "si_clothing"     ,       "si_entz"            ,    "si_mobility"   ,        
-            "si_services"      ,      "si_holiday"          ,   "si_housing"     ,       
-            "si_reserves"       ,           
-            "hhchildren"         ,    "hhinc"                 , "pinc"             ,     
-            "age"                 ,      
-            
-            "part_time"             , "unemployed"             ,"retired"      )
 
 xnames <- c("eduschool"  , "non_single",
              "hhinc"                 ,   "q_inflation",
@@ -147,8 +121,8 @@ xtvnames <- c("hhinc" , "q_inflation", "non_single",
 # Include time varying as averages to control 
 
 T_mean <- degroup(
-  T,
-  c(xtvnames,'lpred_subj','ppred_test','lpred_test','ppred_subj',hhroles),
+  T_fin,
+  c(xtvnames,'fin_lit',hhroles),
   "id",
   center = "mean",
   suffix_demean = "_within",
@@ -178,7 +152,7 @@ b <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 
 # introducing predicted test ordered logit
-f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between +', 
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit_between +', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 tl <- plm( f, data=T_c, effect = "individual", model = "pooling")
@@ -210,7 +184,7 @@ f <- as.formula(paste('y ~','factor(wave) +',
 hh <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # introducing tested literacy
-f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between + ', 
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit_between + ', 
                       paste(xnames, collapse='+'),'+',
                       paste(hhroles, collapse='+'),'+',
                       paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
@@ -219,43 +193,134 @@ a <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # introducing interactions
 # with grocery shopping
-f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between + shop_groceries + shop_groceries_between + shop_groceries:lpred_test + ', 
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit_between + shop_groceries + shop_groceries_between + shop_groceries:fin_lit + ', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 gi <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # introducing main shopping
-f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + shop_groceries:lpred_test + shop_major:lpred_test + ', 
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + shop_groceries:fin_lit + shop_major:fin_lit + ', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 mi <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # introducing meal prep
-f <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between +  shop_groceries:lpred_test + shop_major:lpred_test + prep_meals:lpred_test +', 
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between +  shop_groceries:fin_lit + shop_major:fin_lit + prep_meals:fin_lit +', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 pi <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # full interactions
-f <- as.formula(paste('y ~','factor(wave) +',  'lpred_test + lpred_test_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between + decide_finance + decide_finance_between +  shop_groceries:lpred_test + shop_major:lpred_test + prep_meals:lpred_test + decide_finance:lpred_test +', 
+f <- as.formula(paste('y ~','factor(wave) +',  'fin_lit + fin_lit_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between + decide_finance + decide_finance_between +  shop_groceries:fin_lit + shop_major:fin_lit + prep_meals:fin_lit + decide_finance:fin_lit +', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 i <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 
+# --- Write output
+
+# settings for stargazer
+notes <- "The full set of estimators included can be found in the appendix."
+omit <- c("wave","between")
+omit.labels <- c("Time dummies","Between effects")
+title <- "The role of financial confidence"
+label <- "tab:regresswithfin"
+dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
+
+
+# in which order
+desiredOrder <- c("Constant","female","fin_lit",hhroles)
+
+writeLines(capture.output(stargazer(b,tl,g,m,p,hh,a,
+                                    title = title, notes = notes, label = label, 
+                                    omit = omit, omit.labels = omit.labels, 
+                                    model.names = FALSE, 
+                                    align=TRUE , df = FALSE, digits = 2, header = FALSE, 
+                                    order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
+                                    dep.var.labels = dep.var.labels, no.space = FALSE)), 
+           file.path(outline, source,'code_regresswithfin.tex'))
+
+label <- "tab:regresswithfinint"
+writeLines(capture.output(stargazer(a,gi,mi, pi, i,
+                                    title = title, notes = notes, label = label, 
+                                    omit = omit, omit.labels = omit.labels, 
+                                    model.names = FALSE, 
+                                    align=TRUE , df = FALSE, digits = 2, header = FALSE, 
+                                    order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
+                                    dep.var.labels = dep.var.labels, no.space = FALSE)), 
+           file.path(outline, source,'code_regresswithfin_int.tex'))
+
+
+# ------------
+# Robustness
+# ------------
+
+
+# Test 1: baseline and all with no controls
+
+f <- as.formula(paste('y ~','factor(wave) +', 'female'))
+bnc <- plm( f, data=T_c, effect = "individual", model = "pooling")
+
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit_between + ', 
+                      'female +',
+                      paste(hhroles, collapse='+'),'+',
+                      paste(paste(hhroles,"_between",sep = ""), collapse='+')))
+anc <- plm( f, data=T_c, effect = "individual", model = "pooling")
+
+
+# Test 2: Baseline with no between effects
+f <- as.formula(paste('y ~','factor(wave) +', paste(xnames, collapse='+')))
+bnb <- plm( f, data=T_c, effect = "individual", model = "pooling")
+
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit + ', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(hhroles, collapse='+')))
+anb <- plm( f, data=T_c, effect = "individual", model = "pooling")
+
+
+# Test 3: non extreme outliers
+
+f <- as.formula(paste('y ~','factor(wave) +', paste(xnames, collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+b90 <- plm( f, data=T_c[T_c$y<quantile(T_c$y,0.9),], effect = "individual", model = "pooling")
+
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit_between + ', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(hhroles, collapse='+'),'+',
+                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+a90 <- plm( f, data=T_c[T_c$y<quantile(T_c$y,0.9),], effect = "individual", model = "pooling")
+
+label <- "tab:regresswithfinrob"
+writeLines(capture.output(stargazer(b,a,bnc,anc,bnb,anb,b90,a90,
+                                    title = title, notes = notes, label = label, 
+                                    omit = omit, omit.labels = omit.labels, 
+                                    model.names = FALSE, 
+                                    align=TRUE , df = FALSE, digits = 2, header = FALSE, 
+                                    order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
+                                    dep.var.labels = dep.var.labels, no.space = FALSE)), 
+           file.path(outline, source,'code_regresswithfin_rob.tex'))
 
 
 ## for subsamples
+
+
 
 f <- as.formula(paste('y ~','factor(wave) +', 
                       paste(xnames, collapse='+'),'+',
                       paste(hhroles, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-hhhigh <- plm( f, data=filter(T_c, lpred_test > median(lpred_test)), effect = "individual", model = "pooling")
+hhhigh <- plm( f, data=filter(T_c, fin_lit > median(fin_lit)), effect = "individual", model = "pooling")
+
+
+
+
+
+
 
 ## Lasso Test
 
@@ -265,7 +330,7 @@ library(glmnet)
 y <- T_c$y
 
 #define matrix of predictor variables
-x <- data.matrix(T_c[,c(paste(xnames),paste(hhroles),paste(hhroles,"_between",sep = ""),paste(xtvnames,"_between",sep = ""),'lpred_test','lpred_test_between' )])
+x <- data.matrix(T_c[,c(paste(xnames),paste(hhroles),paste(hhroles,"_between",sep = ""),paste(xtvnames,"_between",sep = ""),'fin_lit','fin_lit_between' )])
 
 
 #perform k-fold cross-validation to find optimal lambda value
@@ -297,46 +362,6 @@ rsq
 # create "models" that show variable importance (absolute value of z startstic) and VIF (variance inflation factor)
 lasso <- a
 lasso$coefficients <- coefficients(best_model)
-
-
-# --- Write output
-
-# settings for stargazer
-notes <- "The full set of estimators included can be found in the appendix."
-omit <- c("wave","between")
-omit.labels <- c("Time dummies","Between effects")
-title <- "The role of financial confidence"
-label <- "tab:regresswithfin"
-dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
-
-# se <- c(NULL, NULL, NULL, NULL,NULL,NA)
-# tstat <- c(NULL, NULL, NULL, NULL,NULL,NA)
-# p <- c(NULL, NULL, NULL, NULL,NULL,NA)
-# r2 <- c("Lasso $R^2$","","","","","",rsq)
-# add.lines <- list(r2)
-
-
-# in which order
-desiredOrder <- c("Constant","female","lpred_test",hhroles)
-
-writeLines(capture.output(stargazer(b,tl,g,m,p,hh,a,
-                                    title = title, notes = notes, label = label, 
-                                    omit = omit, omit.labels = omit.labels, 
-                                    model.names = FALSE, 
-                                    align=TRUE , df = FALSE, digits = 2, header = FALSE, 
-                                    order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
-                                    dep.var.labels = dep.var.labels, no.space = FALSE)), 
-           file.path(outline, l,'code_regresswithfin.tex'))
-
-writeLines(capture.output(stargazer(a,gi,mi, pi, i,
-                                    title = title, notes = notes, label = label, 
-                                    omit = omit, omit.labels = omit.labels, 
-                                    model.names = FALSE, 
-                                    align=TRUE , df = FALSE, digits = 2, header = FALSE, 
-                                    order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
-                                    dep.var.labels = dep.var.labels, no.space = FALSE)), 
-           file.path(outline, l,'code_regresswithfin_int.tex'))
-
 
 
 ## Decile regression
@@ -374,7 +399,7 @@ for (ii in c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)) {
 }
 
 # INCLUDING PREDICT TEST
-form <- as.formula(paste('y ~','factor(wave) +', 'lpred_test + lpred_test_between +', 
+form <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit_between +', 
                          paste(xnames, collapse='+'),'+',
                          paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 
@@ -385,8 +410,8 @@ for (ii in c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)) {
   # collect all coefficient estimates and standard errors for variables of interest
   C_female[2,ii*10] <- coefficients(findec)["female"]
   SE_female[2,ii*10] <- coefficients(summary(findec))[, "Std. Error"]["female"]
-  C_fin[1,ii*10] <- coefficients(findec)["lpred_test"]
-  SE_fin[1,ii*10] <- coefficients(summary(findec))[, "Std. Error"]["lpred_test"]
+  C_fin[1,ii*10] <- coefficients(findec)["fin_lit"]
+  SE_fin[1,ii*10] <- coefficients(summary(findec))[, "Std. Error"]["fin_lit"]
   
   # collect observations, percentiles, R2 and adjuster R2
   O[2,ii*10] <- nrow(filter(T_c, y<=quantile(y,ii)))
@@ -429,7 +454,7 @@ D <- data.frame(t(C_female[1,]),t(C_female[2,]),t(C_female[3,]),t(C_fin),t(C_gro
   mutate(female_l = female_b - 1.96*female_b_se, female_fin_l = female_fin - 1.96*female_fin_se, female_hh_l = female_hh - 1.96*female_hh_se, fin_l = fin - 1.96*fin_se, groc_l = groc - 1.96*groc_se) %>%
   mutate(decile = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)) %>%
   mutate(decilevaly = c(quantile(`T_c`$y,0.1),quantile(`T_c`$y,0.2),quantile(`T_c`$y,0.3),quantile(`T_c`$y,0.4),quantile(`T_c`$y,0.5),quantile(`T_c`$y,0.6),quantile(`T_c`$y,0.7),quantile(`T_c`$y,0.8),quantile(`T_c`$y,0.9),quantile(`T_c`$y,1)))%>%
-  mutate(decilevalfin = c(quantile(`T_c`$lpred_test,0.1),quantile(`T_c`$lpred_test,0.2),quantile(`T_c`$lpred_test,0.3),quantile(`T_c`$lpred_test,0.4),quantile(`T_c`$lpred_test,0.5),quantile(`T_c`$lpred_test,0.6),quantile(`T_c`$lpred_test,0.7),quantile(`T_c`$lpred_test,0.8),quantile(`T_c`$lpred_test,0.9),quantile(`T_c`$lpred_test,1)))
+  mutate(decilevalfin = c(quantile(`T_c`$fin_lit,0.1),quantile(`T_c`$fin_lit,0.2),quantile(`T_c`$fin_lit,0.3),quantile(`T_c`$fin_lit,0.4),quantile(`T_c`$fin_lit,0.5),quantile(`T_c`$fin_lit,0.6),quantile(`T_c`$fin_lit,0.7),quantile(`T_c`$fin_lit,0.8),quantile(`T_c`$fin_lit,0.9),quantile(`T_c`$fin_lit,1)))
 
 
 # save as delimited text file
@@ -441,7 +466,7 @@ write.delim(D, file = file.path(pipeline, 'out', 'D.txt'), sep = "\t")
 
 # Test joint significance
 
-f <- as.formula(paste('y ~','factor(wave) +',  'lpred_test + lpred_test_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between + decide_finance + decide_finance_between +  shop_groceries:lpred_test + shop_major:lpred_test + prep_meals:lpred_test + decide_finance:lpred_test +', 
+f <- as.formula(paste('y ~','factor(wave) +',  'fin_lit + fin_lit_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between + decide_finance + decide_finance_between +  shop_groceries:fin_lit + shop_major:fin_lit + prep_meals:fin_lit + decide_finance:fin_lit +', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
@@ -451,4 +476,4 @@ i <- lm( f, data=T_c)
 library(multcomp)
 
 
-summary(glht(i, "(Intercept) + lpred_test*3.05=0"))
+summary(glht(i, "(Intercept) + fin_lit*3.05=0"))
