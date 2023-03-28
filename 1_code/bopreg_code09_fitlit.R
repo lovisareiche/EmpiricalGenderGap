@@ -133,8 +133,8 @@ mfr2_subj <- pscl::pR2(lsubj_bin)["McFadden"]
 mfr2_test <- pscl::pR2(ltest_bin)["McFadden"]
 
 #calculate predicted value for each individual in full dataset
-T$lpred_subj <- predict(lsubj, T)
-T$lpred_test <- predict(ltest, T)
+T$lpred_subj <- predict(lsubj, T)-1
+T$lpred_test <- predict(ltest, T)-1
 
 T$ppred_subj <- predict(psubj, T, type ="response")
 T$ppred_test <- predict(ptest, T, type ="response")
