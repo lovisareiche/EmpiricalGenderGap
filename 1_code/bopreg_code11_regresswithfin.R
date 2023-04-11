@@ -145,6 +145,9 @@ if (l == 'log') {
 
 ## -- Run different specifications
 
+## Table 1
+############
+
 # baseline 
 f <- as.formula(paste('y ~','factor(wave) +', paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
@@ -157,43 +160,71 @@ f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit_between +',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 tl <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
+
+# introducing predicted test ordered logit interaction with female
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + female:fin_lit + fin_lit_between +', 
+                      paste(xnames, collapse='+'),'+',
+                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
+tlint <- plm( f, data=T_c, effect = "individual", model = "pooling")
+
+
+# --- Write output
+
+# settings for stargazer
+omit <- c("wave","between")
+omit.labels <- c("Time dummies","Between effects")
+title <- "The role of financial confidence"
+label <- "tab:regresswithfin"
+dep.var.labels <- "Inflation expectation (12 months ahead, point estimate)"
+
+
+# in which order
+desiredOrder <- c("Constant","female","fin_lit","female:fin_lit")
+
+writeLines(capture.output(stargazer(b,tl,tlint,
+                                    title = title, label = label, 
+                                    omit = omit, omit.labels = omit.labels, 
+                                    model.names = FALSE, 
+                                    align=TRUE , df = FALSE, digits = 2, header = FALSE, 
+                                    order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
+                                    dep.var.labels = dep.var.labels, no.space = FALSE)), 
+           file.path(outline, source,'code_regresswithfin.tex'))
+
+
+## Table 2
+###########
+
+
+
 # introducing grocery shopping
-f <- as.formula(paste('y ~','factor(wave) +', 'shop_groceries + shop_groceries_between + ', 
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit  + fin_lit_between + shop_groceries + shop_groceries_between + ', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 g <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # introducing main shopping
-f <- as.formula(paste('y ~','factor(wave) +', 'shop_groceries + shop_groceries_between + shop_major + shop_major_between + ', 
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit  + fin_lit_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + ', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 m <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # introducing meal prep
-f <- as.formula(paste('y ~','factor(wave) +', 'shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between + ', 
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit  + fin_lit_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between + ', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 p <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # introducing financial decision
-f <- as.formula(paste('y ~','factor(wave) +', 
+f <- as.formula(paste('y ~','factor(wave) + fin_lit + + fin_lit_between +', 
                       paste(xnames, collapse='+'),'+',
                       paste(hhroles, collapse='+'),'+',
                       paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 hh <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
-# introducing tested literacy
-f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit_between + ', 
-                      paste(xnames, collapse='+'),'+',
-                      paste(hhroles, collapse='+'),'+',
-                      paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
-                      paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
-a <- plm( f, data=T_c, effect = "individual", model = "pooling")
-
 # introducing interactions
 # with grocery shopping
-f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit_between + shop_groceries + shop_groceries_between + shop_groceries:fin_lit + ', 
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit  + fin_lit_between + shop_groceries + shop_groceries_between + shop_groceries:fin_lit + ', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
@@ -207,14 +238,14 @@ f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit_between + shop_
 mi <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # introducing meal prep
-f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit + fin_lit_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between +  shop_groceries:fin_lit + shop_major:fin_lit + prep_meals:fin_lit +', 
+f <- as.formula(paste('y ~','factor(wave) +', 'fin_lit +  fin_lit_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between +  shop_groceries:fin_lit + shop_major:fin_lit + prep_meals:fin_lit +', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
 pi <- plm( f, data=T_c, effect = "individual", model = "pooling")
 
 # full interactions
-f <- as.formula(paste('y ~','factor(wave) +',  'fin_lit + fin_lit_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between + decide_finance + decide_finance_between +  shop_groceries:fin_lit + shop_major:fin_lit + prep_meals:fin_lit + decide_finance:fin_lit +', 
+f <- as.formula(paste('y ~','factor(wave) +',  'fin_lit  + fin_lit_between + shop_groceries + shop_groceries_between + shop_major + shop_major_between + prep_meals + prep_meals_between + decide_finance + decide_finance_between +  shop_groceries:fin_lit + shop_major:fin_lit + prep_meals:fin_lit + decide_finance:fin_lit +', 
                       paste(xnames, collapse='+'),'+',
                       paste(paste(hhroles,"_between",sep = ""), collapse='+'),'+',
                       paste(paste(xtvnames,"_between",sep = ""), collapse='+')))
@@ -224,35 +255,24 @@ i <- plm( f, data=T_c, effect = "individual", model = "pooling")
 # --- Write output
 
 # settings for stargazer
-notes <- "The full set of estimators included can be found in the appendix."
 omit <- c("wave","between")
 omit.labels <- c("Time dummies","Between effects")
-title <- "The role of financial confidence"
-label <- "tab:regresswithfin"
-dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
+title <- "The role of financial literacy and experience"
+label <- "tab:regresswithhhroles"
+dep.var.labels <- "Inflation expectation (12 months ahead, point estimate)"
 
 
 # in which order
 desiredOrder <- c("Constant","female","fin_lit",hhroles)
 
-writeLines(capture.output(stargazer(b,tl,g,m,p,hh,a,
-                                    title = title, notes = notes, label = label, 
+writeLines(capture.output(stargazer(g,m,p,hh,gi,mi,pi,i,
+                                    title = title, label = label, 
                                     omit = omit, omit.labels = omit.labels, 
                                     model.names = FALSE, 
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels, no.space = FALSE)), 
-           file.path(outline, source,'code_regresswithfin.tex'))
-
-label <- "tab:regresswithfinint"
-writeLines(capture.output(stargazer(a,gi,mi, pi, i,
-                                    title = title, notes = notes, label = label, 
-                                    omit = omit, omit.labels = omit.labels, 
-                                    model.names = FALSE, 
-                                    align=TRUE , df = FALSE, digits = 2, header = FALSE, 
-                                    order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
-                                    dep.var.labels = dep.var.labels, no.space = FALSE)), 
-           file.path(outline, source,'code_regresswithfin_int.tex'))
+           file.path(outline, source,'code_regresswithhhroles.tex'))
 
 
 # ------------
@@ -477,3 +497,30 @@ library(multcomp)
 
 
 summary(glht(i, "(Intercept) + fin_lit*3.05=0"))
+
+
+### Histogram
+
+## -- Separate inflation expectations by s
+
+y1 <- T_fin$fin_lit[T_fin["female"]==0]
+y2 <- T_fin$fin_lit[T_fin["female"]==1]
+
+## --- Draw histogram
+
+# create a vector of histogram breaks
+x <- seq(0,1,by = 0.02)
+
+
+h1 <- hist(y1, breaks = x, freq = FALSE,
+           col = alpha('#238a8DFF',0.8),
+           xlim = c(0,1))
+h2 <- hist(y2, breaks = x, freq = FALSE,
+           col = alpha('#FDE725FF',0.7), 
+           xlim = c(0,1), add = TRUE)
+
+
+## --- Save numbers in csv
+library(caroline)
+H <- cbind(h1$mids,h1$counts,h1$density,h2$counts,h2$density)
+write.delim(H, file = file.path(pipeline, 'out', paste('H_','.txt',sep = "")), sep = "\t")
