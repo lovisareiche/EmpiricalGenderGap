@@ -121,6 +121,25 @@ for(i in 1:length(S)){
   H <- cbind(h1$mids,h1$counts,h1$density,h2$counts,h2$density)
   assign(paste("H_",S[i],sep = ""),H)
   write.delim(H, file = file.path(pipeline, 'out', paste('H_',S[i],s,'.txt',sep = "")), sep = "\t")
-}
+
+  ## ---- Overlaid Kernel Density Plot
+  
+  #plot first kernel density plot
+  kd1 <- density(y1,bw = "nrd0", adjust = 3)
+  plot(kd1, col='blue', lwd=2)
+  
+  #plot second kernel density plot
+  kd2 <- density(y2,bw = "nrd0", adjust = 3)
+  lines(kd2, col='red', lwd=2)
+  
+  ## --- Save numbers in csv
+  
+  K <- cbind(kd1$x,kd1$y,kd2$x,kd2$y)
+  assign(paste("K_",S[i],sep = ""),K)
+  write.delim(K, file = file.path(pipeline, 'out', paste('K_',S[i],s,'.txt',sep = "")), sep = "\t")
+  
+  
+  
+  }
 
 rm(T)
