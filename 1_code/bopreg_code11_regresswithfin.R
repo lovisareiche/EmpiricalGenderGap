@@ -499,28 +499,3 @@ library(multcomp)
 summary(glht(i, "(Intercept) + fin_lit*3.05=0"))
 
 
-### Histogram
-
-## -- Separate inflation expectations by s
-
-y1 <- T_fin$fin_lit[T_fin["female"]==0]
-y2 <- T_fin$fin_lit[T_fin["female"]==1]
-
-## --- Draw histogram
-
-# create a vector of histogram breaks
-x <- seq(0,1,by = 0.02)
-
-
-h1 <- hist(y1, breaks = x, freq = FALSE,
-           col = alpha('#238a8DFF',0.8),
-           xlim = c(0,1))
-h2 <- hist(y2, breaks = x, freq = FALSE,
-           col = alpha('#FDE725FF',0.7), 
-           xlim = c(0,1), add = TRUE)
-
-
-## --- Save numbers in csv
-library(caroline)
-H <- cbind(h1$mids,h1$counts,h1$density,h2$counts,h2$density)
-write.delim(H, file = file.path(pipeline, 'out', paste('H_','.txt',sep = "")), sep = "\t")
