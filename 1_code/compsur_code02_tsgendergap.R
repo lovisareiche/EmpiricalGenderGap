@@ -230,3 +230,10 @@ write.delim(D, file = file.path(pipeline, 'out', 'D.txt'), sep = "\t")
 # save as csv
 
 write.csv(D, file = file.path(pipeline, 'out', 'D.csv'))
+
+## Save gender gap as is
+
+Mfm <- M %>%
+  select(-sdy,-p25y,-p50y,-p75y) %>%
+  spread(key = key, value = meany) 
+
