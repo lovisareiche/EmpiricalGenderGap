@@ -61,13 +61,9 @@ if (!dir.exists(pipeline)) {
 if (dir.exists(file.path('empirical', '3_output','results',f,NAME))){
   outline <- file.path('empirical', '3_output','results',f,NAME)
 } else {
-  outline <- file.path('3_output','results',f,NAME)
-}
-
-if (!dir.exists(file.path('empirical', '3_output','results',f,NAME))) {
+  outline <- file.path('empirical','3_output','results',f,NAME)
   dir.create(outline)
 }
-
 
 
 # ---------
@@ -97,9 +93,9 @@ F1 <- group_by(T,pred_subj) %>%
 
 # run wilcoxin and kolmogorov smirnoff tests on subsamples
 
-  w <-  wilcox.test(y~pred_subj, data = T,alternative = c("less"))
+  w <-  wilcox.test(y~pred_subj, data = T)
 
-  t <-  t.test(y~pred_subj, data = T,alternative = c("less"))
+  t <-  t.test(y~pred_subj, data = T)
 
   ks <-  ks.test(T$y[T$pred_subj == 0],T$y[T$pred_subj == 1])
 
@@ -137,9 +133,9 @@ F2 <- group_by(T,pred_test) %>%
 
 # run wilcoxin and kolmogorov smirnoff tests on subsamples
 
-w <-  wilcox.test(y~pred_test, data = T,alternative = c("less"))
+w <-  wilcox.test(y~pred_test, data = T)
 
-t <-  t.test(y~pred_test, data = T,alternative = c("less"))
+t <-  t.test(y~pred_test, data = T)
 
 ks <-  ks.test(T$y[T$pred_test == 0],T$y[T$pred_test == 1])
 
@@ -169,43 +165,55 @@ F2 <- t(F2)
 xtable(cbind(F1,F2))
 
 
-## Show women have lower financial literacy
+### Histogram
 
-W <- T %>%
-  group_by(female) %>%
-  summarise(pred_subj = mean(lpred_subj), 
-            lpred_test = mean(lpred_test),
-            prob_intqr = mean(prob_intqr), 
-            refresher = mean(refresher), 
-            nround = mean(nround), 
-            f_nointerest = mean(f_nointerest), 
-            f_easy = mean(f_easy)) %>%
-  select(-female) %>%
-  # tranpose
-  t %>%
-  # make dataframe
-  as.data.frame %>%
-  # change variable names
-  rename("Male subsample" = "V1", "Female subsample" = "V2")
+## -- Separate inflation expectations by s
 
-w <-  ks.test(T$lpred_subj[T$female==0],T$lpred_subj[T$female==1])
+y1 <- T$y[T["pred_test"]==0]
+y2 <- T$y[T["pred_test"]==1]
+
+## --- Draw histogram
+
+# create a vector of histogram breaks
+x <- seq(-10-0.25,50+0.25,by = 0.5)
 
 
+h1 <- hist(y1[y1>=-10 & y1<=50], breaks = x, freq = FALSE,
+           col = alpha('#238a8DFF',0.8), main = paste("Histogram of Inflation Expectations"),
+           xlim = c(-10,30), xlab = "point estimate of inflation in 12 months")
+h2 <- hist(y2[y2>=-10 & y2<=50], breaks = x, freq = FALSE,
+           col = alpha('#FDE725FF',0.7), 
+           xlim = c(-10,30), add = TRUE)
+
+## ---- Overlaid Kernel Density Plot
+
+#plot first kernel density plot
+kd1 <- density(y1[y1>=-10 & y1<=50],bw = "nrd0", adjust = 3)
+plot(kd1, col='blue', lwd=2)
+
+#plot second kernel density plot
+kd2 <- density(y2[y2>=-10 & y2<=50],bw = "nrd0", adjust = 3)
+lines(kd2, col='red', lwd=2)
+
+## --- Save numbers in csv
+
+K <- cbind(kd1$x,kd1$y,kd2$x,kd2$y)
+write.delim(K, file = file.path(pipeline, 'out', 'K_test.txt'), sep = "\t")
 
 
-## -- Save output
 
-writeLines(capture.output(xtable(W, 
-                                 caption = "Comparing the male and female subsamples", 
-                                 label = "ggfinlit")),
-           file.path(outline, 'gendergapfinlit.tex'))
+## --- Save numbers in csv
+H <- cbind(h1$mids,h1$counts,h1$density,h2$counts,h2$density)
+write.delim(H, file = file.path(pipeline, 'out', paste('H_test','.txt',sep = "")), sep = "\t")
+
+
 
 
 
 T <- transform(T, percentile=(findInterval(y, quantile(T$y, seq(0,1, by=.1)))-1)/10)
 
 jpeg(file.path(pipeline,"boxplot_test.jpg"), width = 1000, height = 700)
-boxplot(lpred_test~percentile,
+b <- boxplot(lpred_test~percentile,
         data=T,
         xlab="Percentile of inflation expectation distribution",
         ylab="Predicted Test Score",
@@ -223,3 +231,27 @@ boxplot(lpred_subj~percentile,
         border="black"
 )
 dev.off()
+
+med <- data.frame()
+uq <- data.frame()
+lq <- data.frame()
+uw <- data.frame()
+lw <- data.frame()
+
+for (i in c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1)) {
+  sub <- T[T$y<=quantile(T$y,i),]
+  med[1,i*10] <- quantile(sub$lpred_test,0.5)
+  uq[1,i*10] <- quantile(sub$lpred_test,0.75)
+  lq[1,i*10] <- quantile(sub$lpred_test,0.25)
+  uw[1,i*10] <- max(sub$lpred_test)
+  lw[1,i*10] <- min(sub$lpred_test)
+  
+}
+
+M <- data.frame(c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1),t(med),t(uq),t(lq),t(uw),t(lw))
+
+# save as delimited text file
+
+library(caroline) # for delimited text file
+
+write.delim(M, file = file.path(pipeline, 'out', 'D.txt'), sep = "\t")
