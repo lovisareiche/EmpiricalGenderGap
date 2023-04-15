@@ -30,7 +30,7 @@ library(data.table)
 
 f <- 'compsur'
 
-m <- 'mean'
+mo <- 'mean'
 # can go mean, sd, 25, 50, 75
 
 
@@ -144,23 +144,23 @@ euro_food_lag <- shift(euro_food, n=1, fill=NA, type="lag")
 
 # add quantitative expectations
 
-msc <- ts(data = D[D$date >= as.Date('1978-01-01'),paste('msc_',m, sep = "")], 
+msc <- ts(data = D[D$date >= as.Date('1978-01-01'),paste('msc_',mo, sep = "")], 
              start=c(1978, 01), 
              end=c(2022, 12), 
              frequency = 12)
 
-sce <- ts(data = D[D$date >= as.Date('2013-06-01') & D$date <= as.Date('2020-11-01'),paste('sce_',m, sep = "")], 
+sce <- ts(data = D[D$date >= as.Date('2013-06-01') & D$date <= as.Date('2020-11-01'),paste('sce_',mo, sep = "")], 
              start=c(2013, 06), 
              end=c(2020, 11), 
              frequency = 12)
 
-bop <- ts(data = D[D$date >= as.Date('2019-05-01') & D$date <= as.Date('2022-09-01'),paste('bop_',m, sep = "")], 
+bop <- ts(data = D[D$date >= as.Date('2019-05-01') & D$date <= as.Date('2022-09-01'),paste('bop_',mo, sep = "")], 
              start=c(2019, 05), 
              end=c(2022, 09), 
              frequency = 12)
 
-if(m!="sd"){
-  ecfin <- ts(data = D[D$date >= as.Date('2004-01-01') & D$date <= as.Date('2022-09-01'),paste('ecfin_',m, sep = "")], 
+if(mo!="sd"){
+  ecfin <- ts(data = D[D$date >= as.Date('2004-01-01') & D$date <= as.Date('2022-09-01'),paste('ecfin_',mo, sep = "")], 
                start=c(2004, 01), 
                end=c(2022, 09), 
                frequency = 12)
@@ -182,7 +182,7 @@ qbop <- ts(data = D[D$date >= as.Date('2019-05-01') & D$date <= as.Date('2022-09
           start=c(2019, 05), 
           end=c(2022, 09), 
           frequency = 12)
-if(m!="sd"){
+if(mo!="sd"){
   qecfin <- ts(data = D[D$date >= as.Date('2004-01-01') & D$date <= as.Date('2022-09-01'),'qecfin'], 
               start=c(2004, 01), 
               end=c(2022, 09), 
@@ -196,7 +196,7 @@ Tsce <- ts.union(us_food_sce,us_tot_sce,us_food_sce_lag,us_tot_sce_lag,sce,qsce)
 colnames(Tsce) <- c("food_cpi","tot_cpi","food_cpi_lag","tot_cpi_lag","sce","q_inflation")
 Tbop <- ts.union(germany_food,germany_tot,germany_food_lag,germany_tot_lag,bop,qbop)
 colnames(Tbop) <- c("food_cpi","tot_cpi","food_cpi_lag","tot_cpi_lag","bop","q_inflation")
-if(m!="sd"){
+if(mo!="sd"){
   Teuro <- ts.union(euro_food,euro_tot,euro_food_lag,euro_tot_lag,ecfin,qecfin)
   colnames(Teuro) <- c("food_cpi","tot_cpi","food_cpi_lag","tot_cpi_lag","ecfin","q_inflation")
 }
@@ -205,61 +205,75 @@ if(m!="sd"){
 ## -- Run static time series
 
 Tbop <- na.remove(Tbop)
-bopq <- lm(bop ~ q_inflation + food_cpi + tot_cpi, data = Tbop, na.action=na.exclude)
-bop <- lm(bop ~ food_cpi + tot_cpi, data = Tbop, na.action=na.exclude)
-summary(bop)
+bq <- lm(bop ~ q_inflation + food_cpi + tot_cpi, data = Tbop, na.action=na.exclude)
+b <- lm(bop ~ food_cpi + tot_cpi, data = Tbop, na.action=na.exclude)
+bql <- lm(bop ~ q_inflation + food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tbop, na.action=na.exclude)
+bl <- lm(bop ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tbop, na.action=na.exclude)
+summary(b)
 
-if(m!="sd"){
+if(mo!="sd"){
   Teuro <- na.remove(Teuro)
-  ecfinq <- lm(ecfin ~ q_inflation + food_cpi + tot_cpi , data = Teuro, na.action=na.exclude)
-  ecfin <- lm(ecfin ~ food_cpi + tot_cpi, data = Teuro, na.action=na.exclude)
-  summary(ecfin)
+  eq <- lm(ecfin ~ q_inflation + food_cpi + tot_cpi , data = Teuro, na.action=na.exclude)
+  e <- lm(ecfin ~ food_cpi + tot_cpi, data = Teuro, na.action=na.exclude)
+  eql <- lm(ecfin ~ q_inflation + food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Teuro, na.action=na.exclude)
+  el <- lm(ecfin ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Teuro, na.action=na.exclude)
+  
+  summary(e)
 }
 
 Tmsc <- na.remove(Tmsc)
-mscq <- lm(msc ~ q_inflation + food_cpi + tot_cpi, data = Tmsc, na.action=na.exclude)
-msc <- lm(msc ~ food_cpi + tot_cpi, data = Tmsc, na.action=na.exclude)
-summary(msc)
+mq <- lm(msc ~ q_inflation + food_cpi + tot_cpi, data = Tmsc, na.action=na.exclude)
+m <- lm(msc ~ food_cpi + tot_cpi, data = Tmsc, na.action=na.exclude)
+mql <- lm(msc ~ q_inflation + food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tmsc, na.action=na.exclude)
+ml <- lm(msc ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tmsc, na.action=na.exclude)
+
+summary(m)
 
 # Robustness: sub period
 Tmscsub <- window(Tmsc, start = 2004)
-mscsq <- lm(msc ~ q_inflation + food_cpi + tot_cpi , data = Tmscsub, na.action=na.exclude)
-mscs <- lm(msc ~ food_cpi + tot_cpi, data = Tmscsub, na.action=na.exclude)
+msq <- lm(msc ~ q_inflation + food_cpi + tot_cpi , data = Tmscsub, na.action=na.exclude)
+ms <- lm(msc ~ food_cpi + tot_cpi, data = Tmscsub, na.action=na.exclude)
+msql <- lm(msc ~ q_inflation + food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tmscsub, na.action=na.exclude)
+msl <- lm(msc ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tmscsub, na.action=na.exclude)
+
 
 
 Tsce <- na.remove(Tsce)
-sceq <- lm(sce ~ q_inflation + food_cpi + tot_cpi , data = Tsce, na.action=na.exclude)
-sce <- lm(sce ~ food_cpi + tot_cpi, data = Tsce, na.action=na.exclude)
-summary(sce)
+sq <- lm(sce ~ q_inflation + food_cpi + tot_cpi , data = Tsce, na.action=na.exclude)
+s <- lm(sce ~ food_cpi + tot_cpi, data = Tsce, na.action=na.exclude)
+sql <- lm(sce ~ q_inflation + food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tsce, na.action=na.exclude)
+sl <- lm(sce ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag, data = Tsce, na.action=na.exclude)
+
+summary(s)
 
 # --- Print output
 
 # settings for stargazer
 column.labels <- c("MSC","SCE","ECFIN","BOP")
 title <- "Timeseries regression"
-label <- paste("tab:timeseries_",m,sep = "")
+label <- paste("tab:timeseries_",mo,sep = "")
 
-if(m!="sd"){
-  writeLines(capture.output(stargazer(msc, mscq, mscs, mscsq, sce, sceq, ecfin, ecfinq, bop, bopq,
+if(mo!="sd"){
+  writeLines(capture.output(stargazer(m, mq, mql, msql, s, sq, sql, e, eq, eql, b, bq, bql,
                                     title = title, label = label, 
                                     column.labels = column.labels,  model.names = FALSE, 
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     intercept.top = TRUE, intercept.bottom = FALSE)),
-           file.path(outline, paste('code_tsreg_',m,'.tex',sep = "")))
+           file.path(outline, paste('code_tsreg_',mo,'.tex',sep = "")))
 } else {
-  writeLines(capture.output(stargazer(msc, mscq, mscs, mscsq, sce, sceq, bop, bopq,
+  writeLines(capture.output(stargazer(m, mq, mql,  msql, s, sq, sql, b, bq, bql,
                                       title = title, label = label, 
                                       column.labels = column.labels,  model.names = FALSE, 
                                       align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                       intercept.top = TRUE, intercept.bottom = FALSE)), 
-            file.path(outline, paste('code_tsreg_',m,'.tex',sep = "")))
+            file.path(outline, paste('code_tsreg_',mo,'.tex',sep = "")))
 }
 
 
 library(multcomp)
-# msc, mscq, mscs, mscsq, sce, sceq, ecfin, ecfinq, bop, bopq
+# m, mq, mql, msql, s, sq, sql, e, eq, eql, b, bq, bql,
 
-summary(glht(msc, "food_cpi - tot_cpi=0"))
+summary(glht(m, "food_cpi - tot_cpi=0"))
 
 ## Leftover Code
 ################
