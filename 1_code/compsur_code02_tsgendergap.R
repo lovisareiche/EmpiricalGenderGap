@@ -80,6 +80,16 @@ moving_average <- function(x, n = 3) {             # Create user-defined functio
   stats::filter(x, rep(1 / n, n), sides = 2)
 }
 
+# function for coeffciient of variation
+cv <- function(x) {
+  sd(x)/mean(x)
+}
+
+# function for moving coefficient of variation
+moving_cv <- function(x, n = 6) {             # Create user-defined function
+  rollapply(x, width = n, FUN = cv, na.pad = TRUE)
+}
+
 
 # ---------
 # Main code
@@ -188,24 +198,30 @@ T <- read_csv2(file.path('empirical', '0_data', 'external', 'OECD_CPI_data.csv')
 
 germany_f <- filter(T,LOCATION == "DEU" & SUBJECT == "FOOD") %>%
   select(date,cpi) %>%
-  dplyr::rename(cpi_food_germany = cpi)
+  dplyr::rename(cpi_food_germany = cpi) %>%
+  mutate(cpi_food_germany_cv = moving_cv(cpi_food_germany))
 germany_t <- filter(T,LOCATION == "DEU" & SUBJECT == "TOT") %>%
   select(date,cpi) %>%
-  dplyr::rename(cpi_tot_germany = cpi)
+  dplyr::rename(cpi_tot_germany = cpi) %>%
+  mutate(cpi_tot_germany_cv = moving_cv(cpi_tot_germany))
 
 us_f <- filter(T,LOCATION == "USA" & SUBJECT == "FOOD") %>%
   select(date,cpi) %>%
-  dplyr::rename(cpi_food_us = cpi)
+  dplyr::rename(cpi_food_us = cpi) %>%
+  mutate(cpi_food_us_cv = moving_cv(cpi_food_us))
 us_t <- filter(T,LOCATION == "USA" & SUBJECT == "TOT") %>%
   select(date,cpi) %>%
-  dplyr::rename(cpi_tot_us = cpi)
+  dplyr::rename(cpi_tot_us = cpi) %>%
+  mutate(cpi_tot_us_cv = moving_cv(cpi_tot_us))
 
 euro_f <- filter(T,LOCATION == "EA19" & SUBJECT == "FOOD") %>%
   select(date,cpi) %>%
-  dplyr::rename(cpi_food_euro= cpi)
+  dplyr::rename(cpi_food_euro= cpi) %>%
+  mutate(cpi_food_euro_cv = moving_cv(cpi_food_euro))
 euro_t <- filter(T,LOCATION == "EA19" & SUBJECT == "TOT") %>%
   select(date,cpi) %>%
-  dplyr::rename(cpi_tot_euro= cpi)
+  dplyr::rename(cpi_tot_euro= cpi) %>%
+  mutate(cpi_tot_euro_cv = moving_cv(cpi_tot_euro))
 
 # merge all together
 
