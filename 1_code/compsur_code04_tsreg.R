@@ -392,10 +392,15 @@ writeLines(capture.output(stargazer(e, eq, el, ev, eql, eqv, elv, eqlv,
 library(multcomp)
 # m, mq, mql, msql, s, sq, sql, e, eq, eql, b, bq, bql,
 
-summary(glht(m, "food_cpi - tot_cpi=0"))
-summary(glht(mqlv, "food_cpi - tot_cpi = 0"))["Estimate"]
+summary(glht(bql, "food_cpi - tot_cpi=0"))
+
+
+summary(glht(mqlv, "food_cpi - tot_cpi = 0"))
 
 library(ggplot2)
+
+### Table 2
+
 
 # Manually added!!!!
 coef <- c(0.14554, -0.20930, -0.0006716)  # Coefficients
@@ -412,14 +417,82 @@ ci_upper <- coef + 1.96 * ster
 df <- data.frame(coef = coef, ci_lower = ci_lower, ci_upper = ci_upper, coef_names = coef_names)
 
 # Plotting
-ggplot(df, aes(y = 1:length(coef))) +
+plot <- ggplot(df, aes(y = 1:length(coef))) +
   geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), width = 0.1, color = rgb(255, 204, 0, maxColorValue = 255), size = 2) +
   geom_point(aes(x = coef), shape = 45, size = 20, color = rgb(0, 38, 78, maxColorValue = 255)) +
+  geom_vline(xintercept = 0, color = "black", size = 0.8) +  # Add the zero axis
   coord_flip() +
   labs( x = "Coefficient Value", y = "") +
   scale_y_continuous(breaks = 1:length(coef), labels = coef_names) +
   theme_minimal()
 
+# Save the combined plot
+ggsave(file.path(outline,"plot.png"), plot, width = 7, height = 9, units = "cm")
+
+
+## Table 3 
+
+library(patchwork)
+
+# lags
+
+# Manually added!!!!
+coef_lags <- c(-0.21, -0.89, -0.29)  # Coefficients
+ster_lags <- c(0.08, 0.77, 0.36)  # Standard errors
+coef_names_lags <- c("MSC 1978-2023", "SCE 2013-2020", "BOP 2019-2022")  # Coefficient names
+
+# Calculate upper and lower bounds of the confidence interval
+ci_lower_lags <- coef_lags - 1.96 * ster_lags
+ci_upper_lags <- coef_lags + 1.96 * ster_lags
+
+# Create a data frame for plotting
+df_lags <- data.frame(coef = coef_lags, ci_lower = ci_lower_lags, ci_upper = ci_upper_lags, coef_names = coef_names_lags)
+
+# Plotting for lags
+plot_lags <- ggplot(df_lags, aes(y = 1:length(coef))) +
+  geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), width = 0.1, color = rgb(255, 204, 0, maxColorValue = 255), size = 2) +
+  geom_point(aes(x = coef), shape = 45, size = 20, color = rgb(0, 38, 78, maxColorValue = 255)) +
+  geom_vline(xintercept = 0, color = "black", size = 0.8) +  # Add the zero axis
+  coord_flip() +
+  labs(x = "Coefficient Value", y = "") +
+  scale_y_continuous(breaks = 1:length(coef_lags), labels = coef_names_lags) +
+  theme_minimal() +
+  labs(title = "Lagged")  # Add title to the plot
+
+# current period
+
+# Manually added!!!!
+coef_current <- c(0.14, 0.22, 0.38)  # Coefficients
+ster_current <- c(0.07694, 0.78, 0.32)  # Standard errors
+coef_names_current <- c("MSC 1978-2023", "SCE 2013-2020", "BOP 2019-2022")  # Coefficient names
+
+# Calculate upper and lower bounds of the confidence interval
+ci_lower_current <- coef_current - 1.96 * ster_current
+ci_upper_current <- coef_current + 1.96 * ster_current
+
+# Create a data frame for plotting
+df_current <- data.frame(coef = coef_current, ci_lower = ci_lower_current, ci_upper = ci_upper_current, coef_names = coef_names_current)
+
+# Plotting for current period
+plot_current <- ggplot(df_current, aes(y = 1:length(coef))) +
+  geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), width = 0.1, color = rgb(255, 204, 0, maxColorValue = 255), size = 2) +
+  geom_point(aes(x = coef), shape = 45, size = 20, color = rgb(0, 38, 78, maxColorValue = 255)) +
+  geom_vline(xintercept = 0, color = "black", size = 0.8) +  # Add the zero axis
+  coord_flip() +
+  labs(x = "Coefficient Value", y = "") +
+  scale_y_continuous(breaks = 1:length(coef_current), labels = coef_names_current) +
+  theme_minimal() +
+  labs(title = "Current Period")  # Add title to the plot
+
+# Combine the plots vertically with titles
+combined_plot <- plot_current + plot_lags +
+  plot_layout(ncol = 1, heights = c(2, 1))
+
+# Display the combined plot
+combined_plot
+
+# Save the combined plot
+ggsave(file.path(outline,"combined_plot.png"), combined_plot, width = 7, height = 9, units = "cm")
 
 ## Leftover Code
 ################
