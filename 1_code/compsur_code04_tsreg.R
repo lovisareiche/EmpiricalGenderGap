@@ -393,6 +393,33 @@ library(multcomp)
 # m, mq, mql, msql, s, sq, sql, e, eq, eql, b, bq, bql,
 
 summary(glht(m, "food_cpi - tot_cpi=0"))
+summary(glht(mqlv, "food_cpi - tot_cpi = 0"))["Estimate"]
+
+library(ggplot2)
+
+# Manually added!!!!
+coef <- c(0.14554, -0.20930, -0.0006716)  # Coefficients
+ster <- c(0.07694, 0.0198323, 0.0198323)  # Standard errors
+coef_names <- c("CPI Food-Total", "CPI Food-Total lagged", "CPI Food-Total cv")  # Coefficient names
+
+
+
+# Calculate upper and lower bounds of the confidence interval
+ci_lower <- coef - 1.96 * ster
+ci_upper <- coef + 1.96 * ster
+
+# Create a data frame for plotting
+df <- data.frame(coef = coef, ci_lower = ci_lower, ci_upper = ci_upper, coef_names = coef_names)
+
+# Plotting
+ggplot(df, aes(y = 1:length(coef))) +
+  geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), width = 0.1, color = rgb(255, 204, 0, maxColorValue = 255), size = 2) +
+  geom_point(aes(x = coef), shape = 45, size = 20, color = rgb(0, 38, 78, maxColorValue = 255)) +
+  coord_flip() +
+  labs( x = "Coefficient Value", y = "") +
+  scale_y_continuous(breaks = 1:length(coef), labels = coef_names) +
+  theme_minimal()
+
 
 ## Leftover Code
 ################
