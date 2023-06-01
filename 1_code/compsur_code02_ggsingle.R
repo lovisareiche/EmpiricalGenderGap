@@ -119,7 +119,8 @@ for(i in 1:length(S)){
     setdiff('year') %>%
     setdiff('survey') %>%
     setdiff('id') %>%
-    setdiff('single')
+    setdiff('single') %>%
+    setdiff('quali')
   
   T_mean <- degroup(
     T,
@@ -164,3 +165,35 @@ writeLines(capture.output(stargazer(`n_BOP-HH`,`s_BOP-HH`,n_FRBNY,s_FRBNY,n_Mich
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels)), 
            file.path(outline, 'code_ggsinglemulti.tex'))
+
+
+library(ggplot2)
+
+# Manually added!!!!
+coef <- c(0.05, -0.65, -0.06)  # Coefficients
+ster <- c(0.09, 0.5, 0.04)  # Standard errors
+coef_names <- c("BOP", "SCE", "MSC")  # Coefficient names
+
+
+
+# Calculate upper and lower bounds of the confidence interval
+ci_lower <- coef - 1.96 * ster
+ci_upper <- coef + 1.96 * ster
+
+# Create a data frame for plotting
+df <- data.frame(coef = coef, ci_lower = ci_lower, ci_upper = ci_upper, coef_names = coef_names)
+
+# Plotting
+plot <- ggplot(df, aes(y = 1:length(coef))) +
+  geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), width = 0.1, color = rgb(255, 204, 0, maxColorValue = 255), size = 2) +
+  geom_point(aes(x = coef), shape = 45, size = 20, color = rgb(0, 38, 78, maxColorValue = 255)) +
+  geom_vline(xintercept = 0, color = "black", size = 0.8) +  # Add the zero axis
+  coord_flip() +
+  labs( x = "Coefficient Value", y = "") +
+  scale_y_continuous(breaks = 1:length(coef), labels = coef_names) +
+  theme_minimal()
+
+# Save the combined plot
+ggsave(file.path(outline,"plot.png"), plot, width = 14, height = 9, units = "cm")
+
+
