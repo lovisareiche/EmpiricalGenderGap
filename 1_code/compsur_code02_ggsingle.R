@@ -142,6 +142,16 @@ for(i in 1:length(S)){
   s <- plm( eq, data=filter(T_c,single ==1), effect = "individual", model = "pooling" )
   assign(paste("s_",S[i],sep = ""),s)
   
+  ## manually add to table:
+  
+  # Compute the difference between coefficient for female in models s and n
+  coef_diff <- coef(n)["female"] - coef(s)["female"]
+  assign(paste("coef_diff_",S[i],sep = ""),coef_diff)
+  
+  # Compute the standard error of the difference
+  se_diff <- sqrt(vcov(n)["female", "female"] + vcov(s)["female", "female"])
+  assign(paste("se_diff_",S[i],sep = ""),se_diff)
+  
 }
 
 # write output
@@ -167,11 +177,12 @@ writeLines(capture.output(stargazer(`n_BOP-HH`,`s_BOP-HH`,n_FRBNY,s_FRBNY,n_Mich
            file.path(outline, 'code_ggsinglemulti.tex'))
 
 
+
+
 library(ggplot2)
 
-# Manually added!!!!
-coef <- c(0.05, -0.65, -0.06)  # Coefficients
-ster <- c(0.09, 0.5, 0.04)  # Standard errors
+coef <- c(`coef_diff_BOP-HH`, coef_diff_FRBNY, coef_diff_Michigan)  # Coefficients
+ster <- c(`se_diff_BOP-HH`, se_diff_FRBNY, se_diff_Michigan)  # Standard errors
 coef_names <- c("BOP", "SCE", "MSC")  # Coefficient names
 
 
@@ -184,13 +195,16 @@ ci_upper <- coef + 1.96 * ster
 df <- data.frame(coef = coef, ci_lower = ci_lower, ci_upper = ci_upper, coef_names = coef_names)
 
 # Plotting
-plot <- ggplot(df, aes(y = 1:length(coef))) +
-  geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), width = 0.1, color = rgb(255, 204, 0, maxColorValue = 255), size = 2) +
-  geom_point(aes(x = coef), shape = 45, size = 20, color = rgb(0, 38, 78, maxColorValue = 255)) +
+plot <- ggplot(df, aes(x = coef_names, y = coef, ymin = ci_lower, ymax = ci_upper)) +
+  geom_col(fill = rgb(0, 38, 78, maxColorValue = 255), width = 0.5) +
+  geom_errorbar(width = 0.2, color = rgb(255, 204, 0, maxColorValue = 255), size = 1) +
   geom_vline(xintercept = 0, color = "black", size = 0.8) +  # Add the zero axis
-  coord_flip() +
-  labs( x = "Coefficient Value", y = "") +
-  scale_y_continuous(breaks = 1:length(coef), labels = coef_names) +
+  labs(x = "", y = "") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12)) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + 
   theme_minimal()
 
 # Save the combined plot
