@@ -124,9 +124,8 @@ Qbop <- select(Qbop, qbop,qbop_mov, date)
 
 ## Michigan
 
-Qmsc <- read_csv(file.path('empirical', '0_data', 'manual','Michigan', 'T.csv')) %>%
-  mutate(female = SEX-1,  year = as.numeric(substr(YYYYMM, 1, 4)), month = as.numeric(substr(YYYYMM, 5, 6))) %>%
-  dplyr::rename(q_inflation = PX1Q1) %>%
+Qmsc <- read_csv(file.path('empirical', '2_pipeline', 'compsur','code01_align','out','Michigan', 'T.csv')) %>%
+  dplyr::rename(q_inflation = quali) %>%
   filter(abs(q_inflation) <= 5 & !is.na(female)) %>%
   select(female,q_inflation,year,month) %>%
   # inefficient way to get right date format
@@ -155,9 +154,8 @@ Qmsc <- merge(Qmsc_f,Qmsc_m, by = "date") %>%
 
 ## SCE
 
-Qsce <- read_csv(file.path('empirical', '0_data', 'manual','FRBNY', 'T.csv')) %>%
-  mutate(female = as.numeric(Q33==1), year = as.numeric(substr(date, 1, 4)), month = as.numeric(substr(date, 5, 6))) %>%
-  dplyr::rename(q_inflation = Q8v2) %>%
+Qsce <- read_csv(file.path('empirical', '2_pipeline', 'compsur','code01_align','out','FRBNY', 'T.csv'))%>%
+  dplyr::rename(q_inflation = quali) %>%
   filter(!is.na(q_inflation) & !is.na(female) ) %>%
   select(female,q_inflation,year,month) %>%
   # inefficient way to get right date format (continue as in msc)
