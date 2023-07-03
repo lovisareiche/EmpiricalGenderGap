@@ -80,7 +80,7 @@ moving_average <- function(x, n = 3) {             # Create user-defined functio
   stats::filter(x, rep(1 / n, n), sides = 2)
 }
 
-# function for coeffciient of variation
+# function for coefficient of variation
 cv <- function(x) {
   sd(x)/mean(x)
 }
@@ -247,9 +247,5 @@ write.delim(D, file = file.path(pipeline, 'out', 'D.txt'), sep = "\t")
 
 write.csv(D, file = file.path(pipeline, 'out', 'D.csv'))
 
-## Save gender gap as is
 
-Mfm <- M %>%
-  select(-sdy,-p25y,-p50y,-p75y) %>%
-  spread(key = key, value = meany) 
 
