@@ -2,7 +2,7 @@
 # Introduction
 # ------------
 
-## Compares distributions from different surveys
+## Compares gender gaps for singles and non-singles from different surveys
 
 rm(list=ls())
 NAME <- 'code02_ggsingle' ## Name of the R file goes here (without the file extension!)
@@ -177,6 +177,7 @@ writeLines(capture.output(stargazer(`n_BOP-HH`,`s_BOP-HH`,n_FRBNY,s_FRBNY,n_Mich
            file.path(outline, 'code_ggsinglemulti.tex'))
 
 
+## Plot for Poster 
 
 
 library(ggplot2)
@@ -211,3 +212,10 @@ plot <- ggplot(df, aes(x = coef_names, y = coef, ymin = ci_lower, ymax = ci_uppe
 ggsave(file.path(outline,"plot.png"), plot, width = 14, height = 9, units = "cm")
 
 
+# Calculate the t-statistic
+t_statistic <- coef_diff_FRBNY / se_diff_FRBNY
+# Calculate the p-value
+p_value <- 2 * (1 - pt(abs(t_statistic), 115491))
+
+# Print the p-value
+print(p_value)
