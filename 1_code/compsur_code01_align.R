@@ -26,7 +26,7 @@ library('tidyverse')
 ## --------
 ### Any settings go here
 
-s <- 'Michigan'
+s <- 'FRBNY'
 # BOP-HH, Michigan, FRBNY
 
 f <- 'compsur'
@@ -88,7 +88,7 @@ if(s=='Michigan'){
   # first need to sort out IDs
   # assign all those who previously participated their original CASEID
   
-  for(i in 1:nrow(T)){ # for all rows
+  for(i in nrow(T):1){ # for all rows
     if(!is.na(T$IDPREV[i])){ # find those that have participated before
       if(length(T$CASEID[T$ID == T$IDPREV[i] & T$YYYYMM == T$DATEPR[i]])>0){
         T$CASEID[i] = T$CASEID[T$ID == T$IDPREV[i] & T$YYYYMM == T$DATEPR[i]] # assign them their original case id
@@ -110,6 +110,11 @@ if(s=='Michigan'){
 if(s=='FRBNY'){
   T <- mutate(T,female = as.numeric(Q33==1), single = Q38 - 1, year = as.numeric(substr(date, 1, 4)), month = as.numeric(substr(date, 5, 6))) %>%
     dplyr::rename(y = Q8v2part2, quali = Q8v2, age = Q32, eduschool = Q36, hhinc = Q47, regionCAT = `_REGION_CAT`, id = userid) %>%
+    group_by(id) %>%
+    mutate(female = ifelse(is.na(female), first(female[!is.na(female)]), female),single = ifelse(is.na(single), first(single[!is.na(single)]), single), age = ifelse(is.na(age), first(age[!is.na(age)]), age), hhinc = ifelse(is.na(hhinc), first(hhinc[!is.na(hhinc)]), hhinc), eduschool = ifelse(is.na(eduschool), first(eduschool[!is.na(eduschool)]), eduschool)) %>%
+    mutate(diff_months = (year - first(year)) * 12 + (month - first(month))) %>%
+    mutate(age = ifelse(diff_months <= 12, age, age + floor(diff_months / 12))) %>%
+    ungroup %>%
     filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(eduschool) & !is.na(regionCAT) & !is.na(age) & abs(eduschool)<=8 & !is.na(quali)  & abs(age)<=100  & abs(age)>15) %>%
     mutate(region = as.numeric(factor(regionCAT))) %>%
     select(female,single,age,eduschool,hhinc,region,y,year,month,id,quali)
