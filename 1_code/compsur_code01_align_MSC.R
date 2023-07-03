@@ -77,14 +77,6 @@ if (!dir.exists(file.path(pipeline,'out',s))) {
 
 T <- read_csv(file.path('empirical', '0_data', 'manual',s, 'T.csv'))
 
-if(s=='BOP-HH'){
-  T <- mutate(T,single = as.numeric(non_single == 0)) %>%
-    filter(abs(y) <= 95 & abs(female) <=1 & abs(single) <=1 & abs(eduschool) <= 6 & abs(hhinc) <= 13 & abs(q_inflation) <= 5) %>%
-    dplyr::rename(region = eastgerman, quali = q_inflation) %>%
-    select(-non_single,-pinc)
-}
-
-if(s=='Michigan'){
   # first need to sort out IDs
   # assign all those who previously participated their original CASEID
   
@@ -105,26 +97,6 @@ if(s=='Michigan'){
   T$quali[T$quali == 7] = 4
   T$quali[T$quali == 8] = 3
   T$quali[T$quali == 10] = 1
-}
-
-if(s=='FRBNY'){
-  T <- mutate(T,female = as.numeric(Q33==1), single = Q38 - 1, year = as.numeric(substr(date, 1, 4)), month = as.numeric(substr(date, 5, 6))) %>%
-    dplyr::rename(y = Q8v2part2, quali = Q8v2, age = Q32, eduschool = Q36, hhinc = Q47, regionCAT = `_REGION_CAT`, id = userid) %>%
-    filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(eduschool) & !is.na(regionCAT) & !is.na(age) & abs(eduschool)<=8 & !is.na(quali)  & abs(age)<=100  & abs(age)>15) %>%
-    mutate(region = as.numeric(factor(regionCAT))) %>%
-    select(female,single,age,eduschool,hhinc,region,y,year,month,id,quali)
-  
-  T$quali[T$quali == 1] = 5
-  T$quali[T$quali == 2] = 1
-}
-
-if(s=='BOE'){
-  T <- mutate(T,female = as.numeric(Q33==1), single = Q38 - 1, year = as.numeric(substr(date, 1, 4)), month = as.numeric(substr(date, 5, 6))) %>%
-    rename(y = Q8v2part2) %>%
-    filter(abs(y) <= 95 & !is.na(female) & !is.na(single)) %>%
-    select(female,single,y,year,month)
-}
-
 
 write_csv(T,file.path(pipeline,'out',s, 'T.csv')) 
 
