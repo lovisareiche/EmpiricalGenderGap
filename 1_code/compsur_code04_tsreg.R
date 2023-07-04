@@ -398,6 +398,9 @@ summary(glht(bql, "food_cpi - tot_cpi=0"))
 summary(glht(mqlv, "food_cpi - tot_cpi = 0"))
 
 library(ggplot2)
+library(stringr)
+
+
 
 ### Table 2
 
@@ -417,13 +420,16 @@ ci_upper <- coef + 1.96 * ster
 df <- data.frame(coef = coef, ci_lower = ci_lower, ci_upper = ci_upper, coef_names = coef_names)
 
 # Plotting
-plot <- ggplot(df, aes(y = 1:length(coef))) +
-  geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), width = 0.1, color = rgb(255, 204, 0, maxColorValue = 255), size = 2) +
-  geom_point(aes(x = coef), shape = 45, size = 20, color = rgb(0, 38, 78, maxColorValue = 255)) +
+plot <- ggplot(df, aes(x = coef_names, y = coef, ymin = ci_lower, ymax = ci_upper)) +
+  geom_col(fill = rgb(0, 38, 78, maxColorValue = 255), width = 0.5) +
+  geom_errorbar(width = 0.2, color = rgb(255, 204, 0, maxColorValue = 255), size = 1) +
   geom_vline(xintercept = 0, color = "black", size = 0.8) +  # Add the zero axis
-  coord_flip() +
-  labs( x = "Coefficient Value", y = "") +
-  scale_y_continuous(breaks = 1:length(coef), labels = coef_names) +
+  labs(x = "", y = "") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12)) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + 
   theme_minimal()
 
 # Save the combined plot
@@ -449,15 +455,19 @@ ci_upper_lags <- coef_lags + 1.96 * ster_lags
 df_lags <- data.frame(coef = coef_lags, ci_lower = ci_lower_lags, ci_upper = ci_upper_lags, coef_names = coef_names_lags)
 
 # Plotting for lags
-plot_lags <- ggplot(df_lags, aes(y = 1:length(coef))) +
-  geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), width = 0.1, color = rgb(255, 204, 0, maxColorValue = 255), size = 2) +
-  geom_point(aes(x = coef), shape = 45, size = 20, color = rgb(0, 38, 78, maxColorValue = 255)) +
+plot_lags <- ggplot(df_lags, aes(x = coef_names, y = coef, ymin = ci_lower, ymax = ci_upper)) +
+  geom_col(fill = rgb(0, 38, 78, maxColorValue = 255), width = 0.5) +
+  geom_errorbar(width = 0.2, color = rgb(255, 204, 0, maxColorValue = 255), size = 1) +
   geom_vline(xintercept = 0, color = "black", size = 0.8) +  # Add the zero axis
-  coord_flip() +
-  labs(x = "Coefficient Value", y = "") +
-  scale_y_continuous(breaks = 1:length(coef_lags), labels = coef_names_lags) +
+  labs(x = "", y = "") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12)) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
   theme_minimal() +
-  labs(title = "Lagged")  # Add title to the plot
+  labs(title = "Lagged") +
+  theme(plot.title = element_text(size = rel(1)))# Add title to the plot
 
 # current period
 
@@ -474,19 +484,24 @@ ci_upper_current <- coef_current + 1.96 * ster_current
 df_current <- data.frame(coef = coef_current, ci_lower = ci_lower_current, ci_upper = ci_upper_current, coef_names = coef_names_current)
 
 # Plotting for current period
-plot_current <- ggplot(df_current, aes(y = 1:length(coef))) +
-  geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper), width = 0.1, color = rgb(255, 204, 0, maxColorValue = 255), size = 2) +
-  geom_point(aes(x = coef), shape = 45, size = 20, color = rgb(0, 38, 78, maxColorValue = 255)) +
+plot_current <- ggplot(df_current, aes(x = coef_names, y = coef, ymin = ci_lower, ymax = ci_upper)) +
+  geom_col(fill = rgb(0, 38, 78, maxColorValue = 255), width = 0.5) +
+  geom_errorbar(width = 0.2, color = rgb(255, 204, 0, maxColorValue = 255), size = 1) +
   geom_vline(xintercept = 0, color = "black", size = 0.8) +  # Add the zero axis
-  coord_flip() +
-  labs(x = "Coefficient Value", y = "") +
-  scale_y_continuous(breaks = 1:length(coef_current), labels = coef_names_current) +
+  labs(x = "", y = "") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12)) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
   theme_minimal() +
-  labs(title = "Current Period")  # Add title to the plot
+  labs(title = "Current Period") + 
+  theme(plot.title = element_text(size = rel(1)))# Add title to the plot
 
 # Combine the plots vertically with titles
 combined_plot <- plot_current + plot_lags +
   plot_layout(ncol = 1, heights = c(2, 1))
+
 
 # Display the combined plot
 combined_plot
