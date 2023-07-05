@@ -337,7 +337,7 @@ T <- combined_data %>%
 write_csv(T,file.path(pipeline,'out', 'T.csv')) 
 
 
-# Add Fin lit
+## Add Fin lit
 #############
 
 # intqr
@@ -391,7 +391,7 @@ T <- T %>%
 ########
 
 # remove intqr obs with absolute val greater 12 (ie -5555)
-T <- filter(T,abs(intqr)<=12) %>%
+T_fin <- filter(T,abs(intqr)<=12) %>%
   # remove nas
   na.omit %>%
   # remove qinterest and qeasy in abs val greater than 5
@@ -400,4 +400,31 @@ T <- filter(T,abs(intqr)<=12) %>%
 # save
 ###### 
 
-write_csv(T,file.path(pipeline,'out', 'T_fin.csv')) 
+write_csv(T_fin,file.path(pipeline,'out', 'T_fin.csv')) 
+
+
+## Add Household Experience
+###########################
+
+# rename
+T$shop_groceries <- recode(combined_data$mainshopper_a, `1` = 3, `2` = 2, `3` = 1)
+T$shop_major <- recode(combined_data$mainshopper_b, `1` = 3, `2` = 2, `3` = 1)
+T$prep_meals <- recode(combined_data$mainshopper_c, `1` = 3, `2` = 2, `3` = 1)
+T$decide_finance <- recode(combined_data$mainshopper_d, `1` = 3, `2` = 2, `3` = 1)
+
+# clean
+########
+
+# remove intqr obs with absolute val greater 12 (ie -5555)
+T_exp <- filter(T,abs(intqr)<=12) %>%
+  # remove nas
+  na.omit %>%
+  # remove qinterest and qeasy in abs val greater than 5
+  filter(abs(qeasy) <= 5 & abs(qinterest) <= 5) %>%
+  # remove non existent experience
+  filter(abs(shop_groceries) <= 3, abs(shop_major) <= 3, abs(prep_meals) <= 3, abs(decide_finance) <= 3)
+
+# save
+###### 
+
+write_csv(T_exp,file.path(pipeline,'out', 'T_exp.csv')) 
