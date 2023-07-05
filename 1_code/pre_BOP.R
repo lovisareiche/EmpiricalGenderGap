@@ -3,6 +3,7 @@
 # ------------
 
 ## Coverts different inflation expectation surveys in a common format
+## saves T, T_fin and T_exp in 0_data, manual, BOP-HH
 
 rm(list=ls())
 NAME <- 'BOP' ## Name of the R file goes here (without the file extension!)
@@ -334,7 +335,7 @@ T <- combined_data %>%
   dplyr::select(female,single,age,educ,hhinc,region,y,year,month,id,quali)
 
 
-write_csv(T,file.path(pipeline,'out', 'T.csv')) 
+write_csv(T,file.path('empirical', '0_data', 'manual',s, 'T.csv')) 
 
 
 ## Add Fin lit
@@ -400,7 +401,7 @@ T_fin <- filter(T,abs(intqr)<=12) %>%
 # save
 ###### 
 
-write_csv(T_fin,file.path(pipeline,'out', 'T_fin.csv')) 
+write_csv(T_fin,file.path('empirical', '0_data', 'manual',s, 'T_fin.csv')) 
 
 
 ## Add Household Experience
@@ -427,4 +428,4 @@ T_exp <- filter(T,abs(intqr)<=12) %>%
 # save
 ###### 
 
-write_csv(T_exp,file.path(pipeline,'out', 'T_exp.csv')) 
+write_csv(T_exp,file.path('empirical', '0_data', 'manual',s, 'T_exp.csv')) 
