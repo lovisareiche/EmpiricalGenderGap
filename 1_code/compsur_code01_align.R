@@ -26,7 +26,7 @@ library('tidyverse')
 ## --------
 ### Any settings go here
 
-s <- 'FRBNY'
+s <- 'BOP-HH'
 # BOP-HH, Michigan, FRBNY
 
 f <- 'compsur'
@@ -76,13 +76,6 @@ if (!dir.exists(file.path(pipeline,'out',s))) {
 ## -- Load data from 0_data folder --
 
 T <- read_csv(file.path('empirical', '0_data', 'manual',s, 'T.csv'))
-
-if(s=='BOP-HH'){
-  T <- mutate(T,single = as.numeric(non_single == 0)) %>%
-    filter(abs(y) <= 95 & abs(female) <=1 & abs(single) <=1 & abs(eduschool) <= 6 & abs(hhinc) <= 13 & abs(q_inflation) <= 5) %>%
-    dplyr::rename(region = eastgerman, quali = q_inflation) %>%
-    select(-non_single,-pinc)
-}
 
 if(s=='Michigan'){
   # first need to sort out IDs
