@@ -389,6 +389,12 @@ T <- T %>%
 
 # financial literacy test
 
+# assume fin lit stay constant
+combined_data <- combined_data %>%
+  group_by(id) %>%
+  mutate(compound_interest = ifelse(is.na(compound_interest), first(compound_interest[!is.na(compound_interest)]), compound_interest), real_rates = ifelse(is.na(real_rates), first(real_rates[!is.na(real_rates)]), real_rates), risk_diversification = ifelse(is.na(risk_diversification), first(risk_diversification[!is.na(risk_diversification)]), risk_diversification)) %>%
+  ungroup 
+
 # Initialize a variable to count correct points
 T$fin_lit_test <- 0
 
