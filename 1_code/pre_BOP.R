@@ -22,8 +22,6 @@ PROJECT_DIR <- 'D:/Lovisa/Studium/Oxford/Department of Economics/DPhil' ## Chang
 library('tidyverse')
 library(haven)
 library(dplyr)
-library(Triangular)
-library(optim)
 
 
 ## --------
@@ -388,15 +386,37 @@ T <- T %>%
   mutate(refresher = ifelse(duplicated(id), 1, 0)) %>% 
   ungroup()
 
+
+# financial literacy test
+
+# Initialize a variable to count correct points
+T$fin_lit_test <- 0
+
+# set values for missing responses
+T$fin_lit_test[combined_data$compound_interest==-6666 | combined_data$real_rates==-6666 | combined_data$risk_diversification==-6666] <- NA
+T$fin_lit_test[combined_data$compound_interest==-5555 | combined_data$real_rates==-5555 | combined_data$risk_diversification==-5555] <- NA
+T$fin_lit_test[combined_data$compound_interest==-9999 | combined_data$real_rates==-9999 | combined_data$risk_diversification==-9999] <- NA
+
+# Check if compound interest is equal to 1 and add 1 point if true
+T$fin_lit_test <- ifelse(combined_data$compound_interest == 1, T$fin_lit_test + 1, T$fin_lit_test)
+
+# Check if QNUM8 is equal to 3 and add 1 point if true
+T$fin_lit_test <- ifelse(combined_data$real_rates == 3, T$fin_lit_test + 1, T$fin_lit_test)
+
+# Check if QNUM9 is equal to 2 and add 1 point if true
+T$fin_lit_test <- ifelse(combined_data$risk_diversification == 2, T$fin_lit_test + 1, T$fin_lit_test)
+
 # clean
 ########
 
 # remove intqr obs with absolute val greater 12 (ie -5555)
-T_fin <- filter(T,abs(intqr)<=12) %>%
-  # remove nas
-  na.omit %>%
+T_fin <- filter(T,abs(intqr)<=100) %>%
   # remove qinterest and qeasy in abs val greater than 5
-  filter(abs(qeasy) <= 5 & abs(qinterest) <= 5)
+  filter(abs(qeasy) <= 5 & abs(qinterest) <= 5) 
+
+# Subset the data frame to remove rows with NA values in all columns except fin_lit_test
+T_fin <- T_fin[complete.cases(T_fin[, !(names(T_fin) %in% "fin_lit_test")]), ]
+
 
 # save
 ###### 
@@ -413,17 +433,32 @@ T$shop_major <- recode(combined_data$mainshopper_b, `1` = 3, `2` = 2, `3` = 1)
 T$prep_meals <- recode(combined_data$mainshopper_c, `1` = 3, `2` = 2, `3` = 1)
 T$decide_finance <- recode(combined_data$mainshopper_d, `1` = 3, `2` = 2, `3` = 1)
 
+# assume hhroles stay constant
+T <- T %>%
+  group_by(id) %>%
+  mutate(shop_groceries = ifelse(is.na(shop_groceries), first(shop_groceries[!is.na(shop_groceries)]), shop_groceries), shop_major = ifelse(is.na(shop_major), first(shop_major[!is.na(shop_major)]), shop_major), prep_meals = ifelse(is.na(prep_meals), first(prep_meals[!is.na(prep_meals)]), prep_meals), decide_finance = ifelse(is.na(decide_finance), first(decide_finance[!is.na(decide_finance)]), decide_finance)) %>%
+  ungroup 
+
+# assume singles do all themselves
+T$shop_groceries[is.na(T$shop_groceries) & T$single==1] <- 3
+T$shop_major[is.na(T$shop_major) & T$single==1] <- 3
+T$prep_meals[is.na(T$prep_meals) & T$single==1] <- 3
+T$decide_finance[is.na(T$decide_finance) & T$single==1] <- 3
+
+
 # clean
 ########
 
 # remove intqr obs with absolute val greater 12 (ie -5555)
 T_exp <- filter(T,abs(intqr)<=12) %>%
-  # remove nas
-  na.omit %>%
   # remove qinterest and qeasy in abs val greater than 5
   filter(abs(qeasy) <= 5 & abs(qinterest) <= 5) %>%
   # remove non existent experience
   filter(abs(shop_groceries) <= 3, abs(shop_major) <= 3, abs(prep_meals) <= 3, abs(decide_finance) <= 3)
+
+# Subset the data frame to remove rows with NA values in all columns except fin_lit_test
+T_exp <- T_exp[complete.cases(T_exp[, !(names(T_exp) %in% "fin_lit_test")]), ]
+
 
 # save
 ###### 
