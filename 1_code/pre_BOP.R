@@ -389,11 +389,6 @@ T <- T %>%
 
 # financial literacy test
 
-# assume fin lit stay constant
-combined_data <- combined_data %>%
-  group_by(id) %>%
-  mutate(compound_interest = ifelse(is.na(compound_interest), first(compound_interest[!is.na(compound_interest)]), compound_interest), real_rates = ifelse(is.na(real_rates), first(real_rates[!is.na(real_rates)]), real_rates), risk_diversification = ifelse(is.na(risk_diversification), first(risk_diversification[!is.na(risk_diversification)]), risk_diversification)) %>%
-  ungroup 
 
 # Initialize a variable to count correct points
 T$fin_lit_test <- 0
@@ -411,6 +406,18 @@ T$fin_lit_test <- ifelse(combined_data$real_rates == 3, T$fin_lit_test + 1, T$fi
 
 # Check if QNUM9 is equal to 2 and add 1 point if true
 T$fin_lit_test <- ifelse(combined_data$risk_diversification == 2, T$fin_lit_test + 1, T$fin_lit_test)
+
+T <- T %>%
+  group_by(id) %>%
+  mutate(
+    fin_lit_test = ifelse(
+      is.na(fin_lit_test),
+      fin_lit_test[year == 2022 & month == 1],
+      fin_lit_test
+    ),
+  ) %>%
+  ungroup()
+
 
 # clean
 ########
