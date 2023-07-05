@@ -26,7 +26,7 @@ library('tidyverse')
 ## --------
 ### Any settings go here
 
-s <- 'BOP-HH'
+S <- c('BOP-HH','Michigan','FRBNY')
 # BOP-HH, Michigan, FRBNY
 
 f <- 'compsur'
@@ -59,10 +59,11 @@ if (!dir.exists(pipeline)) {
 
 ## Add subfolders
 
-if (!dir.exists(file.path(pipeline,'out',s))) {
-  dir.create(file.path(pipeline,'out',s))
+for(s in 1:length(S)){
+if (!dir.exists(file.path(pipeline,'out',S[s]))) {
+  dir.create(file.path(pipeline,'out',S[s]))
 }
-
+}
 
 # ---------
 # Functions
@@ -75,9 +76,11 @@ if (!dir.exists(file.path(pipeline,'out',s))) {
 
 ## -- Load data from 0_data folder --
 
-T <- read_csv(file.path('empirical', '0_data', 'manual',s, 'T.csv'))
+for(s in 1:length(S)){
 
-if(s=='Michigan'){
+T <- read_csv(file.path('empirical', '0_data', 'manual',S[s], 'T.csv'))
+
+if(S[s]=='Michigan'){
   # first need to sort out IDs
   # assign all those who previously participated their original CASEID
   
@@ -90,9 +93,9 @@ if(s=='Michigan'){
   }
   
   T <- mutate(T,female = SEX-1, single = as.numeric(NUMADT == 1), year = as.numeric(substr(YYYYMM, 1, 4)), month = as.numeric(substr(YYYYMM, 5, 6)), PX1Q1 = PX1Q1 + 5) %>%
-    dplyr::rename(y = PX1, age = AGE, hhinc = INCOME, eduschool = EDUC, region = REGION, id = CASEID, quali = PX1Q1) %>%
-    filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(eduschool) & !is.na(region) & !is.na(age)  & abs(quali) <= 10  & abs(age)<=100  & abs(age)>15) %>%
-    select(female,single,age,eduschool,hhinc,region,y,year,month,id,quali)
+    dplyr::rename(y = PX1, age = AGE, hhinc = INCOME, educ = EDUC, region = REGION, id = CASEID, quali = PX1Q1) %>%
+    filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(educ) & !is.na(region) & !is.na(age)  & abs(quali) <= 10  & abs(age)<=100  & abs(age)>15) %>%
+    select(female,single,age,educ,hhinc,region,y,year,month,id,quali)
   
   T$quali[T$quali == 6] = 5
   T$quali[T$quali == 7] = 4
@@ -100,23 +103,8 @@ if(s=='Michigan'){
   T$quali[T$quali == 10] = 1
 }
 
-if(s=='FRBNY'){
-  T <- mutate(T,female = as.numeric(Q33==1), single = Q38 - 1, year = as.numeric(substr(date, 1, 4)), month = as.numeric(substr(date, 5, 6))) %>%
-    dplyr::rename(y = Q8v2part2, quali = Q8v2, age = Q32, eduschool = Q36, hhinc = Q47, regionCAT = `_REGION_CAT`, id = userid) %>%
-    group_by(id) %>%
-    mutate(female = ifelse(is.na(female), first(female[!is.na(female)]), female),single = ifelse(is.na(single), first(single[!is.na(single)]), single), age = ifelse(is.na(age), first(age[!is.na(age)]), age), hhinc = ifelse(is.na(hhinc), first(hhinc[!is.na(hhinc)]), hhinc), eduschool = ifelse(is.na(eduschool), first(eduschool[!is.na(eduschool)]), eduschool)) %>%
-    mutate(diff_months = (year - first(year)) * 12 + (month - first(month))) %>%
-    mutate(age = ifelse(diff_months <= 12, age, age + floor(diff_months / 12))) %>%
-    ungroup %>%
-    filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(eduschool) & !is.na(regionCAT) & !is.na(age) & abs(eduschool)<=8 & !is.na(quali)  & abs(age)<=100  & abs(age)>15) %>%
-    mutate(region = as.numeric(factor(regionCAT))) %>%
-    select(female,single,age,eduschool,hhinc,region,y,year,month,id,quali)
-  
-  T$quali[T$quali == 1] = 5
-  T$quali[T$quali == 2] = 1
-}
 
-if(s=='BOE'){
+if(S[s]=='BOE'){
   T <- mutate(T,female = as.numeric(Q33==1), single = Q38 - 1, year = as.numeric(substr(date, 1, 4)), month = as.numeric(substr(date, 5, 6))) %>%
     rename(y = Q8v2part2) %>%
     filter(abs(y) <= 95 & !is.na(female) & !is.na(single)) %>%
@@ -124,5 +112,6 @@ if(s=='BOE'){
 }
 
 
-write_csv(T,file.path(pipeline,'out',s, 'T.csv')) 
+write_csv(T,file.path(pipeline,'out',S[s], 'T.csv')) 
 
+}
