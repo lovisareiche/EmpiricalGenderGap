@@ -28,7 +28,6 @@ library(stargazer) # for writing regression tables
 library(pscl) # for McFadden R2
 library(caret) # for variable importance
 library(InformationValue) # for optimal cutoff
-library(rms) # for ordered logit
 library(zoo) # for date vector
 library(MASS) # for ordered logistic
 
@@ -145,8 +144,6 @@ writeLines(capture.output(stargazer(`lfin_BOP-HH`,lfin_FRBNY,
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
                                     intercept.top = TRUE, intercept.bottom = FALSE, 
                                     no.space = FALSE)), 
-           file.path('empirical',outline,'code_fitlit.tex'))
+           file.path(outline,'code_fitlit.tex'))
 
 
-## -- Save T with new predicted variables
-save(T, file = file.path(pipeline, 'out', 'T_fin.RData'))
