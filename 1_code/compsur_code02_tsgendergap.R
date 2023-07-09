@@ -108,7 +108,7 @@ moving_cv <- function(x, n = 6) {             # Create user-defined function
 
 for(i in 1:length(S)){
   T <- read_csv(file.path('empirical', '2_pipeline',f, 'code01_align','out',S[i], 'T.csv')) %>%
-    mutate(survey = S[i], date = as.yearmon(paste(year, month), format = "%Y %m"))
+    mutate(survey = S[i], date = ymd(paste0(year, "-", month, "-01")))
   assign(paste("T_",S[i],sep = ""),T)
   if(i==1){
     F <- T
@@ -295,7 +295,8 @@ xnames_DE <- setdiff(colnames(merged_BOP),'date') %>% # Germany
   setdiff('id') %>%
   setdiff('quali') %>%
   setdiff('cpi_food_germany') %>%
-  setdiff('cpi_tot_germany')
+  setdiff('cpi_tot_germany') %>%
+  setdiff('region')
 xnames_US <- setdiff(colnames(merged_Michigan),'date') %>% # both US are the same
   setdiff('y') %>%
   setdiff('month') %>%
@@ -304,7 +305,8 @@ xnames_US <- setdiff(colnames(merged_Michigan),'date') %>% # both US are the sam
   setdiff('id') %>%
   setdiff('quali') %>%
   setdiff('cpi_food_us') %>%
-  setdiff('cpi_tot_us')
+  setdiff('cpi_tot_us') %>%
+  setdiff('region')
 
 # between effects
 BOP_mean <- degroup(
@@ -347,8 +349,8 @@ Michigan_c <- Michigan_c[!duplicated(Michigan_c[c('id','date')]), ]
 
 
 # reg eqn
-eq_DE <- as.formula(paste('y ~',  paste(xnames_DE, collapse='+'),'+ female:cpi_gap + age_between + hhinc_between'))
-eq_US <- as.formula(paste('y ~',  paste(xnames_US, collapse='+'), '+ female:cpi_gap + age_between'))
+eq_DE <- as.formula(paste('y ~ factor(region) + ',  paste(xnames_DE, collapse='+'),'+ female:cpi_gap + age_between + hhinc_between'))
+eq_US <- as.formula(paste('y ~ factor(region) + ',  paste(xnames_US, collapse='+'), '+ female:cpi_gap + age_between'))
 # per survey
 BOP <- plm( eq_DE, data=BOP_c, effect = "individual", model = "pooling" )
 Michigan <- plm( eq_US, data=Michigan_c, effect = "individual", model = "pooling" )
