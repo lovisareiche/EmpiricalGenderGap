@@ -301,7 +301,8 @@ T$quali[T$quali == 2] = 1
 
 T_base <- T %>%
   # select standard panel
-  dplyr::select(female,single,age,educ,hhinc,region,y,year,month,id,quali)
+  dplyr::select(female,single,age,educ,hhinc,region,y,year,month,id,quali) %>%
+  subset(!duplicated(T))
 
 
 write_csv(T_base,file.path('empirical', '0_data', 'manual',s, 'T.csv')) 

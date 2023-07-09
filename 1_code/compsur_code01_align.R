@@ -96,6 +96,7 @@ if(S[s]=='Michigan'){
     dplyr::rename(y = PX1, age = AGE, hhinc = INCOME, educ = EDUC, region = REGION, id = CASEID, quali = PX1Q1) %>%
     filter(abs(y) <= 95 & !is.na(female) & !is.na(single) & !is.na(hhinc) & !is.na(educ) & !is.na(region) & !is.na(age)  & abs(quali) <= 10  & abs(age)<=100  & abs(age)>15) %>%
     select(female,single,age,educ,hhinc,region,y,year,month,id,quali)
+  T <- subset(T, !duplicated(T))
   
   T$quali[T$quali == 6] = 5
   T$quali[T$quali == 7] = 4

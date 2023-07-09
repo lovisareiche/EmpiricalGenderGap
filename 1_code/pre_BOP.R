@@ -22,6 +22,7 @@ PROJECT_DIR <- 'D:/Lovisa/Studium/Oxford/Department of Economics/DPhil' ## Chang
 library('tidyverse')
 library(haven)
 library(dplyr)
+library(lubridate)
 
 
 ## --------
@@ -285,6 +286,30 @@ combined_data[is.na(combined_data)] <- -6666
 # Sort the combined data frame by a common variable (e.g., participant ID)
 combined_data <- combined_data[order(combined_data$id), ] %>%
   filter(abs(inflexppoint) <= 95 & abs(eduschool) <= 8 & abs(hhinc) <= 13 & abs(expmacroquali_e) <= 5 & abs(infdef) <= 2 & abs(gender) <= 2 & abs(eduwork)<=10)
+
+# Make sure dates are unique
+############################
+
+# Assign values based on 'wave' variable
+combined_data$month[combined_data$wave == 1] <- "Apr"
+combined_data$year[combined_data$wave == 1] <- 2019
+
+combined_data$month[combined_data$wave == 2] <- "May"
+combined_data$year[combined_data$wave == 2] <- 2019
+
+combined_data$month[combined_data$wave == 3] <- "Jun"
+combined_data$year[combined_data$wave == 3] <- 2019
+
+combined_data$month[combined_data$wave == 4] <- "Apr"
+combined_data$year[combined_data$wave == 4] <- 2020
+
+for (wave in 5:33) {
+  month_offset <- (wave - 4) %% 12
+  year_offset <- (wave - 4) %/% 12
+  combined_data$month[combined_data$wave == wave] <- month.abb[(4 + month_offset - 1) %% 12 + 1]
+  combined_data$year[combined_data$wave == wave] <- 2020 + year_offset + (4 + month_offset - 1) %/% 12
+}
+
 
 # Cleaning and defining vars:
 ###############################
