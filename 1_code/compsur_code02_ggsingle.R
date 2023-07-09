@@ -25,6 +25,8 @@ library(xtable) # for latex conversion
 library(stargazer) # for latex table
 library('plm')
 library('datawizard')
+library(lubridate)
+library(caret)
 
 ## --------
 ## Settings
@@ -91,7 +93,7 @@ for(i in 1:length(S)){
   # load aligned data
   
   T <- read_csv(file.path('empirical', '2_pipeline',f, 'code01_align','out',S[i], 'T.csv')) %>%
-    mutate(survey = S[i], date = as.yearmon(paste(year, month), format = "%Y %m")) %>%
+    mutate(survey = S[i], date = ymd(paste0(year, "-", month, "-01"))) %>%
     pdata.frame( index=c( "id", "date" ) )
   assign(paste("T_",S[i],sep = ""),T)
   
@@ -113,14 +115,6 @@ for(i in 1:length(S)){
   
   # do multivariate analysis
   
-  xnames <- setdiff(colnames(T),'date') %>%
-    setdiff('y') %>%
-    setdiff('month') %>%
-    setdiff('year') %>%
-    setdiff('survey') %>%
-    setdiff('id') %>%
-    setdiff('single') %>%
-    setdiff('quali')
   
   T_mean <- degroup(
     T,
@@ -135,8 +129,21 @@ for(i in 1:length(S)){
   T_c <- cbind(T,T_mean) %>%
     pdata.frame(index=c( "id", "date" ) )
   
+  # Obtain the names of the predictor variables
+  predictor_names <- c("age","female","hhinc","educ","age_between","hhinc_between")
+  
+  # Check for multicollinearity
+  cor_matrix <- cor(T_c[, predictor_names])
+  highly_correlated <- findCorrelation(cor_matrix, cutoff = 0.8, names = TRUE, verbose = TRUE)
+  
+  # Remove second variable in highly correlated pairs
+  if (length(highly_correlated) > 0) {
+    variable_to_remove <- highly_correlated
+    predictor_names <- predictor_names[!predictor_names %in% variable_to_remove]
+  }
+  
 
-  eq <- as.formula(paste('y ~ factor(date) +', paste(xnames, collapse='+'), '+ age_between + hhinc_between'))
+  eq <- as.formula(paste('y ~ factor(date) + factor(region) +', paste(predictor_names, collapse = '+')))
   n <- plm( eq, data=filter(T_c,single ==0), effect = "individual", model = "pooling" )
   assign(paste("n_",S[i],sep = ""),n)
   s <- plm( eq, data=filter(T_c,single ==1), effect = "individual", model = "pooling" )
@@ -158,14 +165,13 @@ for(i in 1:length(S)){
 
 # settings for stargazer
 title <- "Multivariate: The gender gap for singles and non-singles"
-omit <- c("factor","between")
-omit.labels <- c("Year dummies","Between effects")
+omit <- c("factor")
+omit.labels <- c("Year dummies")
 label <- "tab:ggsinglemulti"
 dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
 
 # in which order
-desiredOrder <- c("Constant","female","age","eduschool","hhinc",
-                  "region")
+desiredOrder <- c("Constant","female","age","eduschool","hhinc")
 
 writeLines(capture.output(stargazer(`n_BOP-HH`,`s_BOP-HH`,n_FRBNY,s_FRBNY,n_Michigan,s_Michigan,
                                     title = title, label = label, 
