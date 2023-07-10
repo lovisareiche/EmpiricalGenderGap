@@ -143,7 +143,13 @@ for(s in 1:length(S)){
   # Model 2: include financial literacy
   #####################################
   
-  eq <- as.formula(tail ~ factor(date) + fin_lit_test  + age + single + female + hhinc + educ + factor(region) + age_between + hhinc_between)
+  if(S[s]=='BOP-HH'){
+    # for bop and fin-lit-test there cannot be date factor as all one date
+    eq <- as.formula(tail ~ fin_lit_test  + age + single + female + hhinc + educ + factor(region) + age_between + hhinc_between)
+  }
+  if(S[s]=='FRBNY'){
+    eq <- as.formula(tail ~ factor(date) + fin_lit_test  + age + single + female + hhinc + educ + factor(region) + age_between + hhinc_between)
+  }
   
   # run regressions
   b <- glm( eq, data=T_c, family = "binomial")
@@ -238,4 +244,4 @@ writeLines(capture.output(stargazer(mbop,bbop,ebop,msce,bsce,esce,
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels,
                                     add.lines = add.lines)), 
-           file.path('empirical',outline, 'code_charactertail.tex'))
+           file.path(outline, 'code_charactertail.tex'))
