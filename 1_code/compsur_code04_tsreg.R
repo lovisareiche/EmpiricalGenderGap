@@ -304,19 +304,55 @@ slv <- lm(sce ~ food_cpi + tot_cpi + food_cpi_lag + tot_cpi_lag + food_cpi_cv + 
 
 summary(s)
 
+coef_diff <- data.frame()
+# Compute the difference between coefficient for female in models s and n
+coef_diff[1,1] <- round(coef(m)["food_cpi"] - coef(m)["tot_cpi"], digits = 2)
+coef_diff[1,2] <- round(coef(mq)["food_cpi"] - coef(mq)["tot_cpi"], digits = 2)
+coef_diff[1,3] <- round(coef(mql)["food_cpi"] - coef(mql)["tot_cpi"], digits = 2)
+coef_diff[1,4] <- round(coef(msql)["food_cpi"] - coef(msql)["tot_cpi"], digits = 2)
+coef_diff[1,5] <- round(coef(s)["food_cpi"] - coef(s)["tot_cpi"], digits = 2)
+coef_diff[1,6] <- round(coef(sq)["food_cpi"] - coef(sq)["tot_cpi"], digits = 2)
+coef_diff[1,7] <- round(coef(sql)["food_cpi"] - coef(sql)["tot_cpi"], digits = 2)
+coef_diff[1,8] <- round(coef(e)["food_cpi"] - coef(e)["tot_cpi"], digits = 2)
+coef_diff[1,9] <- round(coef(eq)["food_cpi"] - coef(eq)["tot_cpi"], digits = 2)
+coef_diff[1,10] <- round(coef(eql)["food_cpi"] - coef(eql)["tot_cpi"], digits = 2)
+coef_diff[1,11] <- round(coef(b)["food_cpi"] - coef(b)["tot_cpi"], digits = 2)
+coef_diff[1,12] <- round(coef(bq)["food_cpi"] - coef(bq)["tot_cpi"], digits = 2)
+coef_diff[1,13] <- round(coef(bql)["food_cpi"] - coef(bql)["tot_cpi"], digits = 2)
+
+# Compute the standard error of the difference
+se_diff <- data.frame()
+se_diff[1,1] <- round(sqrt(vcov(m)["food_cpi", "food_cpi"] + vcov(m)["tot_cpi", "tot_cpi"]), digits = 2)
+se_diff[1,2] <- round(sqrt(vcov(mq)["food_cpi", "food_cpi"] + vcov(mq)["tot_cpi", "tot_cpi"]), digits = 2)
+se_diff[1,3] <- round(sqrt(vcov(mql)["food_cpi", "food_cpi"] + vcov(mql)["tot_cpi", "tot_cpi"]), digits = 2)
+se_diff[1,4] <- round(sqrt(vcov(msql)["food_cpi", "food_cpi"] + vcov(msql)["tot_cpi", "tot_cpi"]), digits = 2)
+se_diff[1,5] <- round(sqrt(vcov(s)["food_cpi", "food_cpi"] + vcov(s)["tot_cpi", "tot_cpi"]), digits = 2)
+se_diff[1,6] <- round(sqrt(vcov(sq)["food_cpi", "food_cpi"] + vcov(sq)["tot_cpi", "tot_cpi"]), digits = 2)
+se_diff[1,7] <- round(sqrt(vcov(sql)["food_cpi", "food_cpi"] + vcov(sql)["tot_cpi", "tot_cpi"]), digits = 2)
+se_diff[1,8] <- round(sqrt(vcov(e)["food_cpi", "food_cpi"] + vcov(e)["tot_cpi", "tot_cpi"]), digits = 2)
+se_diff[1,9] <- round(sqrt(vcov(eq)["food_cpi", "food_cpi"] + vcov(eq)["tot_cpi", "tot_cpi"]), digits = 2)
+se_diff[1,10] <- round(sqrt(vcov(eql)["food_cpi", "food_cpi"] + vcov(eql)["tot_cpi", "tot_cpi"]), digits = 2)
+se_diff[1,11] <- round(sqrt(vcov(b)["food_cpi", "food_cpi"] + vcov(b)["tot_cpi", "tot_cpi"]), digits = 2)
+se_diff[1,12] <- round(sqrt(vcov(bq)["food_cpi", "food_cpi"] + vcov(bq)["tot_cpi", "tot_cpi"]), digits = 2)
+se_diff[1,13] <- round(sqrt(vcov(bql)["food_cpi", "food_cpi"] + vcov(bql)["tot_cpi", "tot_cpi"]), digits = 2)
+
 # --- Print output
 
 # settings for stargazer
 column.labels <- c("MSC","SCE","ECFIN","BOP")
 title <- "Timeseries regression"
 label <- paste("tab:timeseries_",mo,sep = "")
+cd <- c("$\textit{CPI}^{food}_t-\textit{CPI}^{total}_t$",coef_diff[1,1],coef_diff[1,2],coef_diff[1,3],coef_diff[1,4],coef_diff[1,5],coef_diff[1,6],coef_diff[1,7],coef_diff[1,8],coef_diff[1,9],coef_diff[1,10],coef_diff[1,11],coef_diff[1,12],coef_diff[1,13])
+sd <- c("",se_diff[1,1],se_diff[1,2],se_diff[1,3],se_diff[1,4],se_diff[1,5],se_diff[1,6],se_diff[1,7],se_diff[1,8],se_diff[1,9],se_diff[1,10],se_diff[1,11],se_diff[1,12],se_diff[1,13])
+add.lines <- list(cd,sd)
 
 if(mo!="sd"){
   writeLines(capture.output(stargazer(m, mq, mql, msql, s, sq, sql, e, eq, eql, b, bq, bql,
                                     title = title, label = label, 
                                     column.labels = column.labels,  model.names = FALSE, 
                                     align=TRUE , df = FALSE, digits = 2, header = FALSE, 
-                                    intercept.top = TRUE, intercept.bottom = FALSE)),
+                                    intercept.top = TRUE, intercept.bottom = FALSE,
+                                    add.lines = add.lines)),
            file.path(outline, paste('code_tsreg_',mo,'.tex',sep = "")))
 } else {
   writeLines(capture.output(stargazer(m, mq, mql,  msql, s, sq, sql, b, bq, bql,
