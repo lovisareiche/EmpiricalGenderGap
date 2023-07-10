@@ -138,5 +138,5 @@ merged <- cbind(`F_BOP-HH`, F_FRBNY)
 writeLines(capture.output(xtable(merged, 
             caption = "Comparing the male and female subsamples", 
             label = "tab:ggfinlit")),
-            file.path('empirical',outline, 'code_ggfinlit.tex'))
+            file.path(outline, 'code_ggfinlit.tex'))
   
