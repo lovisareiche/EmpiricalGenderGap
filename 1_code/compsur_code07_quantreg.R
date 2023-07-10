@@ -103,9 +103,9 @@ Q <- data.frame()
 R <- data.frame()
 AR <- data.frame()
 
-for(i in 2:length(S)){
+for(i in 1:length(S)){
   T <- read_csv(file.path('empirical', '2_pipeline',f, 'code01_align','out',S[i], 'T.csv')) %>%
-    mutate(survey = S[i], date = as.yearmon(paste(year, month), format = "%Y %m")) %>%
+    mutate(survey = S[i], date = ymd(paste0(year, "-", month, "-01"))) %>%
     pdata.frame( index=c( "id", "date" ) )
   
   T <- T[!duplicated(T[c('id','date')]), ]
@@ -145,12 +145,19 @@ for(i in 2:length(S)){
   predictor_names <- c( xnames, paste(xtvnames, "_between", sep = ""))
   
   # Check for multicollinearity
-  cor_matrix <- cor(T_c[, predictor_names])
+  cor_matrix <- cor(na.omit(T_c[, predictor_names]))
   highly_correlated <- findCorrelation(cor_matrix, cutoff = 0.8, names = TRUE, verbose = TRUE)
+  
+  # Function to check and attach "_between" if necessary
+  check_and_attach <- function(element) {
+    if (!grepl("_between", element))
+      element <- paste0(element, "_between")
+    return(element)
+  }
   
   # Remove second variable in highly correlated pairs
   if (length(highly_correlated) > 0) {
-    variable_to_remove <- highly_correlated
+    variable_to_remove <- sapply(highly_correlated,check_and_attach)
     predictor_names <- predictor_names[!predictor_names %in% variable_to_remove]
   }
   
