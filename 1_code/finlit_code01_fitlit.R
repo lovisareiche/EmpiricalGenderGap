@@ -96,15 +96,19 @@ for(s in 1:length(S)){
   
   #load data
   T <- read_csv(file.path('empirical', '0_data', 'manual',S[s], 'T_fin.csv')) %>%
-    mutate(date = as.yearmon(paste(year, month), format = "%Y %m")) %>%
+    mutate(date = ymd(paste0(year, "-", month, "-01"))) %>%
     pdata.frame( index=c( "id", "date" ) )
   
   # Define variables used in regression
   if(S[s]=='BOP-HH'){
     finlitnames <- c("intqr", "round", "refresher", "qeasy", "qinterest")
-  }
+    # formula
+    eq <- as.formula(paste('fin_lit_test ~ factor(region) + age + female + single + hhinc + educ +', paste(finlitnames, collapse='+')))
+    }
   if(S[s]=='FRBNY'){
     finlitnames <- c("intqr", "round", "refresher", "qinterest")
+    # formula
+    eq <- as.formula(paste('fin_lit_test ~ factor(region) + factor(date) + age + female + single + hhinc + educ +', paste(finlitnames, collapse='+')))
   }
   
   # define data used for predicting:
@@ -114,9 +118,6 @@ for(s in 1:length(S)){
   Tsub$fin_lit_test <- ordered(Tsub$fin_lit_test, levels = c(0, 1, 2, 3),
                                      labels = c("Low", "Medium", "High", "Very High"))
   
-  # formula
-  eq <- as.formula(paste('fin_lit_test ~ age + female + single + hhinc + educ + region +', paste(finlitnames, collapse='+')))
-
   # ordinal logistic regression on sub sample for which we have the test
   lfin <- polr(eq, data= Tsub, method = "logistic",Hess=TRUE)
   # predict out of sample
