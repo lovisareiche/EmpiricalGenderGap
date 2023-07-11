@@ -1,19 +1,19 @@
-## Intro
+# Intro
 
 This folder contains all codes used for the paper: That’s what she said: An Empirical Investigation on the Gender Gap in Inflation Expectations
 
 All codes are written by Lovisa Reiche.
 
-## Master
+# Master
 
 The paper can be replicated by running master.R
 It requires that all datasets are saved in 0_data/external in sub-folders named according to each survey (BOP-HH, FRBNY, Michigan, ECFIN)
 
-## Individual replications
+# Individual replications
 
 Individual parts of the paper can be replicated as follows:
 
-# Tables
+## Tables
 
 Table 1: compsur_code02_ggsingle
 Table 2: compsur_code04_tsreg
@@ -31,7 +31,7 @@ Table 11: hhrole_code02_reg
 Table 13: compsur_code07_quantreg
 Table 14: finlit_code01_fitlit
 
-# Figures
+## Figures
 
 Figure 1:
 Figure 3: 
@@ -41,7 +41,7 @@ Figure 9: compsur_code07_quantreg
 Figure 11: finlit_code06_finhist
 Figure C1: 
 
-# Notes
+## Notes
 
 Dataformat requires preBOP and preSCE to be run prior to any analysis.
 
