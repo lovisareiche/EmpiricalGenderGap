@@ -16,30 +16,40 @@ Individual parts of the paper can be replicated as follows:
 ## Tables
 
 Table 1: compsur_code02_ggsingle
+
 Table 2: compsur_code04_tsreg
+
 Table 3: compsur_code04_tsreg
+
 Table 4: compsur_code02_tsgendergap
 
+
 Table 5: finlit_code02_ggfinlit
+
 Table 6: finlit_code04_tail
+
 Table 7: compsur_code06_ghghighermoments
+
 Table 8 & 9: finlit_code05_regresswithfin
 
+
 Table 10: hhrole_code01_summary
+
 Table 11: hhrole_code02_reg
 
+
 Table 13: compsur_code07_quantreg
+
 Table 14: finlit_code01_fitlit
 
 ## Figures
 
-Figure 1:
-Figure 3: 
+
 Figure 5: finlit_code03_finlitdist
-Figure 7: 
+
 Figure 9: compsur_code07_quantreg
+
 Figure 11: finlit_code06_finhist
-Figure C1: 
 
 ## Notes
 
