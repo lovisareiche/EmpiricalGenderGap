@@ -478,10 +478,10 @@ T <- T %>%
   ungroup 
 
 # assume singles do all themselves
-T$shop_groceries[is.na(T$shop_groceries) & T$single==1] <- 3
-T$shop_major[is.na(T$shop_major) & T$single==1] <- 3
-T$prep_meals[is.na(T$prep_meals) & T$single==1] <- 3
-T$decide_finance[is.na(T$decide_finance) & T$single==1] <- 3
+T$shop_groceries[T$single==1] <- 3
+T$shop_major[T$single==1] <- 3
+T$prep_meals[T$single==1] <- 3
+T$decide_finance[T$single==1] <- 3
 
 
 # clean
