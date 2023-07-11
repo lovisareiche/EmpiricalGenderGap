@@ -22,6 +22,7 @@ library('tidyverse')
 library(stargazer)
 library(plm)
 library('datawizard') # between effects
+library(caret) # find correlation
 
 
 
@@ -106,7 +107,7 @@ for(s in 1:length(S)){
   # demeaning
   T_mean <- degroup(
     T,
-    c("age","hhinc"),
+    c("age","hhinc","single"),
     "id",
     center = "mean",
     suffix_groupmean = "_between",
