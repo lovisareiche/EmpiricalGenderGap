@@ -1,89 +1,51 @@
-# Codes
+## Intro
 
-This folder contains all codes used. There are two pathways to follow:
+This folder contains all codes used for the paper: That’s what she said: An Empirical Investigation on the Gender Gap in Inflation Expectations
 
-## 1. Follow original Matlab Codes
+All codes are written by Lovisa Reiche.
 
-### code01_load
-This file imports the csv files of all waves specified in w and transfers them into a structure with one table for each wave.
-Structures are chosen such that the code can only be run for new waves as updates follow.
+## Master
 
-### code02_prepvars
-This file prepares all used variables such that they can be used in a regression. 
-In the first part, some variables are dealth with individually. It is advised to run these codes only once per variable and wave. Note: this section of the code takes about 24h to run (if all waves are used). For updates: run this only for new waves to sava time.
-The main section can be run several times and runs fairly quick.
+The paper can be replicated by running master.R
+It requires that all datasets are saved in 0_data/external in sub-folders named according to each survey (BOP-HH, FRBNY, Michigan, ECFIN)
 
-### code03_compilepanel
-This file compiles the final panel in one table. It also removes variables which have a lot of missing values.
-We can run this code for a range of compositions. These have to be chosen under t.
+## Individual replications
 
-### code04_ols
-This file runs the first regression, the OLS regression.
-Here we run a "normal" OLS without time fixed effects and a pooled OLS with time effects to account for the panel structure.
-Assumptions OLS: No heteroskedasticity, random effects, no time fixed effects
-Assumptions PO: Random effects and predeterminedness.
+Individual parts of the paper can be replicated as follows:
 
-### code05_randomeffects
-This file runs the Random Effects regression and performs the Beusch Pagan LM test.
-Assumptions: Random effects and strict exogeneity.
-Beusch Pagan Test has null of no random effects
+# Tables
 
-### code06_hausmantaylor
-Hausman Taylor estimation. The sample is split into 4 groups, time varying and time invariant exogenous and endogenous variables. 
-We use fixed effects estimation to estimate all time varying (to control for endogeneity) and the apply an IV approach to recover the time invariant endogenous.
-Assumptions: Fixed effects and strict exogeneity.
+Table 1: compsur_code02_ggsingle
+Table 2: compsur_code04_tsreg
+Table 3: compsur_code04_tsreg
+Table 4: compsur_code02_tsgendergap
 
-### WIP
-code07_iv and code08_pesaranols are work in progress.
+Table 5: finlit_code02_ggfinlit
+Table 6: finlit_code04_tail
+Table 7: compsur_code06_ghghighermoments
+Table 8 & 9: finlit_code05_regresswithfin
 
-## 2. Follow new estimation in R
+Table 10: hhrole_code01_summary
+Table 11: hhrole_code02_reg
 
-### Setup
-Use the first three files in Matlab as indicated above.
+Table 13: compsur_code07_quantreg
+Table 14: finlit_code01_fitlit
 
-### code04_regress
-This file computes the regressions for the cleaned unbalanced dataset.
-#### Settings: 
-- choose combination of included vars (base, interactions, etc) in t          
-- choose if model runs on logs or level
-#### Estimates: 
-- OLS (including a linear model and a least squared dummy variable model)
-- Variable Coefficients Model (allow coefficients to vary between individuals or time periods)
-- Between Estimator (OLS on time averaged)
-- Random effects estimator (uses walhus method)
-- Feasible GLS estimator 
-- Hausman Taylor type estimators
-- Including between effects as controls
+# Figures
 
-### code05_compest
-Create a latex file to compare the estimators.
-#### Settings: 
-- choose combination of vars (typically base)
-- level or logs
-#### Output files: 
-- summary statistics 
-- comparison of y.OLS, y.PO, y.RE, y.FEt, y.LSDVt_control
-#### Note:
-Some variables are not shown in final table. This needs to be specified in the code.
-The code runs Beusch Pagan test (null: homoskedasticity) and Hausman test for endogeneity (RE on subset)
+Figure 1:
+Figure 3: 
+Figure 5: finlit_code03_finlitdist
+Figure 7: 
+Figure 9: compsur_code07_quantreg
+Figure 11: finlit_code06_finhist
+Figure C1: 
 
-### code06_compmod
-Create a latex file to compare the models.
-#### Settings: 
-- choose estimator used (typically LSDV_control) 
-- level or logs
-#### Output files: 
-- comparison of base, interaction, no pessimist, no uncertainty, no hhroles or none of them
-- comparison of no quali, no shopintent, no geo, no edu, no inc
-#### Note:  
-Some variables are not shown in final table. This needs to be specified in the code.
+# Notes
 
-### Robustness Checks
+Dataformat requires preBOP and preSCE to be run prior to any analysis.
 
-#### robust_meanexplainlit
-Run an ordinal logistic regression to see how much of the financial literacy (subjective or test score) is indeed caused by the time invariant and time variant variables. The output is a table that compares a model including and excluding time invariant variables in a cross-sectional dataset (question was asked in waves 21 (subjective) and 25 (test)).
+It is recommended to always run all codes of one track (compsur, finlit or hhrole)
 
-#### robust_uncertaintydrivers
-Investigate which of the uncertainty variables causes the coefficient on female to change in the model comparison. One by one intqr, refresh, nround, nointerest and easy are removed. Need to set the same settings as for the model comparison.
-
+Figures are computed in separate overleaf projects but codes show how data ius computed.
 
