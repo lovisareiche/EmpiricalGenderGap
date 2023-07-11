@@ -2,7 +2,7 @@
 # Introduction
 # ------------
 
-## This file 
+## This file computes regression interacting financial literacy and experience
 
 rm(list=ls())
 NAME <- 'code02_reg' 
