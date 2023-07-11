@@ -97,7 +97,7 @@ Qecfin <- read_csv2(file.path('empirical', '0_data', 'manual','ECFIN','Q60.csv')
 # have to code balance statistic
 
 Qbop <- read_csv(file.path('empirical', '2_pipeline', 'compsur','code01_align','out','BOP-HH', 'T.csv')) %>%
-  mutate(date = as.yearmon(paste(year, month), format = "%Y %m")) %>%
+  mutate(date = ymd(paste0(year, "-", month, "-01"))) %>%
   select(quali,date,female) %>%
   group_by(date,female) %>%
   dplyr::summarise(q1 = sum(as.numeric(quali == 1))/length(quali),q2 = sum(as.numeric(quali == 2))/length(quali),q4 = sum(as.numeric(quali == 4))/length(quali),q5 = sum(as.numeric(quali == 5))/length(quali)) %>%
