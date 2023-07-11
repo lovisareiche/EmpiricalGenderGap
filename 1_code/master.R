@@ -19,22 +19,6 @@ code_source <- file.path('empirical', '1_code')
 
 source(file.path('empirical', '1_code',"pre_BOP.R"))
 
-# 
-# # Stata to CSV
-# # source: empirical/0_data/external/BOP-HH 
-# # save them as csv in: empirical/pipeline/out
-# source(file.path(code_source,"import_dta.R"))
-# 
-# setwd(file.path(PROJECT_DIR, PROJECT, code_source))
-# 
-# # Processing of CSV files in Matlab to save in one .mat file
-# # run bopreg_code01_load.m
-# system("matlab -nodisplay -r \"run('bopreg_code01_load.m'); exit\"")
-# # run bopreg_code02_prepvars.m
-# system("matlab -nodisplay -r \"run('bopreg_code02_prepvars.m'); exit\"")
-# # run bopreg_code03_compilepanel.m
-# system("matlab -nodisplay -r \"run('bopreg_code03_compilepanel.m'); exit\"")
-
 # Preparing SCE
 
 source(file.path('empirical', '1_code',"pre_SCE.R"))
@@ -73,5 +57,106 @@ source(file.path('empirical', '1_code',"compsur_code02_tsgendergap.R"))
 source(file.path('empirical', '1_code',"compsur_code03_addquali.R"))
 source(file.path('empirical', '1_code',"compsur_code04_tsreg.R"))
 # code saves code_tsreg_mean (comparing different surveys) and code_tsreg_msc (analysis of MSC) in the output folder
+
+######################
+##Financial Literacy##
+######################
+
+## -------
+## Table 14
+## -------
+
+# prep BOP and SCE 
+# produce predicted test scores 
+source(file.path('empirical', '1_code',"finlit_code01_fitlit.R"))
+
+
+## -------
+## Table 5
+## -------
+
+# Compute table to compare financial literacy for men and women. Output saved as code for the table.
+source(file.path('empirical', '1_code',"finlit_code02_ggfinlit.R"))
+
+
+## -------
+## Figure 5
+## -------
+
+# Kernel Density plots split by literacy. Output saved as text in pipeline to be used in latex code.
+source(file.path('empirical', '1_code',"finlit_code03_finlitdist.R"))
+# kdpredbop
+# kdpredsce
+# kdtestbop
+# kdtestsce
+
+
+## -------
+## Table 6
+## -------
+
+# Compute table to anal<yse determinants of being in the tail. Output saved as code for the table.
+source(file.path('empirical', '1_code',"finlit_code04_tail.R"))
+
+
+## -------
+## Table 7
+## -------
+
+# Compute table to show moments of inflexp for men and women. Output saved as code for the table.
+source(file.path('empirical', '1_code',"compsur_code06_gghighermoments.R"))
+
+
+## -------
+## Figure 9 (and Table 13)
+## -------
+
+# Compute quantile regression. Output saved as code for the table and in pipeline as text file for the figures.
+source(file.path('empirical', '1_code',"compsur_code07_quantreg.R"))
+# bopfemalequant
+# scefemalequant
+# mscfemalequant
+
+
+## -------
+## Table 8 and 9
+## -------
+
+# Compute table to analyse impact of fin lit on gender gap. Output saved as code for the table.
+source(file.path('empirical', '1_code',"finlit_code05_regresswithfin.R"))
+# output in two files, one for BOP and one for SCE
+
+
+## -------
+## Table 11
+## -------
+
+# Compute histograms for the figures. Output saved as text file in pipeline to be used in latex.
+source(file.path('empirical', '1_code',"finlit_code06_finhist.R"))
+# finlitfemaleintboppred
+# finlitfemaleintscepred
+# note that these codes also use the regression coefficients computed for the table above (8)
+
+
+###################
+##Household Roles##
+###################
+
+# Note: only BOP
+
+## -------
+## Table 10
+## -------
+
+# Compute table to check presence of traditional gender norms. Output saved as code for the table.
+source(file.path('empirical', '1_code',"hhrole_code01_summary.R"))
+
+
+## -------
+## Table 11
+## -------
+
+# Compute table with regression including finlit and experience. Output saved as code for the table.
+source(file.path('empirical', '1_code',"hhrole_code02_reg.R"))
 
 
