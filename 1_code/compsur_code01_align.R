@@ -81,16 +81,17 @@ for(s in 1:length(S)){
 T <- read_csv(file.path('empirical', '0_data', 'manual',S[s], 'T.csv'))
 
 if(S[s]=='Michigan'){
-  # first need to sort out IDs
-  # assign all those who previously participated their original CASEID
+  #first need to sort out IDs
+  #assign all those who previously participated their original CASEID
   
-  for(i in nrow(T):1){ # for all rows
+  for(i in 1:nrow(T)){ # for all rows
     if(!is.na(T$IDPREV[i])){ # find those that have participated before
-      if(length(T$CASEID[T$ID == T$IDPREV[i] & T$YYYYMM == T$DATEPR[i]])>0){
+      if(!is_empty(T$CASEID[T$ID == T$IDPREV[i] & T$YYYYMM == T$DATEPR[i]])){
         T$CASEID[i] = T$CASEID[T$ID == T$IDPREV[i] & T$YYYYMM == T$DATEPR[i]] # assign them their original case id
       }
     }
-  }
+    }
+
   
   T <- mutate(T,female = SEX-1, single = as.numeric(NUMADT == 1), year = as.numeric(substr(YYYYMM, 1, 4)), month = as.numeric(substr(YYYYMM, 5, 6)), PX1Q1 = PX1Q1 + 5) %>%
     dplyr::rename(y = PX1, age = AGE, hhinc = INCOME, educ = EDUC, region = REGION, id = CASEID, quali = PX1Q1) %>%
