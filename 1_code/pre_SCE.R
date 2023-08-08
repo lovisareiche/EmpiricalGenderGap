@@ -394,3 +394,36 @@ T_exp <- select(T,female,single,age,educ,hhinc,region,y,year,month,id,quali,intq
 ###### 
 
 write_csv(T_exp,file.path('empirical', '0_data', 'manual',s, 'T_exp.csv')) 
+
+
+## Add Categorical Expectations
+###############################
+
+# rename
+
+T <- rename(T,y_gas = C4_1, y_food = C4_2, y_medic = C4_3, y_educ = C4_4, y_rent = C4_5, y_gold = C4_6 )
+
+# clean
+
+T_cat <- select(T,female,single,age,educ,hhinc,region,y,year,month,id,quali,intqr,round,qinterest,refresher,fin_lit_test,decide_finance, y_gold, y_rent, y_educ, y_medic, y_food, y_gas) %>%
+  # remove intqr obs with absolute val greater 12 (ie -5555)
+  filter(abs(intqr)<=100) %>%
+  # remove nas
+  na.omit %>%
+  # remove qinterest and qeasy in abs val greater than 5
+  filter(abs(qinterest) <= 5) %>%
+  # remove non existent experience
+  filter(abs(decide_finance) <= 5) %>%
+  # remove expectations beong 100% 
+  filter(abs(y_gas)<=100) %>%
+  filter(abs(y_food)<=100) %>%
+  filter(abs(y_medic)<=100) %>%
+  filter(abs(y_educ)<=100) %>%
+  filter(abs(y_rent)<=100) %>%
+  filter(abs(y_gold)<=100) 
+  
+
+# save
+###### 
+
+write_csv(T_cat,file.path('empirical', '0_data', 'manual',s, 'T_cat.csv')) 
