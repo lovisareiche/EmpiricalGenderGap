@@ -85,7 +85,7 @@ T <- read_csv(file.path('empirical', '0_data', 'manual','BOP-HH', 'T_exp.csv')) 
 
 # summarise gender roles for full sample
 all <- group_by(T,female) %>%
-  summarise(shop_groceries = mean(shop_groceries), shop_major = mean(shop_major), prep_meals = mean(prep_meals), decide_finance = mean(decide_finance))
+  summarise(shop_groceries = mean(shop_groceries), shop_major = mean(shop_major), prep_meals = mean(prep_meals), decide_finance = mean(decide_finance), single= mean(single))
 
 # and non single subset
 non_singles <- group_by(filter(T,single==0),female) %>%
