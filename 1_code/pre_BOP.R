@@ -502,3 +502,41 @@ T_exp <- T_exp[complete.cases(T_exp[, !(names(T_exp) %in% "fin_lit_test")]), ]
 ###### 
 
 write_csv(T_exp,file.path('empirical', '0_data', 'manual',s, 'T_exp.csv')) 
+
+
+
+## Add Mood
+###########
+
+combined_data$mood2021[combined_data$mood2021<0] <- NA
+combined_data$moodnext12months[combined_data$moodnext12months<0] <- NA
+combined_data$mood_currentyear[combined_data$mood_currentyear<0] <- NA
+
+
+# use whichever mood variable is available
+combined_data <- combined_data %>%
+  mutate(mood = coalesce(mood2021, moodnext12months, mood_currentyear))
+
+# don't assume that it stays constant
+T$mood <- combined_data$mood
+
+
+# clean
+########
+
+# remove intqr obs with absolute val greater 12 (ie -5555)
+T_mood <- filter(T,abs(intqr)<=12) %>%
+  # remove qinterest and qeasy in abs val greater than 5
+  filter(abs(qeasy) <= 5 & abs(qinterest) <= 5) %>%
+  # remove non existent experience
+  filter(abs(shop_groceries) <= 3, abs(shop_major) <= 3, abs(prep_meals) <= 3, abs(decide_finance) <= 3)
+
+  # Subset the data frame to remove rows with NA values in all columns except fin_lit_test
+  # this also removes na in mood
+  T_mood <- T_mood[complete.cases(T_mood[, !(names(T_mood) %in% "fin_lit_test")]), ]
+
+
+# save
+###### 
+
+write_csv(T_mood,file.path('empirical', '0_data', 'manual',s, 'T_mood.csv')) 
