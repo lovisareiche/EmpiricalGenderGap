@@ -29,7 +29,7 @@ library(caroline)
 ### Any settings go here
 
 f <- 'bopreg'
-s <- "test_finilliterate"
+s <- "female"
 
 
 ## ---------------------

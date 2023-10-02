@@ -101,12 +101,12 @@ for(s in 1:length(S)){
   
   # Define variables used in regression
   if(S[s]=='BOP-HH'){
-    finlitnames <- c("intqr", "round", "refresher", "qeasy", "qinterest")
+    finlitnames <- c("round", "refresher", "qeasy", "qinterest")
     # formula
     eq <- as.formula(paste('fin_lit_test ~ factor(region) + age + female + single + hhinc + educ +', paste(finlitnames, collapse='+')))
     }
   if(S[s]=='FRBNY'){
-    finlitnames <- c("intqr", "round", "refresher", "qinterest")
+    finlitnames <- c("round", "refresher", "qinterest")
     # formula
     eq <- as.formula(paste('fin_lit_test ~ factor(region) + factor(date) + age + female + single + hhinc + educ +', paste(finlitnames, collapse='+')))
   }
