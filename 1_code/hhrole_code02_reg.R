@@ -92,7 +92,7 @@ hhroles <- c('shop_groceries','shop_major','prep_meals','decide_finance')
 #########################################################################
 
 # Define variables used in regression
-  finlitnames <- c("intqr", "round", "refresher", "qeasy", "qinterest")
+  finlitnames <- c("round", "refresher", "qeasy", "qinterest")
   # formula
   eq <- as.formula(paste('fin_lit_test ~ factor(region) + age + female + single + hhinc + educ +', paste(finlitnames, collapse='+')))
 
@@ -191,5 +191,23 @@ writeLines(capture.output(stargazer(b,f,e,fe,feint,sfeint,
                                     dep.var.labels = dep.var.labels, no.space = FALSE)), 
            file.path(outline,'code_regresswithfinexp.tex'))
 
+
+coefficients <- coef(feint)
+vcovm <- vcovHC(feint)
+
+# Specify the coefficients you want to sum
+coefs_to_sum <- c("shop_groceries", "lfinpred:shop_groceries")
+
+# Find the indices of these coefficients in the coefficient vector
+coef_indices <- which(names(coefficients) %in% coefs_to_sum)
+
+# Compute the standard error of the sum of coefficients
+se_sum_of_coefs <- sqrt(vcovm[coef_indices[1],coef_indices[1]] + vcovm[coef_indices[2],coef_indices[2]] + 2*vcovm[coef_indices[1],coef_indices[2]])
+
+# Calculate the share of values above x
+share_below_x <- mean(T$lfinpred < 0.4757)
+
+# Calculate the number of women with values below x
+women_below_x <- mean(T$female[T$lfinpred < 0.4757])
 
 
