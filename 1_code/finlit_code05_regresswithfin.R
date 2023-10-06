@@ -195,4 +195,34 @@ for(s in 1:length(S)){
                                       dep.var.labels = dep.var.labels, no.space = FALSE)), 
              file.path(outline, S[s],'code_regresswithfin.tex'))
              
-  }
+}
+
+
+############## For Plotting
+###########################################
+# Extract the coefficient estimates and standard errors
+# run for both s=1 and s=2
+coefficients <- coef(tlint)
+vcovm <- vcovHC(tlint)
+
+# Specify the coefficients you want to sum
+coefs_to_sum <- c("female", "lfinpred:female")
+
+# Find the indices of these coefficients in the coefficient vector
+coef_indices <- which(names(coefficients) %in% coefs_to_sum)
+
+# Compute the standard error of the sum of coefficients
+se_sum_of_coefs <- sqrt(vcovm[coef_indices[1],coef_indices[1]] + vcovm[coef_indices[2],coef_indices[2]] + 2*vcovm[coef_indices[1],coef_indices[2]])
+lb <- 1.96*se_sum_of_coefs
+
+# when the lower bound hits zero
+x = as.numeric((coefficients[coefs_to_sum[1]]-lb)/(-coefficients[coefs_to_sum[2]]))
+
+# Calculate the share of values above x
+share_below_x <- mean(T$lfinpred < x)
+
+# Calculate the number of women with values below x
+women_below_x <- mean(T$female[T$lfinpred < x])
+
+
+
