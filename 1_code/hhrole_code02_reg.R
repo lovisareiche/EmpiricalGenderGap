@@ -90,6 +90,9 @@ hhroles <- c('shop_groceries','shop_major','prep_meals','decide_finance')
 
 ## -- Detour: compute financial literacy score as in finlit_code01_fitlit 
 #########################################################################
+# Note: This is done because in finlit structure the dataset is larger since we don't restrict to obervations that we have hh roles for 
+# Convoluted structure as a consequence of paper restructuring.
+
 
 # Define variables used in regression
   finlitnames <- c("round", "refresher", "qeasy", "qinterest")
@@ -110,6 +113,7 @@ T$lfinpred <- predict(lfin, newdata = T, type="probs")[,4]   #gets Prob(>=3)
 
 # Save T with new predicted variables
 write_csv(T, file.path(pipeline, 'out','T.csv'))
+
 
 ## -- Multivariate analysis
 ###############################
@@ -150,27 +154,27 @@ if (length(highly_correlated) > 0) {
 
 # baseline 
 eq <- as.formula(paste('y ~ factor(date) + factor(region) +', paste(predictor_names, collapse = '+')))
-b <- plm( eq, data=T_c, effect = "individual", model = "pooling")
+b <- plm( eq, data=filter(T_c, single==0), effect = "individual", model = "pooling")
 
 # introducing financial literacy
 eq <- as.formula(paste('y ~ factor(date) + factor(region) + lfinpred + ', paste(predictor_names, collapse = '+')))
-f <- plm( eq, data=T_c, effect = "individual", model = "pooling")
+f <- plm( eq, data=filter(T_c, single==0), effect = "individual", model = "pooling")
 
 # introducing shopping
 eq <- as.formula(paste('y ~ factor(date) + factor(region) +', paste(predictor_names, collapse = '+'), '+', paste(hhroles, collapse = '+')))
-e <- plm( eq, data=T_c, effect = "individual", model = "pooling")
+e <- plm( eq, data=filter(T_c, single==0), effect = "individual", model = "pooling")
 
 # both together
 eq <- as.formula(paste('y ~ factor(date) + factor(region) + lfinpred +', paste(predictor_names, collapse = '+'), '+', paste(hhroles, collapse = '+')))
-fe <- plm( eq, data=T_c, effect = "individual", model = "pooling")
+fe <- plm( eq, data=filter(T_c, single==0), effect = "individual", model = "pooling")
 
 # interaction
 eq <- as.formula(paste('y ~ factor(date) + factor(region) + lfinpred +', paste(predictor_names, collapse = '+'), '+', paste(hhroles, collapse = '+'), '+', paste(paste0(hhroles,":lfinpred"),collapse = '+')))
-feint <- plm( eq, data=T_c, effect = "individual", model = "pooling")
+feint <- plm( eq, data=filter(T_c, single==0), effect = "individual", model = "pooling")
 
 # interaction only non singles
-eq <- as.formula(paste('y ~ factor(date) + factor(region) + lfinpred +', paste(predictor_names, collapse = '+'), '+', paste(hhroles, collapse = '+'), '+', paste(paste0(hhroles,":lfinpred"),collapse = '+')))
-sfeint <- plm( eq, data=filter(T_c, single==0), effect = "individual", model = "pooling")
+eq <- as.formula(paste('y ~ factor(date) + factor(region) + lfinpred +', paste(predictor_names, collapse = '+'), '+', paste(hhroles, collapse = '+'), '+', paste(paste0(hhroles,":lfinpred"), '+', "single:lfinpred",collapse = '+')))
+sfeint <- plm( eq, data=T_c, effect = "individual", model = "pooling")
 
 # --- Write output
 
@@ -181,7 +185,7 @@ dep.var.labels <- "Inflation expectation (12 months ahead, point estimate)"
 
 
 # in which order
-desiredOrder <- c("Constant","female","lfinpred",hhroles,paste0(hhroles,":lfinpred"),"age","single","educ","hhinc")
+desiredOrder <- c("Constant","female","lfinpred",hhroles,"single",paste0(hhroles,":lfinpred"),"single:lfinpred","age","educ","hhinc")
 
 writeLines(capture.output(stargazer(b,f,e,fe,feint,sfeint,
                                     title = title, label = label, 
@@ -190,6 +194,11 @@ writeLines(capture.output(stargazer(b,f,e,fe,feint,sfeint,
                                     order = desiredOrder, intercept.top = TRUE, intercept.bottom = FALSE, 
                                     dep.var.labels = dep.var.labels, no.space = FALSE)), 
            file.path(outline,'code_regresswithfinexp.tex'))
+
+
+
+## For plotting
+###############
 
 
 coefficients <- coef(feint)
