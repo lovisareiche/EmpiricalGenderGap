@@ -23,6 +23,7 @@ library('tidyverse')
 library(moments)
 library(xtable)
 library(plm)
+library(caroline)
 
 
 ## --------

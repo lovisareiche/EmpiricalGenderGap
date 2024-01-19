@@ -136,7 +136,7 @@ Mmean <- M %>%
   # take difference: women - men
   mutate(msc_mean = Michigan_1-Michigan_0, sce_mean = FRBNY_1-FRBNY_0, bop_mean = `BOP-HH_1`-`BOP-HH_0`) %>%
   mutate(msc_mean_mov = moving_average(msc_mean),sce_mean_mov = moving_average(sce_mean),bop_mean_mov = moving_average(bop_mean)) %>%
-  dplyr::select(date,msc_mean,msc_mean_mov,sce_mean,sce_mean_mov,bop_mean,bop_mean_mov)
+  dplyr::select(date,msc_mean,msc_mean_mov,sce_mean,sce_mean_mov,bop_mean,bop_mean_mov, Michigan_1, Michigan_0, FRBNY_1, FRBNY_0,`BOP-HH_1`,`BOP-HH_0` )
 
 Msd <- M %>%
   dplyr::select(-meany,-p25y,-p50y,-p75y) %>%
@@ -272,16 +272,16 @@ T_FRBNY$date <- as.yearmon(T_FRBNY$date, format = "%b %Y")
 D$date <- as.yearmon(D$date)
 
 # Merge T and D based on the Date column
-merged_Michigan <- merge(T_Michigan, D[, c("date", "cpi_food_us", "cpi_tot_us")], by = "date", all.x = TRUE) %>%
-  mutate(cpi_gap = cpi_food_us - cpi_tot_us)
+merged_Michigan <- merge(T_Michigan, D[, c("date", "cpi_food_us", "cpi_tot_us","cpi_food_us_cv", "cpi_tot_us_cv")], by = "date", all.x = TRUE) %>%
+  mutate(cpi_gap = cpi_food_us - cpi_tot_us, cpicv_gap = cpi_food_us_cv - cpi_tot_us_cv)
 
 # Merge T and D based on the Date column
-merged_FRBNY <- merge(T_FRBNY, D[, c("date", "cpi_food_us", "cpi_tot_us")], by = "date", all.x = TRUE) %>%
-  mutate(cpi_gap = cpi_food_us - cpi_tot_us)
+merged_FRBNY <- merge(T_FRBNY, D[, c("date", "cpi_food_us", "cpi_tot_us","cpi_food_us_cv", "cpi_tot_us_cv")], by = "date", all.x = TRUE) %>%
+  mutate(cpi_gap = cpi_food_us - cpi_tot_us, cpicv_gap = cpi_food_us_cv - cpi_tot_us_cv)
 
 # Merge T and D based on the Date column
-merged_BOP <- merge(`T_BOP-HH`, D[, c("date", "cpi_food_germany", "cpi_tot_germany")], by = "date", all.x = TRUE) %>%
-  mutate(cpi_gap = cpi_food_germany - cpi_tot_germany)
+merged_BOP <- merge(`T_BOP-HH`, D[, c("date", "cpi_food_germany", "cpi_tot_germany","cpi_food_germany_cv", "cpi_tot_germany_cv")], by = "date", all.x = TRUE) %>%
+  mutate(cpi_gap = cpi_food_germany - cpi_tot_germany, cpicv_gap = cpi_food_germany_cv - cpi_tot_germany_cv)
 
 # Regression
 ############
@@ -296,6 +296,8 @@ xnames_DE <- setdiff(colnames(merged_BOP),'date') %>% # Germany
   setdiff('quali') %>%
   setdiff('cpi_food_germany') %>%
   setdiff('cpi_tot_germany') %>%
+  setdiff('cpi_food_germany_cv') %>%
+  setdiff('cpi_tot_germany_cv') %>%
   setdiff('region')
 xnames_US <- setdiff(colnames(merged_Michigan),'date') %>% # both US are the same
   setdiff('y') %>%
@@ -306,6 +308,8 @@ xnames_US <- setdiff(colnames(merged_Michigan),'date') %>% # both US are the sam
   setdiff('quali') %>%
   setdiff('cpi_food_us') %>%
   setdiff('cpi_tot_us') %>%
+  setdiff('cpi_food_us_cv') %>%
+  setdiff('cpi_tot_us_cv') %>%
   setdiff('region')
 
 # between effects
@@ -349,8 +353,8 @@ Michigan_c <- Michigan_c[!duplicated(Michigan_c[c('id','date')]), ]
 
 
 # reg eqn
-eq_DE <- as.formula(paste('y ~ factor(region) + ',  paste(xnames_DE, collapse='+'),'+ female:cpi_gap + age_between + hhinc_between'))
-eq_US <- as.formula(paste('y ~ factor(region) + ',  paste(xnames_US, collapse='+'), '+ female:cpi_gap + age_between'))
+eq_DE <- as.formula(paste('y ~ factor(region) + ',  paste(xnames_DE, collapse='+'),'+ female:cpi_gap + female:cpicv_gap + age_between + hhinc_between'))
+eq_US <- as.formula(paste('y ~ factor(region) + ',  paste(xnames_US, collapse='+'), '+ female:cpi_gap + female:cpicv_gap + age_between'))
 # per survey
 BOP <- plm( eq_DE, data=BOP_c, effect = "individual", model = "pooling" )
 Michigan <- plm( eq_US, data=Michigan_c, effect = "individual", model = "pooling" )
@@ -366,7 +370,7 @@ label <- "tab:tsmicro"
 dep.var.labels <- "Inflation expectation, 12 months ahead, point estimate"
 
 # in which order
-desiredOrder <- c("Constant","female","cpi_gap","age","eduschool","hhinc","single")
+desiredOrder <- c("Constant","female","cpi_gap", "cpicv_gap","age","eduschool","hhinc","single")
 
 writeLines(capture.output(stargazer(BOP,FRBNY,Michigan,
                                     title = title, label = label, 

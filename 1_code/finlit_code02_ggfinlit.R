@@ -96,11 +96,11 @@ for(s in 1:length(S)){
   
   if(S[s]=='BOP-HH'){
   F <- group_by(T,female) %>%
-    summarise(fin_lit_test = round(mean(fin_lit_test, na.rm = TRUE),2),lfinpred = round(mean(lfinpred),2),intqr = round(mean(intqr),2), refresher = round(mean(refresher),2),round = round(mean(round),2),qinterest = round(mean(qinterest),2),qeasy = round(mean(qeasy),2))
+    summarise(fin_lit_test = round(mean(fin_lit_test, na.rm = TRUE),2),lfinpred = round(mean(lfinpred),2), refresher = round(mean(refresher),2),round = round(mean(round),2),qinterest = round(mean(qinterest),2),qeasy = round(mean(qeasy),2))
   }
   if(S[s]=='FRBNY'){
   F <- group_by(T,female) %>%
-      summarise(fin_lit_test = round(mean(fin_lit_test, na.rm = TRUE),2),lfinpred = round(mean(lfinpred),2),intqr = round(mean(intqr),2), refresher = round(mean(refresher),2),round = round(mean(round),2),qinterest = round(mean(qinterest),2))
+      summarise(fin_lit_test = round(mean(fin_lit_test, na.rm = TRUE),2),lfinpred = round(mean(lfinpred),2), refresher = round(mean(refresher),2),round = round(mean(round),2),qinterest = round(mean(qinterest),2))
   }
   # run wilcoxin and kolmogorov smirnoff tests on subsamples
   
@@ -109,10 +109,10 @@ for(s in 1:length(S)){
   ks <- data.frame()
   
   if(S[s]=='BOP-HH'){
-  vars <- data.frame(T$fin_lit_test,T$lfinpred,T$intqr,T$refresher,T$round,T$qinterest,T$qeasy)
+  vars <- data.frame(T$fin_lit_test,T$lfinpred,T$refresher,T$round,T$qinterest,T$qeasy)
   }
   if(S[s]=='FRBNY'){
-    vars <- data.frame(T$fin_lit_test,T$lfinpred,T$intqr,T$refresher,T$round,T$qinterest)
+    vars <- data.frame(T$fin_lit_test,T$lfinpred,T$refresher,T$round,T$qinterest)
   }
   for (i in 1:length(vars)){
     w[i,1] <-  round(wilcox.test(vars[,i]~T$female, na.rm = TRUE)$p.value,2)
