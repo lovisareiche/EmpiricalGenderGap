@@ -15,41 +15,57 @@ Individual parts of the paper can be replicated as follows:
 
 ## Tables
 
-Table 1: compsur_code02_ggsingle
+Table 2: hhrole_code01_summary
 
-Table 2: compsur_code04_tsreg
+Table 3: hhrole_code02_reg
 
-Table 3: compsur_code04_tsreg
-
-Table 4: compsur_code02_tsgendergap
-
+Table 4: finlit_code05_regresswithfin
 
 Table 5: finlit_code02_ggfinlit
 
-Table 6: finlit_code04_tail
+Table 6: compsur_code02_ggsingle
 
-Table 7: compsur_code06_ghghighermoments
+Table 7: compsur_code02_tsgendergap
 
-Table 8 & 9: finlit_code05_regresswithfin
+Table 9: finlit_code01_fitlit
 
+Table 10: compsur_code08_democontrol
 
-Table 10: hhrole_code01_summary
+Table 11: cat_code01_regress
 
-Table 11: hhrole_code02_reg
+Table 12: finlit_code02_ggfinlit
 
+Table 13: compsur_code02_ggsingle
 
-Table 13: compsur_code07_quantreg
+Table 14: compsur_code07_quantreg
 
-Table 14: finlit_code01_fitlit
+Table 15: compsur_code04_tsreg
+
+Table 16: compsur_code04_tsreg
 
 ## Figures
 
+Figure 1: data used from code hhrole_code02_reg and finlit_code06_finhist
 
-Figure 5: finlit_code03_finlitdist
+Figure 2: finlit_code03_finlitdist
 
-Figure 9: compsur_code07_quantreg
+Figure 3: finlit_code06_finhist
 
-Figure 11: finlit_code06_finhist
+Figure 5: data used from compsur_code07_quantreg
+
+Figure B.1: data_histogramming
+
+Figure F.1: compsur_code08_democontrol
+
+Figure F.3: old/data_histogramming
+
+Figure F.5: finlit_code06_finhist
+
+Figure F.6: 
+
+Figure F.8: compsur_code02_tsgendergap
+
+
 
 ## Notes
 
