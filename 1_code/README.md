@@ -19,9 +19,9 @@ Table 2: hhrole_code01_summary
 
 Table 3: hhrole_code02_reg
 
-Table 4: finlit_code05_regresswithfin
+Table 4: finlit_code02_ggfinlitfinlit_code05_regresswithfin
 
-Table 5: finlit_code02_ggfinlit
+Table 5: finlit_code05_regresswithfin
 
 Table 6: compsur_code02_ggsingle
 
@@ -54,6 +54,8 @@ Figure 3: finlit_code06_finhist
 Figure 5: data used from compsur_code07_quantreg
 
 Figure B.1: data_histogramming
+
+Figure D.1: finlit_code06_intqrcorr
 
 Figure F.1: compsur_code08_democontrol
 
