@@ -205,7 +205,7 @@ coefficients <- coef(feint)
 vcovm <- vcovHC(feint)
 
 # Specify the coefficients you want to sum
-coefs_to_sum <- c("female", "lfinpred:female")
+coefs_to_sum <- c("shop_groceries", "lfinpred:shop_groceries")
 
 # Find the indices of these coefficients in the coefficient vector
 coef_indices <- which(names(coefficients) %in% coefs_to_sum)

@@ -95,7 +95,7 @@ for(s in 1:length(S)){
   ## Load data from pipeline folder 
   
   T <- read_csv(file.path('empirical', '2_pipeline',f, 'code01_fitlit','out',S[s], 'T.csv')) %>%
-    select(intqr,lfinpred) %>%
+    dplyr::select(intqr,lfinpred) %>%
     na.omit()
   assign(paste("T_",S[s],sep = ""),T)
   
@@ -106,7 +106,7 @@ for(s in 1:length(S)){
   
   # Create a new dataframe with binned means
   binned_data <- T %>%
-    rename(x = lfinpred, y = intqr) %>%
+    dplyr::rename(x = lfinpred, y = intqr) %>%
     #filter(x >= 0 & x <= 1 & female ==0) %>%
     mutate(x_bin = cut(x, breaks = num_bins)) %>%
     group_by(x_bin) %>%

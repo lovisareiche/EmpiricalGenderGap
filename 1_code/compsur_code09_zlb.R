@@ -2,7 +2,7 @@
 # Introduction
 # ------------
 
-## Compares gender gaps for singles and non-singles from different surveys
+## checks share of individuals with negative expectations
 
 rm(list=ls())
 NAME <- 'code09_zlb' ## Name of the R file goes here (without the file extension!)

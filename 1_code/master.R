@@ -28,62 +28,51 @@ source(file.path('empirical', '1_code',"pre_SCE.R"))
 source(file.path('empirical', '1_code',"compsur_code01_align.R"))
 # Requires that Michigan survey in 0_data/manual/MSC as T.csv
 
+# can start running from here if the files above have been run once
 
-##############
-##EXPERIENCE##
-##############
+------------------------------------------------------------------------
 
-## -------
-## Table 1
-## -------
+## Section 3: Experience and financial confidence in the data
+###############################################################
 
-# investigate the gender gap for single and nonsingle sample in three surveys. Output saved as code for the table.
-source(file.path('empirical', '1_code',"compsur_code02_ggsingle.R"))
-# note that the code also poduces a plot of the results which can be used for a poster
+# Table 2: Confirming the presence of traditional gender roles in the BOP-HH
+# --------
+source(file.path('empirical', '1_code',"hhrole_code01_summary.R"))
 
-## -------
-## Table 4
-## -------
 
-# compute gender gap per period in all surveys and microlevel analysis
-source(file.path('empirical', '1_code',"compsur_code02_tsgendergap.R"))
-# code saves code_tsmicro in the output folder
+## Section 4: The Effects of Financial Confidence and Shopping Experience
+#########################################################################
 
-## ---------
-## Table 2-3
-## ---------
+# Table 3: The role of financial confidence and experience
+#---------
+source(file.path('empirical', '1_code',"hhrole_code02_reg.R"))
 
-# computes balance statistic per perios
-source(file.path('empirical', '1_code',"compsur_code03_addquali.R"))
-source(file.path('empirical', '1_code',"compsur_code04_tsreg.R"))
-# code saves code_tsreg_mean (comparing different surveys) and code_tsreg_msc (analysis of MSC) in the output folder
+# Figure 1: The effect of grocery shopping involvement on inflation expectations for different levels of financial confidence
+#---------
+# the slope of the figure is calculated in the file above 
+# the histograms will follow below: "finlit_code06_finhist.R
+# finlitgrocpred
 
-######################
-##Financial Literacy##
-######################
 
-## -------
-## Table 14
-## -------
+## Section 5: Financial Confidence Channel
+##########################################
 
+
+# Table Table 9: Explaining financial confidence through financial confidence variables
+# -------
 # prep BOP and SCE 
 # produce predicted test scores 
 source(file.path('empirical', '1_code',"finlit_code01_fitlit.R"))
 
 
-## -------
-## Table 5
-## -------
-
-# Compute table to compare financial literacy for men and women. Output saved as code for the table.
+# Table 4: Financial literacy and confidence of men and women
+# -------
 source(file.path('empirical', '1_code',"finlit_code02_ggfinlit.R"))
 
 
-## -------
-## Figure 5
-## -------
-
-# Kernel Density plots split by literacy. Output saved as text in pipeline to be used in latex code.
+# Figure 2: Kernel Density plots split by literacy. 
+#---------
+# use output in latex code to plot
 source(file.path('empirical', '1_code',"finlit_code03_finlitdist.R"))
 # kdpredbop
 # kdpredsce
@@ -91,72 +80,88 @@ source(file.path('empirical', '1_code',"finlit_code03_finlitdist.R"))
 # kdtestsce
 
 
+# Table 5: The impact of financial confidence on the gender gap (BOP)
+# Table 12: The impact of financial confidence on the gender gap (SCE) 
+#---------
+source(file.path('empirical', '1_code',"finlit_code05_regresswithfin.R"))
+# output in two files, one for BOP and one for SCE
+
+
+# Figure 4: The gender gap for different levels of financial confidence (BOP-HH)
+# Figure F5: The gender gap for different levels of financial confidence (SCE)
+#-----------
+# the slope of the figure is calculated in finlit_code05_regresswithfin.R
+source(file.path('empirical', '1_code',"finlit_code06_finhist.R"))
+# finlitfemaleintboppred
+# finlitfemaleintscepred
+
+
+# Figure 5: The gender gap along deciles in the inflation expectations distribution
+# Table 14: Quantile regression
 ## -------
-## Table 6
-## -------
-
-# Compute table to anal<yse determinants of being in the tail. Output saved as code for the table.
-source(file.path('empirical', '1_code',"finlit_code04_tail.R"))
-
-
-## -------
-## Table 7
-## -------
-
-# Compute table to show moments of inflexp for men and women. Output saved as code for the table.
-source(file.path('empirical', '1_code',"compsur_code06_gghighermoments.R"))
-
-
-## -------
-## Figure 9 (and Table 13)
-## -------
-
-# Compute quantile regression. Output saved as code for the table and in pipeline as text file for the figures.
 source(file.path('empirical', '1_code',"compsur_code07_quantreg.R"))
 # bopfemalequant
 # scefemalequant
 # mscfemalequant
 
 
-## -------
-## Table 8 and 9
-## -------
+## Section 6: Robustness Exercises
+##################################
 
-# Compute table to analyse impact of fin lit on gender gap. Output saved as code for the table.
-source(file.path('empirical', '1_code',"finlit_code05_regresswithfin.R"))
-# output in two files, one for BOP and one for SCE
+# align all three surveys
+source(file.path('empirical', '1_code',"compsur_code01_align.R"))
 
 
-## -------
-## Table 11
-## -------
-
-# Compute histograms for the figures. Output saved as text file in pipeline to be used in latex.
-source(file.path('empirical', '1_code',"finlit_code06_finhist.R"))
-# finlitfemaleintboppred
-# finlitfemaleintscepred
-# note that these codes also use the regression coefficients computed for the table above (8)
+# Table 6: Comparing the gender gap in inflation expectations for singles and non-singles
+# --------
+source(file.path('empirical', '1_code',"compsur_code02_ggsingle.R"))
 
 
-###################
-##Household Roles##
-###################
-
-# Note: only BOP
-
-## -------
-## Table 10
-## -------
-
-# Compute table to check presence of traditional gender norms. Output saved as code for the table.
-source(file.path('empirical', '1_code',"hhrole_code01_summary.R"))
+# Table 7: Comparing the gender gap in inflation expectations for singles and non-singles
+# --------
+source(file.path('empirical', '1_code',"compsur_code02_tsgendergap.R"))
 
 
-## -------
-## Table 11
-## -------
+## Appendix
+############
 
-# Compute table with regression including finlit and experience. Output saved as code for the table.
-source(file.path('empirical', '1_code',"hhrole_code02_reg.R"))
+# Figure B1: Histogram and fitted distribution of inflation expectation point forecasts
+# Figure F2: Histogram of inflation expectation point forecasts of men and women
+#-----------
+source(file.path('empirical', '1_code',"old/data_histogramming.R"))
+
+
+# Figure D1: Binscatter of interquartile range and predicted financial confidence
+#-----------
+source(file.path('empirical', '1_code',"finlit_code06_intqrcorr.R"))
+
+
+# Table 10: The gender gap and demographic controls
+# Figure F1: Implied gender gap by demographics
+#----------
+source(file.path('empirical', '1_code',"compsur_code08_democontrol.R"))
+
+
+# Table 11: Expectations about specific prices
+#----------
+source(file.path('empirical', '1_code',"cat_code01_regress.R"))
+
+
+# Table 13: Higher moments of the gender gap in inflation expectations
+#----------
+source(file.path('empirical', '1_code',"compsur_code06_gghighermoments.R"))
+
+
+# Table 15 & 16: Time series regressions
+#---------------
+source(file.path('empirical', '1_code',"compsur_code03_addquali.R"))
+source(file.path('empirical', '1_code',"compsur_code04_tsreg.R"))
+
+
+
+# Not included in paper
+
+# Compute table to analyse determinants of being in the tail. Output saved as code for the table.
+# source(file.path('empirical', '1_code',"finlit_code04_tail.R"))
 
 

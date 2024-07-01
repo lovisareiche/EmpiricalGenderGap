@@ -2,7 +2,7 @@
 # Introduction
 # ------------
 
-## Compares gender gaps for singles and non-singles from different surveys
+## gedner gap when controlling for different demographics
 
 rm(list=ls())
 NAME <- 'code08_democontrol' ## Name of the R file goes here (without the file extension!)

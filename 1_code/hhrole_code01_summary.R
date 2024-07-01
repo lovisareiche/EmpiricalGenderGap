@@ -91,12 +91,5 @@ all <- group_by(T,female) %>%
 non_singles <- group_by(filter(T,single==0),female) %>%
   summarise(shop_groceries = mean(shop_groceries), shop_major = mean(shop_major), prep_meals = mean(prep_meals), decide_finance = mean(decide_finance))
 
-# combine
-F <- rbind(all, non_singles)
-
-# print
-writeLines(capture.output(xtable(F)), 
-           file.path(outline, 'code_gghhrole.tex'))
-
 
 
