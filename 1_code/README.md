@@ -19,7 +19,7 @@ Table 2: hhrole_code01_summary
 
 Table 3: hhrole_code02_reg
 
-Table 4: finlit_code02_ggfinlitfinlit_code05_regresswithfin
+Table 4: finlit_code02_ggfinlit
 
 Table 5: finlit_code05_regresswithfin
 
@@ -33,9 +33,9 @@ Table 10: compsur_code08_democontrol
 
 Table 11: cat_code01_regress
 
-Table 12: finlit_code02_ggfinlit
+Table 12: finlit_code05_regresswithfin
 
-Table 13: compsur_code02_ggsingle
+Table 13: compsur_code06_highermoments
 
 Table 14: compsur_code07_quantreg
 
@@ -49,7 +49,7 @@ Figure 1: data used from code hhrole_code02_reg and finlit_code06_finhist
 
 Figure 2: finlit_code03_finlitdist
 
-Figure 3: finlit_code06_finhist
+Figure 4: finlit_code06_finhist & finlit_code05_regresswithfin
 
 Figure 5: data used from compsur_code07_quantreg
 
@@ -59,11 +59,11 @@ Figure D.1: finlit_code06_intqrcorr
 
 Figure F.1: compsur_code08_democontrol
 
-Figure F.3: old/data_histogramming
+Figure F.3: compsur_code08_histogramming
 
-Figure F.5: finlit_code06_finhist
+Figure F.5: finlit_code06_finhist  & finlit_code05_regresswithfin
 
-Figure F.6: 
+Figure F.6: compsur_code08_histogramming
 
 Figure F.8: compsur_code02_tsgendergap
 

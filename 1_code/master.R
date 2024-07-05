@@ -126,9 +126,9 @@ source(file.path('empirical', '1_code',"compsur_code02_tsgendergap.R"))
 ############
 
 # Figure B1: Histogram and fitted distribution of inflation expectation point forecasts
-# Figure F2: Histogram of inflation expectation point forecasts of men and women
+# Figure F3: Histogram of inflation expectation point forecasts of men and women
 #-----------
-source(file.path('empirical', '1_code',"old/data_histogramming.R"))
+source(file.path('empirical', '1_code',"compsur_code08_histogramming.R"))
 
 
 # Figure D1: Binscatter of interquartile range and predicted financial confidence

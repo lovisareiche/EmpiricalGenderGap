@@ -158,19 +158,20 @@ T$ks_p25 <- round(c(rep(`ks_BOP-HH`$p.value,2),rep(ks_FRBNY$p.value,2),rep(ks_Mi
 
 #
 # transpose
-T <- t(T)
-Tsub <- t(Tsub)
-
-V7 <- c("ECFIN",0,6.4,4.1,9.7,0.7,1.5,9.1,15.9,0,0,0,0,0,0)
-V8 <- c("ECFIN",1,7.8,4.9,11.5,0.8,1.7,11.3,19.8,0,0,0,0,0,0)
-
-T <- cbind(T,V7,V8)
-
-
-xtable(T)
-xtable(Tsub)
+ T <- t(T)
+ Tsub <- t(Tsub)
+# 
+# V7 <- c("ECFIN",0,6.4,4.1,9.7,0.7,1.5,9.1,15.9,0,0,0,0,0,0)
+# V8 <- c("ECFIN",1,7.8,4.9,11.5,0.8,1.7,11.3,19.8,0,0,0,0,0,0)
+# 
+# T <- cbind(T,V7,V8)
 
 
-histogram(F_p25$y[F_p25$female == 0])
+writeLines(capture.output(xtable(T)), 
+                          file.path(outline, 'code_gghighermoments_full.tex'))
+writeLines(capture.output(xtable(Tsub)), 
+           file.path(outline, 'code_gghighermoments_sub.tex'))
+
+
 
 
