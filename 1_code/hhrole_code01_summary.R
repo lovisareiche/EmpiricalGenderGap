@@ -18,12 +18,7 @@ PROJECT_DIR <- 'D:/Lovisa/Studium/Oxford/Department of Economics/DPhil' ## Chang
 ## -------
 ### All the library imports go here
 
-#install.packages('plm')
-library('plm')
 library('tidyverse')
-library('datawizard')
-library(stargazer)
-library(lubridate) # for ymd
 library(xtable)
 
 ## --------
@@ -79,17 +74,19 @@ if (!dir.exists(outline)) {
 # ---------
 
 ## -- Load data from pipeline folder --
-T <- read_csv(file.path('empirical', '0_data', 'manual','BOP-HH', 'T_exp.csv')) %>%
-  mutate(date = ymd(paste0(year, "-", month, "-01"))) %>%
-  pdata.frame( index=c( "id", "date" ) )
+T <- read_csv(file.path('empirical', '0_data', 'manual','BOP-HH', 'T_exp.csv')) 
 
-# summarise gender roles for full sample
-all <- group_by(T,female) %>%
-  summarise(shop_groceries = mean(shop_groceries), shop_major = mean(shop_major), prep_meals = mean(prep_meals), decide_finance = mean(decide_finance), single= mean(single))
+# summarise gender roles 
+
+singles <- group_by(T,female) %>%
+  summarise(single= mean(single))
 
 # and non single subset
 non_singles <- group_by(filter(T,single==0),female) %>%
   summarise(shop_groceries = mean(shop_groceries), shop_major = mean(shop_major), prep_meals = mean(prep_meals), decide_finance = mean(decide_finance))
 
+table <- cbind(non_singles, singles)
 
 
+writeLines(capture.output(xtable(table)), 
+           file.path(outline, 'code_gghhrole.tex'))

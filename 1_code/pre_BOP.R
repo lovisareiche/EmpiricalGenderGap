@@ -466,10 +466,10 @@ write_csv(T_fin,file.path('empirical', '0_data', 'manual',s, 'T_fin.csv'))
 ###########################
 
 # rename
-T$shop_groceries <- recode(combined_data$mainshopper_a, `1` = 3, `2` = 2, `3` = 1)
-T$shop_major <- recode(combined_data$mainshopper_b, `1` = 3, `2` = 2, `3` = 1)
-T$prep_meals <- recode(combined_data$mainshopper_c, `1` = 3, `2` = 2, `3` = 1)
-T$decide_finance <- recode(combined_data$mainshopper_d, `1` = 3, `2` = 2, `3` = 1)
+T$shop_groceries <- recode(combined_data$mainshopper_a, `1` = 1, `2` = 0.5, `3` = 0)
+T$shop_major <- recode(combined_data$mainshopper_b, `1` = 1, `2` = 0.5, `3` = 0)
+T$prep_meals <- recode(combined_data$mainshopper_c, `1` = 1, `2` = 0.5, `3` = 0)
+T$decide_finance <- recode(combined_data$mainshopper_d, `1` = 1, `2` = 0.5, `3` = 0)
 
 # assume hhroles stay constant
 T <- T %>%
